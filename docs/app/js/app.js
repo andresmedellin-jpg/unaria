@@ -211,7 +211,7 @@ function entradasMenu() {
     const subs = e.id ? de([e.id]) : de(e.modulos || []);
     if (!subs.length) return null;
     const unico = subs.length === 1 && !e.siempreGrupo;
-    return { clave: e.id || 'g' + i, titulo: unico && !e.id ? subs[0].titulo : (e.titulo || subs[0].titulo),
+    return { clave: e.id || 'g' + i, titulo: unico && !e.id ? subs[0].titulo : (e.titulo || subs[0].titulo), corto: e.corto,
       icono: e.icono ? (mios.find((m) => m.id === e.icono)?.icono || subs[0].icono) : subs[0].icono, subs, abajo: !!e.abajo };
   };
   const lista = MARCA.menu.map(armar).filter(Boolean);
@@ -237,7 +237,7 @@ function pintarNav() {
       document.body.appendChild(barra); document.body.classList.add('con-barra'); }
     const principales = entradas.filter((e) => !e.abajo);
     const enBarra = principales.length <= 5 ? principales : principales.slice(0, 4);
-    barra.innerHTML = enBarra.map((e) => `<a href="#/${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}"><span class="nav-ico">${e.icono}</span><span>${esc(e.titulo)}</span></a>`).join('')
+    barra.innerHTML = enBarra.map((e) => `<a href="#/${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}"><span class="nav-ico">${e.icono}</span><span>${esc(e.corto || e.titulo)}</span></a>`).join('')
       + (principales.length > 5 || entradas.some((e) => e.abajo) ? `<button type="button" id="barra-mas"><span class="nav-ico">${ICONO_MAS}</span><span>Más</span></button>` : '');
     barra.querySelector('#barra-mas')?.addEventListener('click', () => $('sidebar').classList.toggle('open'));
     return;
