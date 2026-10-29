@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Unaria</title>
+<title>Unaria · Sistemas a la medida para PyMEs en Monterrey</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Sistemas a la medida para PyMEs de cualquier industria. Nos conectamos a lo que ya usas (ventas, facturación, portales, Excel y WhatsApp) y lo juntamos en un solo lugar. Capturas una vez.">
-<meta property="og:title" content="Unaria · Todo tu negocio en un solo lugar">
+<meta property="og:title" content="Unaria · Captura una vez. Lo demás se actualiza solo.">
 <meta property="og:description" content="Nos conectamos a lo que ya usas y lo juntamos en un sistema hecho a tu medida. Capturas una vez.">
 <meta property="og:image" content="https://unaria.mx/og.png">
 <meta property="og:url" content="https://unaria.mx/">
@@ -200,6 +200,10 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .situacion .giro-s b { color: var(--acento); font-weight: 500; }
 .situacion h3 { font-size: 1.15rem; }
 .situacion p { color: var(--gris); }
+.captura { margin: 36px 0 0; }
+.captura img { display: block; width: 100%; height: auto; border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: 0 18px 40px -24px var(--sombra); background: #fff; }
+.captura figcaption { margin-top: 12px; color: var(--gris); font-size: .95rem; max-width: 70ch; }
+.captura figcaption span { font: 500 .75rem/1.3 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; margin-left: 6px; }
 @media (max-width: 760px) { .situaciones { grid-template-columns: minmax(0, 1fr); } .situacion, .situacion:nth-child(even) { padding: 22px 0; border-left: 0; } }
 
 /* Conexiones */
@@ -287,14 +291,11 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
   <div class="envoltura">
     <div class="portada-texto">
       <p class="etiqueta">Sistemas a la medida para PyMEs</p>
-      <h1>Todo tu negocio en <span class="acento">un solo lugar.</span></h1>
-      <p class="lead">Nos conectamos a lo que ya usas (ventas, facturación, los portales de tus clientes, Excel y WhatsApp) y lo juntamos en un sistema hecho a tu medida. Capturas una vez y lo demás se actualiza solo.</p>
+      <h1>Captura una vez. <span class="acento">Lo demás se actualiza solo.</span></h1>
+      <p class="lead">Nos conectamos a lo que ya usas (ventas, facturación, los portales de tus clientes, Excel y WhatsApp) y lo juntamos en un sistema hecho a tu medida: todo tu negocio en un solo lugar, sin que dejes de usar lo que ya funciona.</p>
       <div class="botones">
-        <button class="btn btn-primario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
-        <a class="btn btn-secundario" data-accion="whatsapp" href="#contacto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1c-1-.4-1.6-1-2-2l1-1-1-2z"/></svg>
-          Escríbenos por WhatsApp
-        </a>
+        <a class="btn btn-primario" data-accion="clic_agendar" href="#contacto">Agenda una llamada de 30 min</a>
+        <button class="btn btn-secundario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
       </div>
       <div class="notas"><span>Nos conectamos a lo que ya usas</span><span>Capturas una vez</span><span>Cualquier industria</span></div>
     </div>
@@ -335,7 +336,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     <figure class="objecion">
       <div>
         <blockquote>“Ya tengo muchos portales. No quiero uno más.”</blockquote>
-        <figcaption>Lo que nos dijo nuestro primer cliente</figcaption>
+        <figcaption>Lo que nos dijo un cliente</figcaption>
       </div>
       <p>Tiene toda la razón. Por eso Unaria no es otro portal: nos conectamos a los que ya usas y los juntamos. No te pedimos que subas tu información otra vez ni que cambies cómo trabajas.</p>
     </figure>
@@ -398,6 +399,14 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
       <div class="situacion"><p class="giro-s">Cualquier empresa</p><h3>El dueño no sabe cuánto le deben ni cuánto vendió esta semana.</h3><p>Un tablero con ventas, cobranza y pendientes, actualizado solo.</p></div>
       <div class="situacion"><p class="giro-s">Empresas sin sistema</p><h3>Todo vive en libretas, Excel y WhatsApp.</h3><p>Empezamos desde ahí: ordenamos lo que ya tienen y lo pasamos a un sistema a su medida, paso a paso.</p></div>
     </div>
+    <figure class="captura">
+      <picture>
+        <source srcset="img/sistema-cobro-servicios.webp" type="image/webp">
+        <img src="img/sistema-cobro-servicios.jpg" width="1600" height="950" loading="lazy" decoding="async"
+             alt="Pantalla del sistema: cobro de luz, gas y agua por departamento, con el total de cada uno y su aviso de cobro en PDF">
+      </picture>
+      <figcaption>Así se ve el sistema del edificio: cada lectura con foto se convierte en el cobro de luz, gas y agua de cada departamento, con su aviso listo para enviar. <span>Datos de ejemplo.</span></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -482,13 +491,12 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
       <h2 style="margin-top:14px">Platiquemos 30 minutos sobre tu operación.</h2>
       <p class="lead">Sin compromiso. Te decimos dónde se te van las horas y si podemos ayudarte.</p>
       <div class="botones" style="margin-top:28px">
-        <a class="btn btn-primario" data-accion="whatsapp" href="#contacto">Escríbenos por WhatsApp</a>
-        <a class="btn btn-secundario" data-accion="agendar" href="#contacto">Agenda una llamada de 30 min</a>
+        <a class="btn btn-primario" data-accion="clic_agendar" href="#contacto">Agenda una llamada de 30 min</a>
+        <button class="btn btn-secundario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
       </div>
     </div>
     <div class="contacto">
       <div><span class="c-et">Correo</span><span class="c-val" id="c-correo">hola@unaria.mx</span></div>
-      <div id="fila-whatsapp" hidden><span class="c-et">WhatsApp</span><span class="c-val" id="c-whatsapp"></span></div>
       <div><span class="c-et">Dónde estamos</span><span class="c-val">Monterrey, Nuevo León</span></div>
     </div>
   </div>
@@ -512,8 +520,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
 <script>
 // ===== Datos para llenar antes de publicar =====
 const CONFIG = {
-  whatsapp: '',          // 10 dígitos, ej. '8112345678' (se le agrega 52)
-  agenda: '',            // enlace de la agenda (Google Calendar o Calendly)
+  agenda: '',            // enlace de la página de citas de 30 min (Google Calendar "Agenda de citas" o Cal.com)
   correo: 'hola@unaria.mx',
   razonSocial: '',       // ej. 'Unaria, S.A.S. de C.V.' (sale en el pie de página)
   precioDiagnostico: '', // si lo quieren publicar, ej. '$8,000'; vacío = "precio fijo, por escrito"
@@ -529,15 +536,10 @@ const CONFIG = {
   const $ = id => document.getElementById(id);
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const peso = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
-  const wa = /^\d{10}$/.test(CONFIG.whatsapp) ? 'https://wa.me/52' + CONFIG.whatsapp : '';
   const agenda = /^https:\/\//.test(CONFIG.agenda) ? CONFIG.agenda : '';
-  const waTexto = t => wa ? wa + '?text=' + encodeURIComponent(t) : '';
-  const SALUDO = 'Hola, vi unaria.mx y me gustaría platicar sobre mi empresa.';
 
   // Enlaces de contacto
-  document.querySelectorAll('[data-accion="whatsapp"]').forEach(a => { if (wa) { a.href = waTexto(SALUDO); a.target = '_blank'; a.rel = 'noopener'; } });
-  document.querySelectorAll('[data-accion="agendar"]').forEach(a => { if (agenda) { a.href = agenda; a.target = '_blank'; a.rel = 'noopener'; } });
-  if (wa) { $('c-whatsapp').textContent = CONFIG.whatsapp.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3'); $('fila-whatsapp').hidden = false; }
+  document.querySelectorAll('[data-accion="clic_agendar"]').forEach(a => { if (agenda) { a.href = agenda; a.target = '_blank'; a.rel = 'noopener'; } });
   if (CONFIG.razonSocial) $('razon-social').textContent = CONFIG.razonSocial;
   $('c-correo').textContent = CONFIG.correo;
   if (CONFIG.precioDiagnostico) {
@@ -561,17 +563,17 @@ const CONFIG = {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', CONFIG.pixelMeta); fbq('track', 'PageView');
   }
+  // Eventos para anuncios: chat_iniciado, lead_capturado (conversión), clic_agendar, llamada_agendada (conversión)
+  const META = { lead_capturado: 'Lead', clic_agendar: 'Schedule', llamada_agendada: 'Schedule' };
   function medir(evento, datos) {
     try { if (window.gtag) gtag('event', evento, datos || {}); } catch (_) {}
-    try {
-      if (window.fbq) {
-        if (evento === 'generate_lead') fbq('track', 'Lead');
-        else if (evento === 'whatsapp') fbq('track', 'Contact');
-        else if (evento === 'agendar') fbq('track', 'Schedule');
-        else fbq('trackCustom', evento);
-      }
-    } catch (_) {}
+    try { if (window.fbq) { if (META[evento]) fbq('track', META[evento]); fbq('trackCustom', evento, datos || {}); } } catch (_) {}
   }
+  // El chat con IA avisa sus eventos con "unaria-chat"
+  window.__unariaMideChat = true;
+  window.addEventListener('unaria-chat', e => { const d = e.detail || {}; if (d.evento) medir(d.evento, { lugar: 'chat' }); });
+  // Cal.com avisa cuando alguien confirma la cita (si la agenda se incrusta o abre con su script)
+  window.addEventListener('message', e => { try { const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; if (d && /bookingSuccessful|booking_successful/i.test(JSON.stringify(d).slice(0, 300))) medir('llamada_agendada'); } catch (_) {} });
   document.addEventListener('click', e => {
     const a = e.target.closest('[data-accion]'); if (!a) return;
     medir(a.dataset.accion, { lugar: a.closest('.chat') ? 'chat' : 'pagina' });
@@ -600,12 +602,12 @@ const CONFIG = {
       titulo: 'Empieza aquí', subtitulo: 'Cuéntanos de tu negocio o pregúntanos lo que quieras', boton: '¿Por dónde empiezo?',
       saludo: 'Hola. Para empezar: ¿qué es lo que más tiempo le quita a tu negocio?',
       opciones: 'Capturo lo mismo en varios lados|No sé cuánto vendo ni cuánto me deben|Todo lo llevo en Excel y WhatsApp',
-      aviso: new URL('aviso-de-privacidad', location.href).href, whatsapp: CONFIG.whatsapp, agenda: CONFIG.agenda, correo: CONFIG.correo
+      aviso: new URL('aviso-de-privacidad', location.href).href, agenda: CONFIG.agenda, correo: CONFIG.correo
     });
     document.body.appendChild(s);
   }
   const log = $('chat-log'), opciones = $('chat-opciones'), form = $('chat-form'), entrada = $('chat-texto');
-  const S = { dolor: '', giro: '', tamano: '', sistemas: [], horas: null, sueldo: null, supuesto: false, costoMes: 0, nombre: '', empresa: '', whatsapp: '' };
+  const S = { dolor: '', giro: '', tamano: '', sistemas: [], horas: null, sueldo: null, supuesto: false, costoMes: 0, nombre: '', empresa: '', correo: '', whatsapp: '' };
   let paso = 'dolor', empezo = false, historial = [];
 
   function bajar() { log.scrollTop = log.scrollHeight; }
@@ -726,34 +728,33 @@ const CONFIG = {
     const f = document.createElement('form'); f.className = 'datos'; f.noValidate = true;
     f.innerHTML = '<label for="d-nombre" style="position:absolute;left:-9999px">Tu nombre</label><input id="d-nombre" placeholder="Tu nombre" autocomplete="name" maxlength="120">' +
       '<label for="d-empresa" style="position:absolute;left:-9999px">Tu empresa</label><input id="d-empresa" placeholder="Tu empresa" autocomplete="organization" maxlength="120">' +
-      '<label for="d-whatsapp" style="position:absolute;left:-9999px">Tu WhatsApp</label><input id="d-whatsapp" placeholder="Tu WhatsApp (10 dígitos)" inputmode="tel" autocomplete="tel" maxlength="20">' +
+      '<label for="d-correo" style="position:absolute;left:-9999px">Tu correo</label><input id="d-correo" type="email" placeholder="Tu correo" inputmode="email" autocomplete="email" maxlength="160">' +
+      '<label for="d-tel" style="position:absolute;left:-9999px">Tu teléfono (opcional)</label><input id="d-tel" placeholder="Tu teléfono (opcional)" inputmode="tel" autocomplete="tel" maxlength="20">' +
       '<span class="error" id="d-error" hidden></span><button class="op fuerte" type="submit">Enviar mis datos</button>';
     f.addEventListener('submit', async e => {
       e.preventDefault();
-      const n = $('d-nombre').value.trim(), em = $('d-empresa').value.trim(), w = $('d-whatsapp').value.replace(/\D/g, '').slice(-10);
+      const n = $('d-nombre').value.trim(), em = $('d-empresa').value.trim(), c = $('d-correo').value.trim().toLowerCase(), w = $('d-tel').value.replace(/\D/g, '').slice(-10);
       const err = $('d-error');
-      if (!n || w.length !== 10) { err.textContent = !n ? 'Escribe tu nombre.' : 'Revisa tu WhatsApp: son 10 dígitos.'; err.hidden = false; return; }
-      S.nombre = n; S.empresa = em; S.whatsapp = w;
-      limpiar(); yo(n + (em ? ' · ' + em : '') + ' · ' + w);
+      const malo = !n ? 'Escribe tu nombre.' : !em ? 'Escribe el nombre de tu empresa.' : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c) ? 'Revisa tu correo.' : w && w.length !== 10 ? 'Revisa tu teléfono: son 10 dígitos.' : '';
+      if (malo) { err.textContent = malo; err.hidden = false; return; }
+      S.nombre = n; S.empresa = em; S.correo = c; S.whatsapp = w;
+      limpiar(); yo(n + ' · ' + em + ' · ' + c + (w ? ' · ' + w : ''));
       const guardado = await guardarProspecto();
-      medir('generate_lead', { method: 'chat', valor: S.costoMes || 0 });
+      medir('lead_capturado', { method: 'chat', valor: S.costoMes || 0 });
       paso = 'fin';
       await bot('Gracias, ' + esc(n.split(' ')[0]) + '. ' + (guardado
-        ? 'Ya recibimos tu resumen. Te escribimos por WhatsApp para platicarlo.'
-        : 'Para que nos llegue tu resumen, mándalo por WhatsApp con un toque:'));
+        ? 'Ya recibimos tu resumen. Te escribimos a tu correo para platicarlo, o agenda la llamada aquí abajo.'
+        : 'No pudimos guardar tu resumen. Escríbenos a ' + esc(CONFIG.correo) + ' o agenda la llamada aquí abajo.'));
       cierre(true);
     });
     opciones.appendChild(f); bajar(); setTimeout(() => $('d-nombre').focus({ preventScroll: true }), 50);
   }
 
-  function cierre(conDatos) {
+  function cierre() {
     limpiar();
-    const enlaceWa = waTexto(conDatos ? resumen() : resumen());
-    const a = document.createElement('a'); a.className = 'op fuerte'; a.dataset.accion = 'whatsapp';
-    a.textContent = 'Seguir por WhatsApp'; a.href = enlaceWa || '#contacto'; if (enlaceWa) { a.target = '_blank'; a.rel = 'noopener'; }
-    const b = document.createElement('a'); b.className = 'op'; b.dataset.accion = 'agendar';
+    const b = document.createElement('a'); b.className = 'op fuerte'; b.dataset.accion = 'clic_agendar';
     b.textContent = 'Agenda una llamada de 30 min'; b.href = agenda || '#contacto'; if (agenda) { b.target = '_blank'; b.rel = 'noopener'; }
-    opciones.append(a, b); bajar();
+    opciones.append(b); bajar();
   }
 
   // Puntaje provisional (0–100) mientras se define el criterio con el de Moncan
@@ -770,7 +771,7 @@ const CONFIG = {
   async function guardarProspecto() {
     if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey) return false;
     const p = Object.assign({
-      nombre: S.nombre, whatsapp: S.whatsapp, empresa: S.empresa, tipo_obra: S.giro.slice(0, 60), pagina: location.href.slice(0, 300),
+      nombre: S.nombre, correo: S.correo, whatsapp: S.whatsapp || null, empresa: S.empresa, tipo_obra: S.giro.slice(0, 60), pagina: location.href.slice(0, 300),
       mensaje: resumen().split('\n').slice(1).join('\n'),
       resumen: resumen().split('\n').slice(1).join(' · '),
       costo_mensual: S.costoMes || null,
@@ -818,7 +819,7 @@ const CONFIG = {
     [/industria|giro|sirve para|restaurante|caf[eé]|tienda|f[aá]brica|manufactura|despacho|cl[ií]nica|escuela|constructora|distribuidora|taller|papeler/i, 'Sí. No trabajamos para un solo giro: diseñamos cada sistema según cómo opera tu empresa.'],
     [/d[oó]nde est[aá]n|monterrey|ciudad|fuera de|otro estado|estados unidos|remoto|presencial|oficina/i, 'Estamos en Monterrey y atendemos empresas de México, empezando por el norte. La primera llamada puede ser por teléfono o videollamada.'],
     [/qui[eé]n(es)? (son|est[aá]n|es)|ustedes|socios|experiencia|equipo de unaria/i, 'Somos Angel y Andrés, empresarios que operan sus propias empresas. Hicimos estos sistemas primero para nuestros negocios; por eso hablamos como cliente.'],
-    [/llamada|agendar|cita|reuni[oó]n|contact|hablar con (alguien|una persona)/i, 'La llamada dura 30 minutos y no tiene costo. Puedes agendarla o escribirnos por WhatsApp; si terminas estas preguntas, te mandamos el resumen para llegar con todo listo.']
+    [/llamada|agendar|cita|reuni[oó]n|contact|hablar con (alguien|una persona)/i, 'La llamada dura 30 minutos y no tiene costo. Puedes agendarla con el botón "Agenda una llamada" o escribirnos a hola@unaria.mx; si terminas estas preguntas, te mandamos el resumen para llegar con todo listo.']
   ];
   function pareceDuda(t) {
     return /\?|^(qu[eé]|c[oó]mo|cu[aá]nt|cu[aá]ndo|d[oó]nde|por qu[eé]|qui[eé]n|tienen|hacen|pueden|puedo|se puede|sirve|usan|trabajan|hay|es posible)\b/i.test(t.trim())

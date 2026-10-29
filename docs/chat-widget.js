@@ -126,7 +126,7 @@ button.env:disabled { opacity: .5; cursor: default; }
     }
     if (C.agenda) {
       const a = document.createElement('a'); a.className = 'op'; a.textContent = 'Agenda una llamada de 30 min';
-      a.href = C.agenda; a.target = '_blank'; a.rel = 'noopener'; a.addEventListener('click', () => medir('agendar')); ops.appendChild(a);
+      a.href = C.agenda; a.target = '_blank'; a.rel = 'noopener'; a.addEventListener('click', () => medir('clic_agendar')); ops.appendChild(a);
     }
     if (fallo && !C.whatsapp && !C.agenda && C.correo) {
       const a = document.createElement('a'); a.className = 'op f'; a.textContent = 'Escríbenos: ' + C.correo; a.href = 'mailto:' + C.correo; ops.appendChild(a);
@@ -135,8 +135,10 @@ button.env:disabled { opacity: .5; cursor: default; }
   }
   function medir(evento, extra) {
     try { window.dispatchEvent(new CustomEvent('unaria-chat', { detail: Object.assign({ evento }, extra) })); } catch (_) {}
+    // La página que lo incrusta mide con su propia etiqueta (escucha "unaria-chat"); si no lo hace, se mide aquí
+    if (window.__unariaMideChat) return;
     try { if (window.gtag) gtag('event', evento, extra || {}); } catch (_) {}
-    try { if (window.fbq) fbq('track', { generate_lead: 'Lead', whatsapp: 'Contact', agendar: 'Schedule' }[evento] || 'ViewContent'); } catch (_) {}
+    try { if (window.fbq) { const m = { lead_capturado: 'Lead', clic_agendar: 'Schedule' }[evento]; if (m) fbq('track', m); fbq('trackCustom', evento); } } catch (_) {}
   }
 
   let ocupado = false, empezo = S.mensajes.some(m => m.role === 'user');
@@ -159,7 +161,7 @@ button.env:disabled { opacity: .5; cursor: default; }
       const t = (j.texto || '') + (j.opciones && j.opciones.length ? '\nOPCIONES: ' + j.opciones.join(' | ') : '');
       S.mensajes.push({ role: 'assistant', content: t }); burbuja('assistant', t);
       S.opciones = j.opciones || [];
-      if (j.completo && !S.completo) { S.completo = true; S.resumen = j.resumen || ''; medir('generate_lead', { method: 'chat' }); }
+      if (j.completo && !S.completo) { S.completo = true; S.resumen = j.resumen || ''; medir('lead_capturado', { method: 'chat' }); }
       guardar(); pintarOpciones();
     } catch (_) {
       ind.remove();

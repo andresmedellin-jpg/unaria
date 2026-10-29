@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
   let saludo = '';
   while (mensajes.length && mensajes[0].role !== 'user') saludo += (saludo ? '\n' : '') + mensajes.shift()!.content;
   if (!mensajes.length || mensajes[mensajes.length - 1].role !== 'user') return json({ error: 'Falta el mensaje' }, 400, h);
-  if (total > LIM.total) return json({ texto: 'La plática ya va muy larga. Para seguir, escríbenos por WhatsApp y con gusto te atendemos.', opciones: [], completo: false }, 200, h);
+  if (total > LIM.total) return json({ texto: 'La plática ya va muy larga. Para seguir, agenda una llamada de 30 minutos o escríbenos a hola@unaria.mx y con gusto te atendemos.', opciones: [], completo: false }, 200, h);
 
   const herramientas: any[] = [{
     name: 'registrar_datos',
@@ -139,7 +139,7 @@ async function avisar(d: any, id: string) {
   const linea = (t: string, v: unknown) => v ? t + ': ' + v + '\n' : '';
   const cuerpo = (d.resumen ? d.resumen + '\n\n' : '') +
     linea('Nombre', d.nombre) + linea('Empresa', d.empresa) + linea('Puesto', d.puesto) +
-    linea('WhatsApp', d.telefono) + linea('Correo', d.email) + linea('Ciudad', d.ciudad) +
+    linea('Teléfono', d.telefono) + linea('Correo', d.email) + linea('Ciudad', d.ciudad) +
     linea('Puntaje', d.puntaje) + linea('Costo estimado al mes', d.costo_mensual ? '$' + Number(d.costo_mensual).toLocaleString('es-MX') : '') +
     '\nConversación: chat:' + id;
   try {
