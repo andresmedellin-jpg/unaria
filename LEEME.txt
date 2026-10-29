@@ -39,3 +39,11 @@ PARA UN CLIENTE NUEVO
        data-color="#1F6F4A" data-logo="https://.../logo.png" data-whatsapp="8112345678"
        data-aviso="https://supagina.com/aviso-de-privacidad"></script>
   4. Cada cliente necesita su propio aviso de privacidad (el chat pide datos personales).
+
+==== LA APP DE UNARIA (el modelo) ====
+- unaria.mx/app/  → la plataforma de Unaria con su propia base (Supabase "unaria"). Aquí se construye todo lo nuevo.
+- unaria.mx/demo/ → demostración con datos inventados (?demo=inmobiliaria para el ejemplo de rentas). No toca ninguna base.
+- El código de la app vive aquí, en docs/app (y su copia para el demo en docs/demo). Ya no depende de la plataforma de Treme/MEDCO.
+- Antes de cada commit que cambie docs/app o docs/demo: python3 publicar.py (sube la versión para que todos vean el cambio).
+- Clientes: docs/app/clientes/<cliente>.js (Galcor ya tiene su archivo, aún sin base).
+- Funciones del servidor (proyecto unaria): supabase/functions/chat, asistente y usuarios.
