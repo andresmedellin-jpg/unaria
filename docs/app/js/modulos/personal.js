@@ -404,7 +404,7 @@ async function nomina(el) {
         <span class="mut">${lista.length} · <strong class="n-sub ${pagadoC >= sub ? 'pos' : ''}">${fmt(pagadoC)} / ${fmt(sub)}</strong></span></div>
         <ul class="nomina">${lista.map(tarjeta).join('')}</ul></section>`;
     }).join('') || '<div class="vacio">Sin empleados activos.</div>'}
-    <p class="nota">Cada pago se registra también como gasto de "Nómina" en el centro de la persona. Los retardos se muestran como referencia y no se descuentan solos (igual que antes).</p></div>`;
+    <p class="nota">Cada pago se registra también como gasto de "Nómina" en el centro de la persona. Los retardos se muestran como referencia y no se descuentan solos.</p></div>`;
   el = el.querySelector('.n-caja');   // los clics se escuchan aquí: cada vez que se pinta, la caja es nueva
   function tarjeta(e) {
           const p = pagoDe(e.id), faltas = faltasDe(e.id), monto = montoDe(e), ret = retardosDe(e.id);

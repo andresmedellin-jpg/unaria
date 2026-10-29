@@ -101,9 +101,9 @@ export const MODULOS = [
 // Perfiles listos para dar de alta a alguien: un rol principal + roles extra
 const PERFILES_TODOS = [
   { id: 'socio',     titulo: 'Socio: todo',                rol: 'socio',     roles: [],
-    desc: CLIENTE ? 'Ve y hace todo, igual que el dueño, incluidos nómina y patrimonio. Solo no puede dar de alta usuarios.' : 'Ve y hace todo, igual que el dueño: Casa, Socios, nómina y patrimonio. Solo no puede dar de alta usuarios.' },
+    desc: CLIENTE ? 'Ve y hace todo, igual que el dueño, incluida la nómina. Solo no puede dar de alta usuarios.' : 'Ve y hace todo, igual que el dueño: Casa, Socios, nómina y patrimonio. Solo no puede dar de alta usuarios.' },
   { id: 'captura',   titulo: 'Captura: gastos y cobranza', rol: 'cobranza',  roles: ['operacion'],
-    desc: CLIENTE ? 'Captura gastos y registra cobranza. No ve nómina ni patrimonio.' : 'Captura gastos de obra y oficina, y registra cobranza. No ve Casa, Socios, nómina ni patrimonio.' },
+    desc: CLIENTE ? 'Captura gastos y registra cobranza. No ve la nómina.' : 'Captura gastos de obra y oficina, y registra cobranza. No ve Casa, Socios, nómina ni patrimonio.' },
   { id: 'cobranza',  titulo: 'Cobranza y rentas',          rol: 'cobranza',  roles: [],
     desc: MARCA.demo || CLIENTE ? 'Rentas, cobranza y adeudos. No ve gastos.' : 'Rentas, cobranza de Elysium y adeudos. No ve gastos.' },
   { id: 'gastos',    titulo: 'Solo gastos',                rol: 'operacion', roles: [],
@@ -111,7 +111,7 @@ const PERFILES_TODOS = [
   { id: 'encargado', titulo: 'Encargado de sitio',         rol: 'encargado', roles: [],
     desc: 'Tareas, rondines, incidencias y asistencia de su personal. No ve dinero.' },
   { id: 'admin',     titulo: 'Administración',             rol: 'administracion', roles: [],
-    desc: CLIENTE ? 'Todo, incluida la nómina, menos Patrimonio y Usuarios.' : 'Todo, incluidos Casa, Socios y nómina, menos Patrimonio y Usuarios.' },
+    desc: CLIENTE ? 'Todo, incluida la nómina, menos dar de alta usuarios.' : 'Todo, incluidos Casa, Socios y nómina, menos Patrimonio y Usuarios.' },
 ];
 // Un cliente sin rentas ni cobranza no necesita el perfil de cobranza
 export const PERFILES = PERFILES_TODOS.filter((p) => p.id !== 'cobranza' || !CLIENTE || (MARCA.modulos || []).some((m) => m === 'rentas' || m === 'cobranza'));

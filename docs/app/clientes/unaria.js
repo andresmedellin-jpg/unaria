@@ -14,8 +14,8 @@ window.__CLIENTE = {
     isotipo: '<svg viewBox="0 0 120 120"><g fill="currentColor"><rect x="0" y="0" width="36" height="36" rx="4"/><rect x="0" y="42" width="36" height="36" rx="4"/><rect x="0" y="84" width="36" height="36" rx="4"/><rect x="84" y="0" width="36" height="36" rx="4"/><rect x="84" y="42" width="36" height="36" rx="4"/><rect x="84" y="84" width="36" height="36" rx="4"/></g><rect x="42" y="84" width="36" height="36" rx="4" fill="var(--primary)"/></svg>',
     logos: [],
     color: '#BF4D17', color2: '#9A3D11', colorSuave: '#F6E7DD',
-    // Módulos generales (sirven a cualquier giro). El paquete inmobiliario (rentas, ocupación, lecturas) se prende por cliente.
-    modulos: ['inicio', 'prospectos', 'cotizaciones', 'inventario', 'obras', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
+    // Módulos generales (sirven a cualquier giro). El paquete inmobiliario (rentas, ocupación, lecturas, patrimonio) se prende por cliente.
+    modulos: ['inicio', 'prospectos', 'cotizaciones', 'inventario', 'obras', 'gastos', 'personal', 'importar', 'usuarios'],
     // Menú corto: lo que va junto se muestra como pestañas; Configuración va abajo, junto al nombre
     menu: [
       { id: 'inicio' },
@@ -23,11 +23,10 @@ window.__CLIENTE = {
       { id: 'obras' },
       { id: 'gastos' },
       { id: 'personal' },
-      { id: 'patrimonio' },
     ],
     ajustes: ['usuarios', 'importar'],
     ocultarPestanas: ['rondin'],
-    titulos: { obras: 'Proyectos' }, palabraObra: ['proyecto', 'proyectos'],
+    titulos: { obras: 'Proyectos', personal: 'Equipo' }, palabraObra: ['proyecto', 'proyectos'],
     reciboEmpresa: 'Unaria',
     dominioUsuarios: '@usuarios.unaria.mx',
   },
