@@ -1,0 +1,41 @@
+UNARIA.MX — página + chat ("¿Por dónde empiezo?")
+
+QUÉ HAY AQUÍ
+  docs/                           la página (GitHub Pages publica esta carpeta, como app.medco.mx)
+    index.html, aviso-de-privacidad.html, favicon.svg, og.png, CNAME (unaria.mx)
+    chat-widget.js                la burbuja del chat (sirve para cualquier página, de Unaria o de un cliente)
+  supabase/functions/chat/        el servidor del chat (ya publicado en el proyecto "unaria" de Supabase)
+    index.ts                      habla con Claude, calcula el costo, guarda el prospecto, avisa por correo
+    config.ts                     LO ÚNICO QUE CAMBIA POR CLIENTE: prompt, preguntas, puntaje, campos, dominios
+
+YA ESTÁ HECHO
+  - Base de Unaria en Supabase con prospectos.
+  - Servidor del chat: https://gimvgsjpeyvdretubrgc.supabase.co/functions/v1/chat
+
+FALTA (lo que necesita a Andrés o a Angel)
+  1. Llave de Anthropic de Unaria: console.anthropic.com → API keys → crear (y poner tope de gasto, p. ej. US$20/mes).
+     Pegarla en Supabase → proyecto "unaria" → Edge Functions → Secrets → ANTHROPIC_API_KEY.
+  2. Repositorio vacío en GitHub: andresmedellin-jpg/unaria-web (público). Claude sube la página y activa GitHub Pages.
+  3. DNS de unaria.mx (donde se compró el dominio):
+       A     @    185.199.108.153
+       A     @    185.199.109.153
+       A     @    185.199.110.153
+       A     @    185.199.111.153
+       CNAME www  andresmedellin-jpg.github.io
+     (No tocar los registros MX de Google Workspace.) unaria.com.mx y unaria.ai: reenvío a https://unaria.mx.
+  4. En docs/index.html (bloque CONFIG): whatsapp, agenda, googleAnalytics, pixelMeta.
+     Pendientes en amarillo: [RAZÓN SOCIAL]; en el aviso: [RAZÓN SOCIAL], [DOMICILIO], [FECHA] (que lo revise el abogado).
+  5. Opcional, aviso por correo: cuenta en resend.com y en Secrets: RESEND_API_KEY, AVISO_PARA (correos), AVISO_DE.
+
+PARA UN CLIENTE NUEVO
+  1. Su propia base de Supabase (supabase/plantilla/operia_base.sql + alta_cliente.sql + función guardar_chat).
+  2. Copiar supabase/functions/chat, cambiar solo config.ts (negocio, empresaDestino, origenes con SU dominio,
+     calculadora, prompt con la plantilla de Angel, campos) y publicarla en su proyecto (sin verificación JWT).
+     Su llave de Anthropic en sus Secrets.
+  3. En su página, una línea antes de </body>:
+     <script src="https://unaria.mx/chat-widget.js" defer
+       data-api="https://SU-PROYECTO.supabase.co/functions/v1/chat" data-titulo="Su negocio"
+       data-saludo="Hola, ¿en qué te ayudamos?" data-opciones="Opción 1|Opción 2|Otro"
+       data-color="#1F6F4A" data-logo="https://.../logo.png" data-whatsapp="8112345678"
+       data-aviso="https://supagina.com/aviso-de-privacidad"></script>
+  4. Cada cliente necesita su propio aviso de privacidad (el chat pide datos personales).
