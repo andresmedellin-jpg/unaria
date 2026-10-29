@@ -28,8 +28,14 @@ const vistas = {
     r.setProperty('--primary-2', MARCA.color2 || MARCA.color);
     if (MARCA.colorSuave) r.setProperty('--primary-soft', MARCA.colorSuave);
   }
-  document.querySelector('.sidebar .brand').innerHTML = MARCA.marca.map(esc).join(' <span class="brand-sep">/</span> ');
-  document.querySelector('.login-logos').innerHTML = MARCA.logos.length ? MARCA.logos.map((l) =>
+  if (MARCA.isotipo) {
+    // Marca con isotipo (Unaria y clientes con logo en SVG): ícono + nombre en la letra de la marca
+    const nombre = esc(MARCA.marca.join(' '));
+    document.querySelector('.sidebar .brand').innerHTML = `<span class="brand-iso" aria-hidden="true">${MARCA.isotipo}</span><span class="brand-nombre">${nombre}</span>`;
+    document.querySelector('.login-logos').innerHTML = `<span class="login-iso" aria-hidden="true">${MARCA.isotipo}</span>
+      <strong class="login-marca">${nombre}</strong>${MARCA.lema ? `<span class="login-lema">${esc(MARCA.lema)}</span>` : ''}`;
+  } else document.querySelector('.sidebar .brand').innerHTML = MARCA.marca.map(esc).join(' <span class="brand-sep">/</span> ');
+  if (!MARCA.isotipo) document.querySelector('.login-logos').innerHTML = MARCA.logos.length ? MARCA.logos.map((l) =>
     `<picture><img src="${l.src}" alt="${esc(l.alt)}" class="${l.clase || ''}"></picture>`).join('<span class="login-logos-sep" aria-hidden="true"></span>')
     : `<strong class="login-nombre">${esc(MARCA.marca.join(' / '))}</strong>`;   // cliente sin logo todavía: su nombre
   if (MARCA.demo) {
@@ -88,7 +94,7 @@ $('login-olvide').addEventListener('click', async () => {
       await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
     }
     // Mismo mensaje exista o no el usuario, para no revelar quién tiene cuenta
-    mensajeLogin('Si tu usuario tiene correo, te llegó un enlace para cambiar la contraseña. Si no tienes correo, pídele a Andrés que te la cambie.');
+    mensajeLogin('Si tu usuario tiene correo, te llegó un enlace para cambiar la contraseña. Si no tienes correo, pídele al administrador que te la cambie.');
   } catch (err) {
     mensajeLogin(err.message);
   }
@@ -159,7 +165,7 @@ async function entrar(user) {
       $('login').hidden = false; $('shell').hidden = true;
       mensajeLogin(error
         ? 'No se pudo conectar con la base: ' + error.message
-        : 'Tu usuario todavía no tiene acceso a la plataforma. Pídele a Andrés que te dé de alta.');
+        : 'Tu usuario todavía no tiene acceso a la plataforma. Pídele al administrador que te dé de alta.');
       return;
     }
     estado.miembro = miembro;
@@ -231,7 +237,7 @@ async function navegar() {
     mod = mios.find((m) => m.listo) || mios[0];
     if (!mod) {
       $('page-title').textContent = 'Sin módulos';
-      $('view').innerHTML = '<div class="vacio">Tu usuario todavía no tiene módulos asignados. Pídele a Andrés que te dé acceso.</div>';
+      $('view').innerHTML = '<div class="vacio">Tu usuario todavía no tiene módulos asignados. Pídele al administrador que te dé acceso.</div>';
       return;
     }
     history.replaceState(null, '', '#/' + mod.id);

@@ -1,0 +1,62 @@
+/* Tema Unaria: tinta sobre papel, el único color es el cobre de "la pieza que une".
+   Va después de app.css y solo cambia la apariencia; la marca de cada cliente (nombre, isotipo, color) llega desde clientes/<id>.js. */
+:root {
+  --bg: #F7F6F4; --surface: #FFFFFF; --surface-2: #F0EEEA; --border: #E2E1DE;
+  --text: #121314; --text-2: #3D4045; --text-3: #62666C;
+  --neg: #B42318; --ok: #067647; --warn: #B54708;
+  --radius: 6px;
+  --tinta: #121314; --papel: #F7F6F4;
+  --lateral: #121314; --lateral-texto: #D9D8D4; --lateral-gris: #8E9297; --lateral-linea: #26292D;
+  --cobre-claro: #E9682C;
+  --f-display: 'Sora', 'Trebuchet MS', Arial, sans-serif;
+  --f-texto: 'Albert Sans', 'Segoe UI', Arial, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
+}
+body { font: 400 14.5px/1.5 var(--f-texto); background: var(--bg); }
+h1, h2, h3, .topbar h1 { font-family: var(--f-display); letter-spacing: -0.02em; }
+.topbar { background: var(--bg); }
+.topbar h1 { font-size: 20px; font-weight: 600; }
+
+/* Esquinas: un solo radio en todo */
+.btn, .icon-btn, input, select, textarea, .nav a, .form .opcion, .segmento, .lista-pagos li, .dia-falta, .t-mes { border-radius: var(--radius); }
+.btn { font-weight: 600; }
+
+/* Tablas: etiquetas en mono, línea fina en tinta */
+.tabla th { font: 500 10.5px/1.4 var(--f-mono); letter-spacing: .08em; color: var(--text-3); border-bottom: 1px solid var(--tinta); }
+
+/* ---------- menú lateral en tinta ---------- */
+.sidebar { background: var(--lateral); border-right: 0; color: var(--lateral-texto); }
+.sidebar .brand { color: var(--papel); }
+.nav-titulo { font: 500 10.5px/1.4 var(--f-mono); letter-spacing: .1em; color: var(--lateral-gris); }
+.nav a { color: var(--lateral-texto); }
+.nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav a.active { background: color-mix(in srgb, var(--primary) 24%, transparent); color: color-mix(in srgb, var(--primary) 50%, #fff); font-weight: 600; }
+.nav-tag { color: var(--lateral-gris); }
+.sidebar-foot { border-top-color: var(--lateral-linea); }
+.user strong { color: var(--papel); }
+.user-txt > span { color: var(--lateral-gris); }
+.user-avatar { background: var(--primary); color: #fff; font-family: var(--f-display); }
+.sidebar-foot .btn-ghost { color: var(--lateral-texto); border-color: var(--lateral-linea); }
+.sidebar-foot .btn-ghost:hover { background: rgba(255,255,255,.06); color: #fff; }
+
+/* Marca con isotipo */
+.brand { gap: 10px; }
+.brand-iso { width: 24px; height: 24px; display: inline-flex; flex: none; color: var(--papel); }
+.brand-iso svg { width: 100%; height: 100%; display: block; }
+.brand-nombre { font: 600 21px/1 var(--f-display); letter-spacing: -0.03em; color: var(--papel); }
+
+/* ---------- acceso ---------- */
+.login { background: var(--bg); }
+.login-card { border-color: var(--border); padding: 32px 28px; }
+.login-logos { display: grid; justify-items: start; gap: 6px; }
+.login-iso { width: 40px; height: 40px; display: inline-flex; color: var(--tinta); margin-bottom: 6px; }
+.login-iso svg { width: 100%; height: 100%; display: block; }
+.login-marca { font: 600 30px/1 var(--f-display); letter-spacing: -0.035em; color: var(--tinta); }
+.login-lema { font: 500 11px/1.4 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--primary); }
+.login-sub { margin-top: 14px; }
+
+/* Botón AI con la letra de la marca */
+.ayuda-btn { font-family: var(--f-texto); border-radius: var(--radius); }
+
+/* Casillas y opciones en cobre */
+input[type="radio"], input[type="checkbox"] { accent-color: var(--primary); }
