@@ -197,8 +197,51 @@ const rolLegible = (r) => ({ dueno: 'Dueño', socio: 'Socio', administracion: 'A
 // ================= NAVEGACIÓN =================
 const modulosDelUsuario = () => MODULOS.filter((m) => tieneRol(m.roles));
 
+// Menú. Por omisión, todos los módulos por grupo. Con MARCA.menu, un menú corto: cada opción es un módulo
+// ({ id }) o un grupo de módulos que se muestran como pestañas ({ titulo, modulos: [...] }); MARCA.ajustes va abajo,
+// junto al nombre, como "Configuración". En el celular, las primeras opciones van en una barra abajo.
+const ICONO_AJUSTES = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+const ICONO_MAS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+let entradas = [];   // opciones del menú corto: { clave, titulo, icono, subs: [módulos que puede ver] }
+
+function entradasMenu() {
+  const mios = modulosDelUsuario();
+  const de = (ids) => ids.map((id) => mios.find((m) => m.id === id)).filter(Boolean);
+  const armar = (e, i) => {
+    const subs = e.id ? de([e.id]) : de(e.modulos || []);
+    if (!subs.length) return null;
+    const unico = subs.length === 1 && !e.siempreGrupo;
+    return { clave: e.id || 'g' + i, titulo: unico && !e.id ? subs[0].titulo : (e.titulo || subs[0].titulo),
+      icono: e.icono ? (mios.find((m) => m.id === e.icono)?.icono || subs[0].icono) : subs[0].icono, subs, abajo: !!e.abajo };
+  };
+  const lista = MARCA.menu.map(armar).filter(Boolean);
+  const aj = armar({ titulo: 'Configuración', modulos: MARCA.ajustes || [], siempreGrupo: true }, 'aj');
+  if (aj) { aj.icono = ICONO_AJUSTES; aj.abajo = true; lista.push(aj); }
+  return lista;
+}
+
 function pintarNav() {
   const mios = modulosDelUsuario();
+  if (MARCA.menu) {
+    entradas = entradasMenu();
+    const liga = (e) => `<a href="#/${e.subs[0].id}" data-mod="${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}">
+        <span class="nav-ico">${e.icono}</span>${esc(e.titulo)}</a>`;
+    $('nav').innerHTML = `<div class="nav-grupo">${entradas.filter((e) => !e.abajo).map(liga).join('')}</div>`;
+    let abajo = document.getElementById('nav-abajo');
+    if (!abajo) { abajo = document.createElement('nav'); abajo.id = 'nav-abajo'; abajo.className = 'nav nav-abajo'; abajo.setAttribute('aria-label', 'Configuración');
+      document.querySelector('.sidebar-foot').before(abajo); }
+    abajo.innerHTML = entradas.filter((e) => e.abajo).map(liga).join('');
+    // Barra de abajo en el celular: hasta 4 opciones + "Más" (abre el menú completo)
+    let barra = document.getElementById('barra-movil');
+    if (!barra) { barra = document.createElement('nav'); barra.id = 'barra-movil'; barra.className = 'barra-movil'; barra.setAttribute('aria-label', 'Menú rápido');
+      document.body.appendChild(barra); document.body.classList.add('con-barra'); }
+    const principales = entradas.filter((e) => !e.abajo);
+    const enBarra = principales.length <= 5 ? principales : principales.slice(0, 4);
+    barra.innerHTML = enBarra.map((e) => `<a href="#/${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}"><span class="nav-ico">${e.icono}</span><span>${esc(e.titulo)}</span></a>`).join('')
+      + (principales.length > 5 || entradas.some((e) => e.abajo) ? `<button type="button" id="barra-mas"><span class="nav-ico">${ICONO_MAS}</span><span>Más</span></button>` : '');
+    barra.querySelector('#barra-mas')?.addEventListener('click', () => $('sidebar').classList.toggle('open'));
+    return;
+  }
   const grupos = [...new Set(mios.map((m) => m.grupo))];
   $('nav').innerHTML = grupos.map((g) => `
     <div class="nav-grupo">
@@ -213,7 +256,7 @@ function pintarNav() {
 
 // Contador en el menú de prospectos que llevan más de una hora sin respuesta (se revisa cada 5 minutos)
 async function avisoProspectos() {
-  const a = document.querySelector('#nav a[data-mod="prospectos"]');
+  const a = document.querySelector('#nav a[data-mod="prospectos"]') || [...document.querySelectorAll('#nav a[data-subs]')].find((x) => x.dataset.subs.split(' ').includes('prospectos'));
   if (!a) return;
   try {
     const desde = new Date(Date.now() - 3600e3).toISOString();
@@ -242,9 +285,12 @@ async function navegar() {
     }
     history.replaceState(null, '', '#/' + mod.id);
   }
-  document.querySelectorAll('#nav a').forEach((a) => a.classList.toggle('active', a.dataset.mod === mod.id));
+  const enMenu = (a) => a.dataset.subs ? a.dataset.subs.split(' ').includes(mod.id) : a.dataset.mod === mod.id;
+  document.querySelectorAll('#nav a, #nav-abajo a, #barra-movil a').forEach((a) => a.classList.toggle('active', enMenu(a)));
   $('sidebar').classList.remove('open');
-  $('page-title').textContent = mod.titulo;
+  // En el menú corto, los módulos de un mismo grupo se muestran como pestañas arriba de la pantalla
+  const grupo = MARCA.menu ? entradas.find((e) => e.subs.length > 1 && e.subs.some((m) => m.id === mod.id)) : null;
+  $('page-title').textContent = grupo ? grupo.titulo : mod.titulo;
   $('page-actions').innerHTML = '';
   // Cada vez que se abre un módulo se le da una caja nueva. Si una carga anterior sigue en camino
   // (doble clic, cambio rápido de pantalla, sesión que se renueva), termina en su caja vieja y no estorba.
@@ -253,7 +299,12 @@ async function navegar() {
   const caja = document.createElement('div');
   caja.className = 'vista';
   caja.innerHTML = '<div class="cargando">Cargando…</div>';
-  view.replaceChildren(caja);
+  if (grupo) {
+    const pest = document.createElement('div');
+    pest.className = 'sub-modulos';
+    pest.innerHTML = `<div class="tabs" role="tablist">${grupo.subs.map((m) => `<a role="tab" href="#/${m.id}" aria-selected="${m.id === mod.id}">${esc(m.titulo)}</a>`).join('')}</div>`;
+    view.replaceChildren(pest, caja);
+  } else view.replaceChildren(caja);
   try {
     const m = await (vistas[mod.vista || mod.id] || pendiente)();
     if (mio !== turno) return;
