@@ -26,7 +26,7 @@ const n0 = (x) => (x == null ? '—' : Number(x).toLocaleString('es-MX', { maxim
 
 const st = { tab: null, centro: null, ym: hoyISO().slice(0, 7), q: '', fSrv: '', fEst: '' };
 let raiz, campo = false;
-let medidores = [], lecturas = [], recibos = [], tarifas = [], unidades = [], contratos = [], pagosSrv = [];
+let medidores = [], lecturas = [], recibos = [], tarifas = [], unidades = [], contratos = [], pagosSrv = [], titulares = [];
 
 export async function render(view, mod) {
   raiz = view;
@@ -49,6 +49,7 @@ export async function render(view, mod) {
           .map((ym) => `<option value="${ym}" ${ym === st.ym ? 'selected' : ''}>${mesTxt(ym)}</option>`).join('')}</select>
       </div>
     </div>
+    ${campo ? '' : '<div id="lec-pasos" class="lec-pasos" aria-label="Pasos del mes"></div>'}
     <div id="lec-cuerpo"><div class="cargando">Cargando…</div></div>`;
   view.querySelector('#lec-centro')?.addEventListener('change', (e) => { st.centro = e.target.value; cargar(); });
   view.querySelector('#lec-mes').addEventListener('change', (e) => { st.ym = e.target.value; cargar(); });
@@ -62,7 +63,7 @@ export async function render(view, mod) {
 
 async function cargar() {
   const desde = (() => { let ym = st.ym; for (let k = 0; k < 4; k++) ym = mesAnterior(ym); return per(ym); })();
-  const [m, l, r, t, u, c, p] = await Promise.all([
+  const [m, l, r, t, u, c, p, rs] = await Promise.all([
     db().from('medidores').select('*').eq('centro_id', st.centro).eq('activo', true),
     todo(() => db().from('lecturas').select('*').eq('centro_id', st.centro).gte('periodo', desde).lte('periodo', per(st.ym))),
     db().from('recibos_servicio').select('*').eq('centro_id', st.centro),
@@ -70,6 +71,7 @@ async function cargar() {
     db().from('unidades').select('id, identificador, tipo').eq('centro_id', st.centro),
     db().from('contratos').select('id, unidad_id, arrendatario, telefono, activo').eq('centro_id', st.centro).eq('activo', true),
     db().from('pagos').select('id, unidad_id, contrato_id, monto, fecha, forma_pago').eq('centro_id', st.centro).eq('concepto', 'servicios').eq('periodo', per(st.ym)),
+    db().from('residentes').select('unidad_id, nombre, telefono, es_titular').eq('activo', true).not('telefono', 'is', null),
   ]);
   const err = m.error || l.error || u.error;
   if (err) { toast('No se pudo cargar: ' + err.message, true); return; }
@@ -77,6 +79,7 @@ async function cargar() {
   const ord = (x) => unidades.find((y) => y.id === x.unidad_id)?.identificador || '';
   const OS = { luz: 0, gas: 1, agua: 2 };
   pagosSrv = p.data || [];
+  titulares = (rs.data || []).sort((a, b) => Number(b.es_titular) - Number(a.es_titular));
   medidores = m.data.sort((a, b) => OS[a.servicio] - OS[b.servicio] || (a.zona || '').localeCompare(b.zona || '') || a.orden - b.orden || ord(a).localeCompare(ord(b), 'es', { numeric: true }));
   marcarBases();
   pintar();
@@ -125,6 +128,7 @@ function pintar() {
   const el = raiz.querySelector('#lec-cuerpo');
   const acc = document.getElementById('page-actions');
   acc.innerHTML = '';
+  pintarPasos();
   if (st.tab === 'recorrido') return pintarRecorrido(el);
   if (st.tab === 'avance') return pintarAvance(el);
   if (st.tab === 'revision') return pintarRevision(el);
@@ -394,7 +398,7 @@ function editarRecibo(s) {
       <label>Compañía<input name="compania" value="${esc(r?.compania || S.compania)}" maxlength="60"></label>
       <div class="form-2"><label>Consumo del recibo (${S.unidad})<input type="number" name="consumo" min="0" step="0.01" value="${r ? Number(r.consumo) : ''}"></label>
         <label>Total a pagar<input type="number" name="monto" min="0" step="0.01" value="${r ? Number(r.monto) : ''}"></label></div>
-      <p class="nota">Lo que viene en el recibo que le llega al edificio. El pago del recibo se registra en Gastos como siempre.</p></form>`,
+      <p class="nota">Lo que viene en el recibo que le llega al edificio: los ${S.unidad} que marcó el medidor general y el total a pagar.</p></form>`,
     pie: `<button class="btn btn-ghost" id="rf-no">Cancelar</button><button class="btn btn-primary" id="rf-si">Guardar</button>`,
   });
   const f = modal.querySelector('#rf');
@@ -429,6 +433,30 @@ function editarTarifa(s) {
   });
 }
 
+// ----- pasos del mes: qué sigue, de un vistazo -----
+// 1 Tomar lecturas → 2 Revisar las raras → 3 Capturar los recibos de las compañías → 4 Mandar avisos → 5 Cobrar
+function pintarPasos() {
+  const caja = raiz.querySelector('#lec-pasos'); if (!caja) return;
+  const hechas = medidores.filter((m) => lecturaDe(m)).length;
+  const raras = medidores.filter((m) => lecturaDe(m)?.estado === 'revisar').length;
+  const ocupaRecibo = Object.keys(SERV).filter((s) => tarifaDe(s).modo === 'prorrateo' && medidores.some((m) => m.servicio === s));
+  const conRecibo = ocupaRecibo.filter((s) => reciboDe(s)).length;
+  const filas = filasCobro(), aCobrar = filas.filter((r) => !r.revisar && ['pendiente', 'parcial', 'pagado'].includes(r.est)), env = enviados();
+  const mandados = aCobrar.filter((r) => env.has(r.u.id)).length, pagados = aCobrar.filter((r) => r.est === 'pagado').length;
+  const base = hechas > 0 && medidores.every((m) => !lecturaDe(m) || esBase(m));
+  const pasos = [
+    { tab: 'avance', t: 'Tomar lecturas', d: `${hechas} de ${medidores.length}`, ok: hechas === medidores.length && medidores.length > 0 },
+    { tab: 'revision', t: 'Revisar', d: raras ? `${raras} raras` : hechas ? 'sin raras' : '—', ok: hechas > 0 && !raras },
+    { tab: 'cuadre', t: 'Recibos CFE, gas y agua', d: ocupaRecibo.length ? `${conRecibo} de ${ocupaRecibo.length}` : 'tarifa fija', ok: conRecibo === ocupaRecibo.length },
+    { tab: 'cobro', t: 'Mandar avisos', d: base ? 'mes base' : aCobrar.length ? `${mandados} de ${aCobrar.length}` : '—', ok: aCobrar.length > 0 && mandados >= aCobrar.length },
+    { tab: 'cobro', t: 'Cobrar', d: base ? 'mes base' : aCobrar.length ? `${pagados} de ${aCobrar.length}` : '—', ok: aCobrar.length > 0 && pagados === aCobrar.length },
+  ];
+  const actual = pasos.findIndex((p) => !p.ok);
+  caja.innerHTML = pasos.map((p, i) => `<button type="button" class="lec-paso${p.ok ? ' hecho' : ''}${i === actual ? ' actual' : ''}" data-ir="${p.tab}">
+      <span class="lec-paso-n">${p.ok ? '✓' : i + 1}</span><span><b>${p.t}</b><small>${p.d}</small></span></button>`).join('');
+  caja.querySelectorAll('[data-ir]').forEach((b) => b.addEventListener('click', () => raiz.querySelector(`[data-tab="${b.dataset.ir}"]`)?.click()));
+}
+
 // ----- cobro por unidad -----
 // Lo que le toca a cada unidad, el aviso en PDF, el mensaje de WhatsApp y el registro de quién ya pagó.
 const contratoU = (unidadId) => contratos.find((c) => c.unidad_id === unidadId);
@@ -456,7 +484,14 @@ function mensaje(r) {
   return `Hola${quien ? ' ' + quien.split(' ')[0] : ''}, te compartimos tu consumo de servicios de ${mesTxt(st.ym).toLowerCase()} en ${centro}, ${r.u.identificador}:\n\n${lineas.join('\n')}\n\n*Total a pagar: ${fmt(r.total)}*`
     + `${r.pagado ? `\nYa recibimos ${fmt(r.pagado)}; queda ${fmt(Math.max(0, r.total - r.pagado))}.` : ''}\n\nLas lecturas se tomaron con foto del medidor; si tienes dudas, con gusto te la mandamos. Gracias.`;
 }
-const telDe = (unidadId) => { const t = String(contratoU(unidadId)?.telefono || '').replace(/\D/g, ''); return t.length === 10 ? '52' + t : t.length >= 12 ? t : ''; };
+// Teléfono para el aviso: el del contrato; si no tiene, el del residente titular (o cualquier residente con teléfono)
+const telCrudo = (unidadId) => contratoU(unidadId)?.telefono || titulares.find((r) => r.unidad_id === unidadId)?.telefono || '';
+const telWa = (t) => { t = String(t || '').replace(/\D/g, ''); return t.length === 10 ? '52' + t : t.length >= 12 ? t : ''; };
+const telDe = (unidadId) => telWa(telCrudo(unidadId));
+// Avisos ya mandados este mes (en este navegador): para saber por dónde vas
+const claveAvisos = () => `unaria-avisos:${st.centro}:${st.ym}`;
+function enviados() { try { return new Set(JSON.parse(localStorage.getItem(claveAvisos()) || '[]')); } catch { return new Set(); } }
+function marcarEnviado(id) { const s = enviados(); s.add(id); try { localStorage.setItem(claveAvisos(), JSON.stringify([...s])); } catch { /* sin almacenamiento */ } }
 
 function pintarCobro(el) {
   const todas = filasCobro();
@@ -464,6 +499,7 @@ function pintarCobro(el) {
   const listos = todas.filter((r) => ['pendiente', 'parcial', 'pagado'].includes(r.est));
   const aCobrar = todas.reduce((a, r) => a + r.total, 0), cobrado = todas.reduce((a, r) => a + r.pagado, 0);
   const soloBase = todas.length && todas.every((r) => r.est === 'base' || r.est === 'incompleto') && todas.some((r) => r.est === 'base');
+  const env = enviados(), porMandar = todas.filter((r) => !r.revisar && ['pendiente', 'parcial'].includes(r.est) && !env.has(r.u.id));
   el.innerHTML = `<div class="kpis">
       <div class="kpi"><span>A cobrar a las unidades</span><strong>${fmt(aCobrar)}</strong><small>${mesTxt(st.ym)}</small></div>
       <div class="kpi"><span>Cobrado</span><strong class="pos">${fmt(cobrado)}</strong><small>${todas.filter((r) => r.est === 'pagado').length} unidades pagadas</small></div>
@@ -472,26 +508,57 @@ function pintarCobro(el) {
     </div>
     ${soloBase ? `<div class="panel rs-aviso"><b>Este es el mes de las lecturas base.</b> Lo que se tome este mes es el punto de partida de cada medidor; el cobro empieza con el siguiente recorrido.</div>` : ''}
     <section class="panel"><div class="panel-head"><h3>Cobro por unidad</h3>
-      <input type="search" id="cb-q" placeholder="Buscar unidad o inquilino" value="${esc(st.q)}" aria-label="Buscar"></div>
+      <div class="filtros filtros-sm"><input type="search" id="cb-q" placeholder="Buscar unidad o inquilino" value="${esc(st.q)}" aria-label="Buscar">
+      ${porMandar.length ? `<button class="btn btn-sm btn-wa" id="cb-todos">Mandar avisos uno por uno (${porMandar.length})</button>` : ''}</div></div>
       <div class="tabla-wrap"><table class="tabla lec-t"><thead><tr><th>Unidad</th><th class="num">Luz</th><th class="num">Gas</th><th class="num">Agua</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead>
       <tbody>${filas.map((r) => `<tr><td data-l="Unidad"><b>${esc(r.u.identificador)}</b><br><small>${esc(ocupante(r.u.id) || 'Sin inquilino')}</small></td>
         ${Object.keys(SERV).map((s) => `<td data-l="${SERV[s].nombre}" class="num">${r.imp[s] === undefined ? '<small>—</small>' : r.imp[s] == null ? `<small>${r.ms.some((m) => m.servicio === s && esBase(m)) ? 'base' : 'falta'}</small>` : fmt(r.imp[s])}</td>`).join('')}
         <td data-l="Total" class="num"><b>${fmt(r.total)}</b>${r.pagado && r.est !== 'pagado' ? `<br><small>pagó ${fmt(r.pagado)}</small>` : ''}</td>
-        <td data-l="Estado">${r.revisar ? '<span class="tag tag-aviso">Revisar</span>' : EST_COBRO[r.est]}</td>
+        <td data-l="Estado">${r.revisar ? '<span class="tag tag-aviso">Revisar</span>' : EST_COBRO[r.est]}${env.has(r.u.id) && r.est !== 'pagado' ? '<br><small>aviso enviado</small>' : ''}</td>
         <td data-l="" class="nowrap">${r.total > 0 ? `<button class="btn btn-sm btn-ghost" data-aviso="${r.u.id}">PDF</button>
           <button class="btn btn-sm btn-wa" data-wa="${r.u.id}">WhatsApp</button>
           ${r.est !== 'pagado' && tieneRol(['administracion', 'cobranza']) ? `<button class="btn btn-sm btn-ghost" data-pago="${r.u.id}">Pagó</button>` : ''}` : ''}</td></tr>`).join('')}</tbody></table></div>
-      <p class="nota" style="margin-top:10px">WhatsApp abre el mensaje ya escrito con lo que le toca, listo para mandar. Si el inquilino no tiene teléfono, el mensaje se copia para pegarlo donde quieras.</p>
+      <p class="nota" style="margin-top:10px">WhatsApp abre el mensaje ya escrito con lo que le toca, listo para mandar. "Mandar avisos uno por uno" te lleva por todos los departamentos en orden: abres, mandas y pasa al siguiente.</p>
     </section>`;
   el.querySelector('#cb-q').addEventListener('change', (e) => { st.q = e.target.value; pintarCobro(el); });
   el.querySelectorAll('[data-aviso]').forEach((b) => b.addEventListener('click', () => avisoCobro(unidades.find((u) => u.id === b.dataset.aviso))));
-  el.querySelectorAll('[data-wa]').forEach((b) => b.addEventListener('click', async () => {
-    const r = todas.find((x) => x.u.id === b.dataset.wa), txt = mensaje(r), tel = telDe(r.u.id);
-    if (tel) { window.open(`https://wa.me/${tel}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener'); return; }
-    try { await navigator.clipboard.writeText(txt); toast('No tiene teléfono: copié el mensaje para que lo pegues'); }
-    catch { abrirModal({ titulo: 'Mensaje', cuerpo: `<textarea rows="12" style="width:100%">${esc(txt)}</textarea>` }); }
-  }));
+  el.querySelectorAll('[data-wa]').forEach((b) => b.addEventListener('click', () => mandarAvisos([todas.find((x) => x.u.id === b.dataset.wa)])));
+  el.querySelector('#cb-todos')?.addEventListener('click', () => mandarAvisos(porMandar));
   el.querySelectorAll('[data-pago]').forEach((b) => b.addEventListener('click', () => registrarPago(todas.find((x) => x.u.id === b.dataset.pago))));
+}
+
+// Avisos por WhatsApp, uno tras otro: muestra a quién, cuánto y el mensaje; "Abrir WhatsApp" lo deja escrito
+// en el chat del inquilino y pasa al siguiente. Si no tiene teléfono se escribe aquí y se guarda en su contrato.
+function mandarAvisos(lista, i = 0) {
+  if (i >= lista.length) { cerrarModal(); if (lista.length > 1) toast('Listo, ya pasaste por todos ✓'); pintar(); return; }
+  const r = lista[i], tel = telCrudo(r.u.id), c = contratoU(r.u.id), txt = mensaje(r);
+  const modal = abrirModal({
+    titulo: lista.length > 1 ? `Aviso ${i + 1} de ${lista.length} · ${r.u.identificador}` : `Aviso · ${r.u.identificador}`,
+    cuerpo: `<div class="form">
+      <p class="nota"><b>${esc(ocupante(r.u.id) || 'Sin inquilino')}</b> · le toca <b>${fmt(r.total)}</b></p>
+      <label>WhatsApp del inquilino<input type="tel" id="av-tel" value="${esc(tel)}" placeholder="10 dígitos" inputmode="tel" maxlength="20"></label>
+      <label>Mensaje<textarea id="av-txt" rows="9">${esc(txt)}</textarea></label></div>`,
+    pie: `${lista.length > 1 ? '<button class="btn btn-ghost" id="av-saltar">Saltar</button>' : '<button class="btn btn-ghost" data-cerrar>Cancelar</button>'}
+      <button class="btn btn-ghost" id="av-copiar">Copiar</button><button class="btn btn-wa" id="av-abrir">Abrir WhatsApp</button>`,
+  });
+  modal.querySelector('[data-cerrar]')?.addEventListener('click', cerrarModal);
+  modal.querySelector('#av-saltar')?.addEventListener('click', () => mandarAvisos(lista, i + 1));
+  modal.querySelector('#av-copiar').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(modal.querySelector('#av-txt').value); toast('Mensaje copiado'); }
+    catch { modal.querySelector('#av-txt').select(); }
+  });
+  modal.querySelector('#av-abrir').addEventListener('click', () => {
+    const nuevo = modal.querySelector('#av-tel').value.trim(), wa = telWa(nuevo);
+    if (!wa) { toast('Escribe su WhatsApp a 10 dígitos', true); modal.querySelector('#av-tel').focus(); return; }
+    // se abre primero (el navegador solo deja abrir ventanas justo al tocar) y luego se guarda el teléfono
+    window.open(`https://wa.me/${wa}?text=${encodeURIComponent(modal.querySelector('#av-txt').value)}`, '_blank', 'noopener');
+    marcarEnviado(r.u.id);
+    if (c && nuevo !== String(c.telefono || '')) {
+      c.telefono = nuevo;
+      db().from('contratos').update({ telefono: nuevo }).eq('id', c.id).then(({ error }) => { if (error) toast('No se guardó el teléfono: ' + error.message, true); });
+    }
+    mandarAvisos(lista, i + 1);
+  });
 }
 
 function registrarPago(r) {

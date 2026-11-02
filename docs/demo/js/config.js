@@ -121,11 +121,15 @@ const PERFILES_TODOS = [
     desc: 'Tareas, rondines, incidencias y asistencia de su personal. No ve dinero.' },
   { id: 'equipo',    titulo: 'Equipo (vigilancia, limpieza)', rol: 'equipo', roles: [],
     desc: 'Desde su celular: checa con foto, hace su rondín, marca sus pendientes, recibe paquetes y busca placas. No ve dinero. Mejor dale acceso desde Equipo → Empleados para ligarlo a su ficha.' },
+  { id: 'lecturista', titulo: 'Toma de lecturas',          rol: 'equipo', roles: [], soloSiSePide: true,
+    desc: 'Desde su celular escanea el QR de cada medidor, escribe la lectura y le toma foto. No ve dinero.' },
   { id: 'admin',     titulo: 'Administración',             rol: 'administracion', roles: [],
     desc: CLIENTE ? 'Todo, incluida la nómina, menos dar de alta usuarios.' : 'Todo, incluidos Casa, Socios y nómina, menos Patrimonio y Usuarios.' },
 ];
 // Un cliente sin rentas ni cobranza no necesita el perfil de cobranza
-export const PERFILES = PERFILES_TODOS.filter((p) => p.id !== 'cobranza' || !CLIENTE || (MARCA.modulos || []).some((m) => m === 'rentas' || m === 'cobranza'));
+// MARCA.perfiles: el cliente solo ofrece esos tipos de usuario (p. ej. Arboretum: administración y toma de lecturas)
+export const PERFILES = MARCA.perfiles ? MARCA.perfiles.map((id) => PERFILES_TODOS.find((p) => p.id === id)).filter(Boolean)
+  : PERFILES_TODOS.filter((p) => !p.soloSiSePide && (p.id !== 'cobranza' || !CLIENTE || (MARCA.modulos || []).some((m) => m === 'rentas' || m === 'cobranza')));
 
 // Altas sugeridas (desaparecen al crearlas)
 export const SUGERIDOS = MARCA.demo || CLIENTE ? [] : [

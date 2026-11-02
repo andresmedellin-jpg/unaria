@@ -163,7 +163,7 @@ tr.inactivo td { opacity: .55; }
 .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
 .modal-head h2 { font-size: 16px; }
 .modal-body { padding: 18px 20px; }
-.modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 14px 20px; border-top: 1px solid var(--border); }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: #141414; color: #fff; padding: 10px 16px; border-radius: var(--radius); font-weight: 500; opacity: 0; pointer-events: none; transition: .2s; z-index: 60; max-width: calc(100vw - 32px); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.error { background: var(--neg); }
@@ -714,3 +714,14 @@ h4.grupo:first-of-type { margin-top: 4px; }
 #s-nomina .periodo { display: none; }   /* en Semana la semana se cambia arriba, en los turnos */
 .p-sec { margin: 22px 0 10px; font-size: 16px; }
 .eq-ley { margin-top: 12px; }
+
+/* Luz, gas y agua: los pasos del mes */
+.lec-pasos { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.lec-paso { display: flex; gap: 10px; align-items: center; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; cursor: pointer; min-width: 0; }
+.lec-paso b { display: block; font-size: 13px; line-height: 1.25; }
+.lec-paso small { color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lec-paso-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: var(--surface-2); border: 1px solid var(--border); }
+.lec-paso.hecho .lec-paso-n { background: var(--ok); border-color: var(--ok); color: #fff; }
+.lec-paso.actual { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.lec-paso.actual .lec-paso-n { background: var(--primary); border-color: var(--primary); color: #fff; }
+@media (max-width: 900px) { .lec-pasos { grid-template-columns: repeat(5, minmax(150px, 1fr)); overflow-x: auto; padding-bottom: 4px; } }

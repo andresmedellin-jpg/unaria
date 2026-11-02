@@ -15,18 +15,16 @@ window.__CLIENTE = {
     isotipo: '<svg viewBox="0 0 120 120"><circle cx="60" cy="46" r="34" fill="var(--primary)"/><circle cx="38" cy="58" r="20" fill="var(--primary)" opacity=".75"/><circle cx="82" cy="58" r="20" fill="var(--primary)" opacity=".75"/><rect x="54" y="66" width="12" height="44" rx="3" fill="currentColor"/></svg>',
     logos: [],
     color: '#2F6B4F', color2: '#24533D', colorSuave: '#E6F0EA',
-    modulos: ['turno', 'inicio', 'residentes', 'rentas', 'servicios', 'lecturas', 'propietarios', 'gastos', 'personal', 'importar', 'usuarios'],
+    // Por ahora (nov. 2026) el cliente arranca solo con luz, gas y agua: medir cada medidor, calcular y mandarle a cada
+    // inquilino lo suyo. Lo demás (rentas, residentes, propietarios, gastos, equipo) ya está hecho: para prenderlo,
+    // regresarlo a esta lista y al menú.
+    modulos: ['servicios', 'lecturas', 'importar', 'usuarios'],
     menu: [
-      { id: 'turno' },          // solo lo ve el personal en su celular
-      { id: 'inicio' },
-      { id: 'residentes' },
-      { id: 'rentas' },
       // El edificio paga un solo recibo de luz, gas y agua; aquí se toma la lectura de cada depto y se le cobra lo suyo
-      { titulo: 'Luz, gas y agua', corto: 'Servicios', modulos: ['servicios', 'lecturas'], siempreGrupo: true, icono: 'servicios' },
-      { id: 'propietarios' },
-      { id: 'gastos' },
-      { id: 'personal', corto: 'Equipo' },
+      { id: 'servicios', titulo: 'Luz, gas y agua' },
+      { id: 'lecturas' },
     ],
+    perfiles: ['admin', 'lecturista'],
     ajustes: ['usuarios', 'importar'],
     ocultarPestanas: ['rondin'],
     titulos: { personal: 'Equipo de la torre' },
