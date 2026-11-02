@@ -78,3 +78,28 @@ ARBORETUM (torre de 66 departamentos; primer cliente) → unaria.mx/arboretum/
 - Tablas: turnos, puntos_rondin, rondin_marcas, solicitudes, paquetes, bitacora_turno; asistencia.foto_entrada/foto_salida;
   empleados.telefono. Funciones: puede_checar, asistencia_foto, mi_empleado, reporte_residente, centro_publico.
 - Demo: ?demo=inmobiliaria&rol=equipo abre la vista del vigilante.
+
+==== ARBORETUM · PRIMERA ENTREGA: OPERACIÓN POR WHATSAPP (brief de Angel, 2 nov 2026) ====
+Fuente de verdad: brief "Brief_Claude_Torre_Arboretum_v1" (en el proyecto de Claude de Unaria: cliente-torre-arboretum/brief-v1.md).
+Orden: A) WhatsApp + padrón + Caseta → B) Mantenimiento → C) Lecturas + conciliación → D) Estados de cuenta y pagos.
+- Menú de Arboretum: Caseta · WhatsApp · Residentes · Luz, gas y agua. Perfiles de usuario: Administración y "Caseta y lecturas" (rol equipo).
+- Caseta (js/modulos/caseta.js, tablet): ＋ Paquete (foto, depto escribiendo "405", paquetería) → aviso por WhatsApp con foto;
+  Entregar (a quién) → confirmación; Recordar. ＋ Visita sin pase → el depto recibe "¿Autorizas?" con botones Sí/No (la respuesta
+  aparece sola). Validar pase (código de 6 dígitos). Visitas esperadas hoy y Bitácora del día (con salida).
+  Sin WhatsApp conectado: los avisos quedan en cola y sale un botón verde para avisar desde un WhatsApp normal.
+- WhatsApp (js/modulos/whatsapp.js, para Carlos): conversaciones por teléfono ligadas a su depto y a lo que se registró
+  (✓ pase …, ✓ reporte #…), filtro "Necesitan a una persona", contestar desde el portal, "Probar como residente" (el asistente
+  de verdad sin Meta) y "Plantillas para Meta" (textos exactos para dar de alta).
+- Función supabase/functions/whatsapp (verify_jwt = false; se valida la firma de Meta con WA_APP_SECRET):
+  webhook de Meta, el asistente (Claude, ANTHROPIC_API_KEY de Unaria; modelo WA_MODELO o claude-sonnet-5-5) con herramientas
+  crear_pase, crear_reporte (folio, categoría, depto/área común, prioridad, si se puede entrar), sumarse_a_reporte,
+  paquetes_en_caseta, pasar_a_humano; accion 'procesar' (manda la cola y recordatorios de paquetes cada X horas),
+  'simular' y 'responder'. Fuera de la ventana de 24 h usa plantillas (solo las marcadas en wa_cuentas.plantillas_aprobadas).
+- Base (migraciones 0030–0032): residentes.recibe_avisos / recibe_cobro; paquetes.estado/avisos/ultimo_aviso/subio_depto;
+  pases, accesos, torre_reglas, wa_cuentas (phone_number_id → torre; SIN la llave), wa_mensajes (todo lo que entra y sale);
+  solicitudes.folio/prioridad/area/puede_entrar/calificacion/avisar_tambien. Funciones: tel10, contactos_aviso, encolar_aviso,
+  crear_pase, validar_pase, unidades_de_telefono. pg_net instalado (sirve para probar la función desde SQL).
+- PARA CONECTAR EL NÚMERO (cuando el cliente lo dé): en Meta Business → WhatsApp → número nuevo; usuario del sistema con token
+  permanente; secretos de la función: WA_TOKEN, WA_APP_SECRET, WA_VERIFY_TOKEN; webhook =
+  https://gimvgsjpeyvdretubrgc.supabase.co/functions/v1/whatsapp (campo "messages"); en app.wa_cuentas de Arboretum poner
+  phone_number_id, numero y activo = true; dar de alta las 6 plantillas y anotarlas en plantillas_aprobadas al aprobarse.

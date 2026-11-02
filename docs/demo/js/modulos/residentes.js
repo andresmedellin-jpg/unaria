@@ -37,7 +37,7 @@ async function cargar() {
   const [u, c, r, v, m] = await Promise.all([
     todo(() => db().from('unidades').select('id, centro_id, identificador, tipo, propietario, amueblado, notas, activo')),
     todo(() => db().from('contratos').select('id, unidad_id, centro_id, arrendatario, telefono, email, fecha_inicio, fecha_fin, monto, moneda, activo')),
-    todo(() => db().from('residentes').select('id, unidad_id, nombre, telefono, email, es_titular, notas, activo').eq('activo', true)),
+    todo(() => db().from('residentes').select('id, unidad_id, nombre, telefono, email, es_titular, recibe_avisos, recibe_cobro, notas, activo').eq('activo', true)),
     todo(() => db().from('vehiculos').select('id, unidad_id, placas, color, modelo, notas, activo').eq('activo', true)),
     todo(() => db().from('mascotas').select('id, unidad_id, tipo, nombre, notas, activo').eq('activo', true)),
   ]);
@@ -233,8 +233,8 @@ function contacto(x) {
 // Cada sección (residentes, vehículos, mascotas) se edita ahí mismo, sin abrir otra ventana.
 const SECCIONES = {
   residentes: { titulo: 'Residentes', tabla: 'residentes', nuevo: 'Agregar residente',
-    campos: [['nombre', 'Nombre', 'text', true], ['telefono', 'Teléfono', 'tel'], ['email', 'Correo', 'email'], ['es_titular', 'Es el arrendatario', 'check']],
-    linea: (r) => `<strong>${esc(r.nombre)}</strong>${r.es_titular ? ' <span class="tag tag-ok">Arrendatario</span>' : ''}<br><small>${esc([r.telefono, r.email].filter(Boolean).join(' · ') || 'Sin contacto')}</small>`,
+    campos: [['nombre', 'Nombre', 'text', true], ['telefono', 'Teléfono', 'tel'], ['email', 'Correo', 'email'], ['es_titular', 'Es el arrendatario', 'check'], ['recibe_avisos', 'Recibe avisos por WhatsApp (paquetes, visitas)', 'check'], ['recibe_cobro', 'Recibe el estado de cuenta', 'check']],
+    linea: (r) => `<strong>${esc(r.nombre)}</strong>${r.es_titular ? ' <span class="tag tag-ok">Arrendatario</span>' : ''}${r.recibe_cobro ? ' <span class="tag tag-azul">Recibe el cobro</span>' : ''}${r.recibe_avisos === false ? ' <span class="tag tag-suave">Sin avisos</span>' : ''}<br><small>${esc([r.telefono, r.email].filter(Boolean).join(' · ') || 'Sin contacto')}</small>`,
     extra: (r) => contacto(r) },
   vehiculos: { titulo: 'Vehículos', tabla: 'vehiculos', nuevo: 'Agregar vehículo',
     campos: [['placas', 'Placas', 'text'], ['modelo', 'Modelo', 'text'], ['color', 'Color', 'text'], ['notas', 'Notas', 'text']],
@@ -253,7 +253,7 @@ function ficha(u, editando = null) {
     const s = SECCIONES[clave], l = de(listas[clave](), u);
     const form = (x) => `<form class="form rs-form" data-form="${clave}" data-id="${x?.id || ''}">
       <div class="form-2">${s.campos.map(([n, t, tipo, req]) => tipo === 'check'
-        ? `<label class="opcion opcion-linea"><input type="checkbox" name="${n}" ${x?.[n] ? 'checked' : ''}> ${t}</label>`
+        ? `<label class="opcion opcion-linea"><input type="checkbox" name="${n}" ${(x ? x[n] : n === 'recibe_avisos') ? 'checked' : ''}> ${t}</label>`
         : `<label>${t}<input name="${n}" type="${tipo}" value="${esc(x?.[n] ?? '')}" ${req ? 'required' : ''} maxlength="120"></label>`).join('')}</div>
       <div class="rs-form-pie">${x && puedeBorrar() ? `<button type="button" class="btn btn-sm btn-peligro" data-borrar="${clave}:${x.id}">Quitar</button>` : ''}
         <button type="button" class="btn btn-sm btn-ghost" data-cancelar>Cancelar</button><button type="submit" class="btn btn-sm btn-primary">Guardar</button></div></form>`;
@@ -271,8 +271,8 @@ function ficha(u, editando = null) {
         <div><span class="mut">Arrendatario</span><strong>${k ? esc(k.arrendatario) : 'Disponible'}</strong>
           ${k ? `<small>${esc([k.telefono, k.email].filter(Boolean).join(' · ') || 'Sin teléfono ni correo')}</small>` : ''}</div>
         <div><span class="mut">Contrato</span>${badge(e, k)}${k?.fecha_inicio ? `<small>Desde ${fmtFecha(k.fecha_inicio)}</small>` : ''}</div>
-        <div><span class="mut">Renta</span><strong>${k && Number(k.monto) ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: k.moneda === 'USD' ? 'USD' : 'MXN' }).format(k.monto) : '—'}</strong>
-          <small>${k ? 'Se edita en Rentas → Contratos' : 'Hazle contrato en Rentas'}</small></div>
+        ${tieneRol(['administracion', 'cobranza']) ? `<div><span class="mut">Renta</span><strong>${k && Number(k.monto) ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: k.moneda === 'USD' ? 'USD' : 'MXN' }).format(k.monto) : '—'}</strong>
+          <small>${k ? 'Se edita en Rentas → Contratos' : 'Hazle contrato en Rentas'}</small></div>` : ''}
         ${k ? `<div class="rs-contrato-acc">${contacto(k)}</div>` : ''}
       </div>
       ${editando === 'unidad' ? `<form class="form rs-form" data-form="unidad"><div class="form-2">

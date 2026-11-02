@@ -15,16 +15,17 @@ window.__CLIENTE = {
     isotipo: '<svg viewBox="0 0 120 120"><circle cx="60" cy="46" r="34" fill="var(--primary)"/><circle cx="38" cy="58" r="20" fill="var(--primary)" opacity=".75"/><circle cx="82" cy="58" r="20" fill="var(--primary)" opacity=".75"/><rect x="54" y="66" width="12" height="44" rx="3" fill="currentColor"/></svg>',
     logos: [],
     color: '#2F6B4F', color2: '#24533D', colorSuave: '#E6F0EA',
-    // Por ahora (nov. 2026) el cliente arranca solo con luz, gas y agua: medir cada medidor, calcular y mandarle a cada
-    // inquilino lo suyo. Lo demás (rentas, residentes, propietarios, gastos, equipo) ya está hecho: para prenderlo,
-    // regresarlo a esta lista y al menú.
-    modulos: ['servicios', 'lecturas', 'importar', 'usuarios'],
+    // Primera entrega (brief del 2 nov 2026, Angel): operación diaria por WhatsApp. Caseta → mantenimiento → cobranza.
+    // Rentas, propietarios, gastos y equipo ya existen: para prenderlos, agregarlos aquí y al menú.
+    modulos: ['caseta', 'whatsapp', 'residentes', 'servicios', 'lecturas', 'importar', 'usuarios'],
     menu: [
+      { id: 'caseta' },                                   // guardia (tablet)
+      { id: 'whatsapp', titulo: 'WhatsApp' },             // Carlos: conversaciones y lo que pide atención
+      { id: 'residentes' },                               // padrón: deptos, contactos y quién recibe avisos
       // El edificio paga un solo recibo de luz, gas y agua; aquí se toma la lectura de cada depto y se le cobra lo suyo
-      { id: 'servicios', titulo: 'Luz, gas y agua' },
-      { id: 'lecturas' },
+      { titulo: 'Luz, gas y agua', corto: 'Servicios', modulos: ['servicios', 'lecturas'], siempreGrupo: true, icono: 'servicios' },
     ],
-    perfiles: ['admin', 'lecturista'],
+    perfiles: ['admin', 'caseta'],
     ajustes: ['usuarios', 'importar'],
     ocultarPestanas: ['rondin'],
     titulos: { personal: 'Equipo de la torre' },

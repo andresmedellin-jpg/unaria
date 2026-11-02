@@ -42,8 +42,8 @@
     nombre: 'Inmobiliaria Galcor · Administración',
     marca: ['Galcor', 'Inmobiliaria'],
     logos: [{ src: logoInm.replaceAll(encodeURIComponent(COLOR), encodeURIComponent(COLOR_INM)), alt: 'Inmobiliaria Galcor', clase: 'logo-demo' }],
-    modulos: ['turno', 'inicio', 'prospectos', 'rentas', 'servicios', 'lecturas', 'residentes', 'propietarios', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
-    menu: [{ id: 'turno' }, { id: 'inicio' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'residentes' }, { id: 'propietarios' }, { id: 'gastos' }, { id: 'personal', corto: 'Equipo' }, { id: 'patrimonio' }],
+    modulos: ['turno', 'inicio', 'caseta', 'whatsapp', 'prospectos', 'rentas', 'servicios', 'lecturas', 'residentes', 'propietarios', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
+    menu: [{ id: 'turno' }, { id: 'inicio' }, { id: 'caseta' }, { id: 'whatsapp' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'residentes' }, { id: 'propietarios' }, { id: 'gastos' }, { id: 'personal', corto: 'Equipo' }, { id: 'patrimonio' }],
     ajustes: ['usuarios', 'importar'],
     centrosPersonal: ['Torre Cumbres', 'Torre Valle'], titulos: { personal: 'Equipo de las torres' }, ocultarPestanas: ['rondin'],
     rentaParcial: true, ocupacion: true,
@@ -758,7 +758,7 @@
     }
 
     // ---------- equipo de la torre: puntos de rondín, turnos de vigilancia, lo que pasó hoy (generador aparte) ----------
-    const puntos_rondin = [], rondin_marcas = [], turnos = [], solicitudes = [], paquetes = [], bitacora_turno = [];
+    const puntos_rondin = [], rondin_marcas = [], turnos = [], solicitudes = [], paquetes = [], bitacora_turno = [], pases = [], accesos = [], wa_mensajes = [];
     {
       const vig = empleados.filter((e) => e.centro_id === torreA.id && /Vigilante/.test(e.puesto));
       const limp = empleados.filter((e) => e.centro_id === torreA.id && /Limpieza/.test(e.puesto));
@@ -789,6 +789,25 @@
         categoria: 'Electricidad', origen: 'caseta', estado: 'resuelta', asignado_a: mant?.id, creado_en: new Date(HOY.getTime() - 50 * 3600e3).toISOString(), resuelto_en: new Date(HOY.getTime() - 46 * 3600e3).toISOString(), nota_cierre: 'Se cambió el foco' });
       paquetes.push({ id: id('paq'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(402)?.id, paqueteria: 'Amazon', descripcion: 'Caja mediana', recibido_por: vig[1]?.nombre, recibido_en: t(5, 50) });
       paquetes.push({ id: id('paq'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(701)?.id, paqueteria: 'Mercado Libre', descripcion: null, recibido_por: vig[0]?.nombre, recibido_en: t(9, 35) });
+      paquetes.forEach((p) => Object.assign(p, { estado: 'avisado', avisos: 1, ultimo_aviso: p.recibido_en }));
+      paquetes.push({ id: id('paq'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(602)?.id, paqueteria: 'DHL', descripcion: null, recibido_por: vig[0]?.nombre,
+        recibido_en: new Date(HOY.getTime() - 26 * 3600e3).toISOString(), estado: 'avisado', avisos: 2, ultimo_aviso: t(8, 0) });
+      // Caseta: pases que pidieron por WhatsApp, visitas de hoy y una plática con el asistente
+      const pase = (n, nombre, tipo, h1, h2, extra = {}) => pases.push({ id: id('pas'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(n)?.id, tipo, nombre, desde: t(h1, 0), hasta: t(h2, 0),
+        codigo: String(100000 + Math.floor(Math.random() * 899999)), estado: 'activo', origen: 'whatsapp', solicita: conT(n)?.arrendatario, creado_en: t(8, 0), ...extra });
+      pase(405, 'Ana (hermana)', 'invitado', 18, 23, { placas: 'RTX-45-12', vehiculo: 'Jetta gris' });
+      pase(302, 'Rappi', 'delivery', 13, 15);
+      pase(305, 'Técnico del aire', 'proveedor', 10, 13, { origen: 'portal', llegada: t(10, 12) });
+      accesos.push({ id: id('acc'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(305)?.id, pase_id: pases[2].id, tipo: 'proveedor', nombre: 'Técnico del aire', autorizacion: 'pase', entrada: t(10, 12), guardia: vig[0]?.nombre });
+      accesos.push({ id: id('acc'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(507)?.id, tipo: 'invitado', nombre: 'Jorge Treviño', autorizacion: 'autorizada', respondio: conT(507)?.arrendatario, entrada: t(9, 5), salida: t(10, 0), guardia: vig[0]?.nombre });
+      const tel = String(conT(405)?.telefono || '8112345678').replace(/\D/g, '').slice(-10), quien = conT(405)?.arrendatario || 'Residente';
+      [['entra', 'Hola, viene mi hermana Ana en la noche, se queda a dormir. Trae carro', 17, 5], ['sale', `Va, ${quien.split(' ')[0]}. ¿Me pasas las placas? Le genero su pase para hoy y mañana.`, 17, 5],
+       ['entra', 'RTX-45-12 jetta gris', 17, 6], ['sale', `Listo, pase para Ana · Depto 405, válido hoy 6 pm a 11 pm. Reenvíale este código: *${pases[0].codigo}*`, 17, 6, [`pase ${pases[0].codigo} para Ana (Depto 405)`]]]
+        .forEach(([dir, texto, h, m, hechos]) => wa_mensajes.push({ id: id('wam'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(405)?.id, direccion: dir, telefono: tel, nombre: quien, texto,
+          estado: dir === 'entra' ? 'recibido' : 'leido', variables: hechos ? { hechos } : {}, creado_en: new Date(HOY.getTime() - 24 * 3600e3 + (h * 60 + m) * 6e4).toISOString() }));
+      const tel2 = String(conT(603)?.telefono || '8187654321').replace(/\D/g, '').slice(-10);
+      wa_mensajes.push({ id: id('wam'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(603)?.id, direccion: 'entra', telefono: tel2, nombre: conT(603)?.arrendatario, texto: '¿Me pueden decir cuánto debo de mantenimiento?', estado: 'recibido', variables: { humano: true, motivo: 'Pregunta por su saldo de mantenimiento' }, creado_en: t(9, 41) });
+      wa_mensajes.push({ id: id('wam'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(603)?.id, direccion: 'sale', telefono: tel2, nombre: conT(603)?.arrendatario, texto: 'Eso lo revisa la administración; ya les pasé tu mensaje y en un momento te contestan.', estado: 'leido', variables: {}, creado_en: t(9, 41) });
       // tareas fijas de la torre por puesto
       [['Lobby y elevadores', 'Limpieza', 'Limpieza'], ['Pasillos y escaleras', 'Limpieza', 'Limpieza'], ['Sacar basura', 'Limpieza', 'Limpieza'],
        ['Recibir turno y revisar cámaras', 'Seguridad', 'Vigilante'], ['Revisar cuarto de bombas', 'Mantenimiento', 'Mantenimiento'], ['Revisar elevadores', 'Mantenimiento', 'Mantenimiento']]
@@ -811,7 +830,7 @@
       miembros,
       empresas: [E, E2], centros, productos, inventario_movs, ingresos, gastos, cuentas_por_cobrar, pagos, empleados,
       nomina_periodos, nomina_lineas, asistencia, vacaciones, prestamos, prestamo_abonos, tareas_plantilla, tareas,
-      cotizaciones, contratos, unidades, residentes, vehiculos, mascotas, puntos_rondin, rondin_marcas, turnos, solicitudes, paquetes, bitacora_turno, cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
+      cotizaciones, contratos, unidades, residentes, vehiculos, mascotas, puntos_rondin, rondin_marcas, turnos, solicitudes, paquetes, bitacora_turno, pases, accesos, wa_mensajes, wa_cuentas: [], torre_reglas: [], cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
     };
     if (MEDCO) {            // las dos empresas juntas, con los nombres de Treme y MEDCO
       E.nombre = 'Desarrollos y Proyectos MEDCO'; E.nombre_corto = 'MEDCO';
@@ -828,7 +847,7 @@
       .forEach((t) => { D[t] = porEmp(D[t]); });
     const unis = new Set(D.unidades.filter((u) => cen.has(u.centro_id)).map((u) => u.id));
     ['residentes', 'vehiculos', 'mascotas'].forEach((t) => { D[t] = D[t].filter((r) => unis.has(r.unidad_id)); });
-    ['unidades', 'contratos', 'tareas_plantilla', 'tareas', 'puntos_rondin', 'rondin_marcas', 'turnos', 'solicitudes', 'paquetes', 'bitacora_turno', 'medidores', 'lecturas', 'recibos_servicio', 'tarifas_servicio'].forEach((t) => { D[t] = D[t].filter((r) => cen.has(r.centro_id)); });
+    ['unidades', 'contratos', 'tareas_plantilla', 'tareas', 'puntos_rondin', 'rondin_marcas', 'turnos', 'solicitudes', 'paquetes', 'bitacora_turno', 'pases', 'accesos', 'wa_mensajes', 'medidores', 'lecturas', 'recibos_servicio', 'tarifas_servicio'].forEach((t) => { D[t] = D[t].filter((r) => cen.has(r.centro_id)); });
     const emps = new Set(D.empleados.map((e) => e.id));
     ['nomina_lineas', 'asistencia', 'vacaciones', 'prestamos'].forEach((t) => { D[t] = D[t].filter((r) => emps.has(r.empleado_id)); });
     const pres = new Set(D.prestamos.map((p) => p.id));

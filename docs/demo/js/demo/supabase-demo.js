@@ -174,6 +174,23 @@
   const miembro = () => T('miembros')[0];
   const horas = (t) => { const [h, m] = String(t || '08:00').split(':').map(Number); return h + (m || 0) / 60; };
   const RPC = {
+    // Caseta y WhatsApp: los avisos quedan "en cola" como cuando aún no se conecta el número de la torre
+    encolar_aviso: ({ p_unidad, p_texto, p_ref_tabla, p_ref_id }) => {
+      const tels = [...T('residentes').filter((r) => r.unidad_id === p_unidad && r.telefono && r.recibe_avisos !== false), ...T('contratos').filter((c) => c.unidad_id === p_unidad && c.activo && c.telefono)]
+        .map((x) => [x.nombre || x.arrendatario, String(x.telefono).replace(/\D/g, '').slice(-10)]).filter(([, t]) => t.length === 10);
+      const u = T('unidades').find((x) => x.id === p_unidad);
+      [...new Map(tels.map((x) => [x[1], x])).values()].forEach(([n, t]) => T('wa_mensajes').push({ id: uid(), org_id: u?.org_id, centro_id: u?.centro_id, unidad_id: p_unidad, direccion: 'sale',
+        telefono: t, nombre: n, texto: String(p_texto).replace('{nombre}', String(n || '').split(' ')[0]), estado: 'en_cola', ref_tabla: p_ref_tabla, ref_id: p_ref_id, variables: {}, creado_en: new Date().toISOString() }));
+      return tels.length;
+    },
+    validar_pase: ({ p_centro, p_codigo, p_guardia }) => {
+      const p = T('pases').find((x) => x.centro_id === p_centro && x.codigo === String(p_codigo) && x.estado === 'activo');
+      if (!p) return { ok: false, motivo: 'No hay un pase activo con ese código' };
+      if (new Date(p.hasta) < new Date()) return { ok: false, motivo: 'El pase ya venció', pase: p };
+      p.llegada = p.llegada || new Date().toISOString(); if (p.tipo === 'delivery') p.estado = 'usado';
+      T('accesos').push({ id: uid(), org_id: p.org_id, centro_id: p.centro_id, unidad_id: p.unidad_id, pase_id: p.id, tipo: p.tipo, nombre: p.nombre, placas: p.placas, autorizacion: 'pase', entrada: new Date().toISOString(), guardia: p_guardia });
+      return { ok: true, pase: p, unidad: T('unidades').find((u) => u.id === p.unidad_id)?.identificador };
+    },
     correo_para_login: () => 'demo@demo.mx',
     marcar_password_cambiado: () => null,
     siguiente_folio_renta: () => 'REC-' + String(T('pagos').filter((p) => p.concepto === 'renta').length + 1).padStart(4, '0'),
@@ -265,6 +282,11 @@
     // Alta y edición de usuarios: en el demo se simula (no se crea ninguna cuenta real)
     functions: { invoke: async (nombre, { body } = {}) => {
       await espera();
+      if (nombre === 'whatsapp') {
+        if (body?.accion === 'simular') return { data: { respuestas: ['(Demo) Aquí contesta el asistente de verdad. En el demo no se conecta a WhatsApp.'] }, error: null };
+        if (body?.accion === 'responder') { T('wa_mensajes').push({ id: uid(), direccion: 'sale', telefono: body.telefono, texto: body.texto, estado: 'en_cola', variables: { por: 'Tú' }, creado_en: new Date().toISOString() }); return { data: { ok: true, enviado: false }, error: null }; }
+        return { data: { conectado: false, en_cola: T('wa_mensajes').filter((m) => m.estado === 'en_cola').length }, error: null };
+      }
       if (nombre !== 'usuarios' || !body) return { data: null, error: { message: 'No disponible en el demo' } };
       const M = T('miembros');
       if (body.accion === 'crear') {

@@ -11,6 +11,8 @@ export const BUCKET_COMPROBANTES = 'comprobantes';
 // Íconos de línea (heredan el color del texto)
 const svg = (d) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const ICONOS = {
+  caseta:     svg('<path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-7h6v7"/><path d="M3 21h18"/>'),
+  whatsapp:   svg('<path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5"/>'),
   inicio:     svg('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'),
   reportes:   svg('<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>'),
   gastos:     svg('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>'),
@@ -81,6 +83,10 @@ export const MODULOS = [
   { id: 'rentas',     grupo: 'Finanzas',  titulo: 'Rentas',           icono: ICONOS.rentas,     roles: ['dueno','administracion','cobranza'], listo: true },
   // Directorio de residentes, autos y mascotas por unidad (paquete inmobiliario; el encargado de la caseta también lo ve)
   { id: 'residentes', grupo: 'Operación', titulo: 'Residentes', icono: ICONOS.residentes, roles: ['dueno','administracion','cobranza','encargado','equipo'], listo: true, opcional: true },
+  // Caseta (tablet del guardia): paquetes con aviso por WhatsApp, pases y visitas, bitácora
+  { id: 'caseta', grupo: 'Operación', titulo: 'Caseta', icono: ICONOS.caseta, roles: ['dueno','administracion','cobranza','encargado','equipo'], listo: true, opcional: true },
+  // WhatsApp de la torre: conversaciones con residentes, el asistente y la conexión con Meta
+  { id: 'whatsapp', grupo: 'Operación', titulo: 'WhatsApp', icono: ICONOS.whatsapp, roles: ['dueno','administracion','cobranza','encargado'], listo: true, opcional: true },
   // La pantalla del celular del personal de piso (solo la ve quien tiene el rol "equipo")
   { id: 'turno', grupo: 'Operación', titulo: 'Mi turno', icono: ICONOS.turno, roles: ['equipo'], soloRoles: ['equipo'], listo: true, opcional: true },
   // Reporte y liquidación mensual a los dueños de las unidades (paquete inmobiliario)
@@ -123,6 +129,8 @@ const PERFILES_TODOS = [
     desc: 'Desde su celular: checa con foto, hace su rondín, marca sus pendientes, recibe paquetes y busca placas. No ve dinero. Mejor dale acceso desde Equipo → Empleados para ligarlo a su ficha.' },
   { id: 'lecturista', titulo: 'Toma de lecturas',          rol: 'equipo', roles: [], soloSiSePide: true,
     desc: 'Desde su celular escanea el QR de cada medidor, escribe la lectura y le toma foto. No ve dinero.' },
+  { id: 'caseta',    titulo: 'Caseta y lecturas',          rol: 'equipo', roles: [], soloSiSePide: true,
+    desc: 'Guardias y quien toma lecturas: paquetes, visitas y pases en caseta, y el recorrido de medidores. No ve dinero.' },
   { id: 'admin',     titulo: 'Administración',             rol: 'administracion', roles: [],
     desc: CLIENTE ? 'Todo, incluida la nómina, menos dar de alta usuarios.' : 'Todo, incluidos Casa, Socios y nómina, menos Patrimonio y Usuarios.' },
 ];

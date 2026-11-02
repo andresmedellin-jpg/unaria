@@ -20,6 +20,8 @@ const vistas = {
   residentes: () => import('./modulos/residentes.js'),
   turno: () => import('./modulos/turno.js'),
   propietarios: () => import('./modulos/propietarios.js'),
+  caseta: () => import('./modulos/caseta.js'),
+  whatsapp: () => import('./modulos/whatsapp.js'),
 };
 
 // ================= MARCA =================
