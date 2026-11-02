@@ -18,6 +18,7 @@ const vistas = {
   lecturas: () => import('./modulos/lecturas.js'),
   importar: () => import('./modulos/importar.js'),
   residentes: () => import('./modulos/residentes.js'),
+  propietarios: () => import('./modulos/propietarios.js'),
 };
 
 // ================= MARCA =================

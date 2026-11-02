@@ -15,11 +15,14 @@ window.__CLIENTE = {
     isotipo: '<svg viewBox="0 0 120 120"><circle cx="60" cy="46" r="34" fill="var(--primary)"/><circle cx="38" cy="58" r="20" fill="var(--primary)" opacity=".75"/><circle cx="82" cy="58" r="20" fill="var(--primary)" opacity=".75"/><rect x="54" y="66" width="12" height="44" rx="3" fill="currentColor"/></svg>',
     logos: [],
     color: '#2F6B4F', color2: '#24533D', colorSuave: '#E6F0EA',
-    modulos: ['inicio', 'residentes', 'rentas', 'gastos', 'personal', 'importar', 'usuarios'],
+    modulos: ['inicio', 'residentes', 'rentas', 'servicios', 'lecturas', 'propietarios', 'gastos', 'personal', 'importar', 'usuarios'],
     menu: [
       { id: 'inicio' },
       { id: 'residentes' },
       { id: 'rentas' },
+      // El edificio paga un solo recibo de luz, gas y agua; aquí se toma la lectura de cada depto y se le cobra lo suyo
+      { titulo: 'Luz, gas y agua', corto: 'Servicios', modulos: ['servicios', 'lecturas'], siempreGrupo: true, icono: 'servicios' },
+      { id: 'propietarios' },
       { id: 'gastos' },
       { id: 'personal', corto: 'Personal' },
     ],

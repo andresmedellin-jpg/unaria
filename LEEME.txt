@@ -59,3 +59,9 @@ ARBORETUM (torre de 66 departamentos; primer cliente) → unaria.mx/arboretum/
   mascotas, propietario (Edifica / JAGC), amueblado y vencimientos de contrato. Tablas: residentes, vehiculos, mascotas;
   columnas nuevas en unidades: propietario, amueblado. Se prende para cualquier cliente con 'residentes' en sus módulos.
 - Importar datos ahora acepta hojas Residentes, Vehículos y Mascotas, y la renta puede ir vacía.
+  Si el depto ya tiene contrato con ese inquilino, el Excel le completa renta/día/fechas; si el medidor ya existe, le pone serie/lectura inicial.
+- Luz, gas y agua (lecturas con QR): el edificio paga un solo recibo y se reparte según el medidor de cada depto ("Repartir el recibo real").
+  Se dieron de alta 198 medidores (66 deptos × luz, gas, agua) SIN lectura inicial: la primera lectura del recorrido queda de base y no se cobra.
+  Cobro por unidad: PDF, WhatsApp con el mensaje ya escrito y "Pagó" (pagos con concepto 'servicios').
+- Propietarios (js/modulos/propietarios.js): reporte mensual a Edifica y JAGC (ocupación, rentas cobradas/pendientes, servicios,
+  contratos por renovar) y liquidación (cobrado − comisión de administración). PDF y WhatsApp. Tabla propietarios (contacto, comisión).

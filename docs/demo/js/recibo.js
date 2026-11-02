@@ -1,7 +1,7 @@
 // Recibo de pago con el formato de Grupo Inmobiliario Treme (el mismo para rentas, mantenimiento y luz).
 // Se abre en una ventana nueva con dos botones: "Descargar PDF" (guarda el archivo directo, con html2pdf en
 // js/vendor, cargado solo al usarlo) e "Imprimir" (impresión del navegador, tamaño carta).
-import { MESES, MARCA } from './config.js';
+import { MESES, MARCA, CLIENTE } from './config.js';
 // Quién emite el recibo: Treme por omisión; otra instalación lo cambia en MARCA (reciboEmpresa, reciboLogo, reciboColor)
 const EMISOR = MARCA.reciboEmpresa || 'Grupo Inmobiliario Treme';
 const ROJO = MARCA.reciboColor || '#8B1A1A';
@@ -31,7 +31,8 @@ async function incrustar(ruta) {
   } catch { cache[ruta] = ''; }
   return cache[ruta];
 }
-const logo = () => incrustar(MARCA.reciboLogo || 'img/logo-treme.png');
+// Un cliente de Unaria sin logo propio sale con su nombre en letra (nunca con el logo de Treme)
+const logo = () => { const r = MARCA.reciboLogo || (CLIENTE ? '' : 'img/logo-treme.png'); return r ? incrustar(r) : Promise.resolve(''); };
 async function fuentes() {
   const pesos = await Promise.all([400, 600, 700].map((p) => incrustar(`fonts/inter-latin-${p}-normal.woff2`)));
   return [400, 600, 700].map((p, i) => pesos[i]

@@ -580,3 +580,13 @@ h4.grupo:first-of-type { margin-top: 4px; }
 .rs-mes.activo { background: var(--primary-soft); font-weight: 600; }
 .rs-tabla td.acciones { white-space: nowrap; }
 .rs-tabla .rs-contacto { flex-wrap: nowrap; }
+/* ---------- Propietarios ---------- */
+.pp-prop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.pp-prop > div { display: grid; gap: 2px; }
+.pp-prop strong { font-size: 18px; }
+.pp-liq { max-width: 420px; }
+.pp-tabla tfoot td { padding-top: 10px; }
+@media (max-width: 760px) {
+  .pp-tabla td[data-l="Inquilino"] { grid-column: 1 / -1; }
+  .pp-tabla td[data-l="Renta"], .pp-tabla td[data-l="Servicios"] { display: none; }
+}

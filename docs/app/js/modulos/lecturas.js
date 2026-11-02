@@ -22,11 +22,11 @@ const per = (ym) => ym + '-01';
 const ymDe = (d) => d.slice(0, 7);
 const mesTxt = (ym) => `${MESES[+ym.slice(5, 7) - 1]} ${ym.slice(0, 4)}`;
 const mesAnterior = (ym) => { const [y, m] = ym.split('-').map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`; };
-const n0 = (x) => Number(x || 0).toLocaleString('es-MX', { maximumFractionDigits: 2 });
+const n0 = (x) => (x == null ? '—' : Number(x).toLocaleString('es-MX', { maximumFractionDigits: 2 }));
 
 const st = { tab: null, centro: null, ym: hoyISO().slice(0, 7), q: '', fSrv: '', fEst: '' };
 let raiz, campo = false;
-let medidores = [], lecturas = [], recibos = [], tarifas = [], unidades = [], contratos = [];
+let medidores = [], lecturas = [], recibos = [], tarifas = [], unidades = [], contratos = [], pagosSrv = [];
 
 export async function render(view, mod) {
   raiz = view;
@@ -62,22 +62,26 @@ export async function render(view, mod) {
 
 async function cargar() {
   const desde = (() => { let ym = st.ym; for (let k = 0; k < 4; k++) ym = mesAnterior(ym); return per(ym); })();
-  const [m, l, r, t, u, c] = await Promise.all([
+  const [m, l, r, t, u, c, p] = await Promise.all([
     db().from('medidores').select('*').eq('centro_id', st.centro).eq('activo', true),
     todo(() => db().from('lecturas').select('*').eq('centro_id', st.centro).gte('periodo', desde).lte('periodo', per(st.ym))),
     db().from('recibos_servicio').select('*').eq('centro_id', st.centro),
     db().from('tarifas_servicio').select('*').eq('centro_id', st.centro),
     db().from('unidades').select('id, identificador, tipo').eq('centro_id', st.centro),
-    db().from('contratos').select('id, unidad_id, arrendatario, activo').eq('centro_id', st.centro).eq('activo', true),
+    db().from('contratos').select('id, unidad_id, arrendatario, telefono, activo').eq('centro_id', st.centro).eq('activo', true),
+    db().from('pagos').select('id, unidad_id, contrato_id, monto, fecha, forma_pago').eq('centro_id', st.centro).eq('concepto', 'servicios').eq('periodo', per(st.ym)),
   ]);
   const err = m.error || l.error || u.error;
   if (err) { toast('No se pudo cargar: ' + err.message, true); return; }
   unidades = u.data; contratos = c.data || []; recibos = r.data || []; tarifas = t.data || []; lecturas = l.data;
   const ord = (x) => unidades.find((y) => y.id === x.unidad_id)?.identificador || '';
   const OS = { luz: 0, gas: 1, agua: 2 };
+  pagosSrv = p.data || [];
   medidores = m.data.sort((a, b) => OS[a.servicio] - OS[b.servicio] || (a.zona || '').localeCompare(b.zona || '') || a.orden - b.orden || ord(a).localeCompare(ord(b), 'es', { numeric: true }));
+  marcarBases();
   pintar();
 }
+function marcarBases() { medidores.forEach((m) => { const l = lecturaDe(m); if (l) l.base = esBase(m); }); }
 
 // ---------- cálculo ----------
 const unidadDe = (m) => unidades.find((u) => u.id === m.unidad_id);
@@ -86,9 +90,12 @@ const ocupante = (unidadId) => contratos.find((c) => c.unidad_id === unidadId)?.
 const lecturaDe = (m, ym = st.ym) => lecturas.find((l) => l.medidor_id === m.id && l.periodo === per(ym));
 function anterior(m, ym = st.ym) {
   const prev = lecturas.filter((l) => l.medidor_id === m.id && l.periodo < per(ym)).sort((a, b) => b.periodo.localeCompare(a.periodo))[0];
-  return prev ? Number(prev.lectura) : Number(m.lectura_inicial || 0);
+  // Sin lectura anterior ni lectura inicial: la primera lectura que se tome queda de punto de partida (null = no hay base)
+  return prev ? Number(prev.lectura) : m.lectura_inicial == null ? null : Number(m.lectura_inicial);
 }
-const consumo = (m, ym = st.ym) => { const l = lecturaDe(m, ym); return l ? Number(l.lectura) - anterior(m, ym) : null; };
+const consumo = (m, ym = st.ym) => { const l = lecturaDe(m, ym), a = anterior(m, ym); return l && a != null ? Number(l.lectura) - a : null; };
+// La lectura de este mes es la primera del medidor: sirve de base, no se cobra
+const esBase = (m, ym = st.ym) => !!lecturaDe(m, ym) && anterior(m, ym) == null;
 function normal(m) {                    // promedio de los meses anteriores con lectura
   const cs = []; let ym = st.ym;
   for (let k = 0; k < 3; k++) { ym = mesAnterior(ym); const c = consumo(m, ym); if (c != null && lecturaDe(m, mesAnterior(ym)) ) cs.push(c); }
@@ -127,9 +134,11 @@ function pintar() {
 }
 
 const chipEstado = (l) => !l ? '<span class="tag tag-suave">Falta</span>'
+  : l.base ? '<span class="tag tag-azul">Lectura base</span>'
   : l.estado === 'revisar' ? '<span class="tag tag-aviso">Revisar</span>'
   : l.estado === 'aprobada' ? '<span class="tag tag-ok">Aprobada</span>' : '<span class="tag tag-ok">Bien</span>';
-const drum = (v) => `<span class="lec-drum">${[...String(Math.round(v)).padStart(6, '0')].map((d) => `<i>${d}</i>`).join('')}</span>`;
+const drum = (v) => v == null ? '<span class="tag tag-suave">Primera lectura: queda como punto de partida</span>'
+  : `<span class="lec-drum">${[...String(Math.round(v)).padStart(6, '0')].map((d) => `<i>${d}</i>`).join('')}</span>`;
 
 function porServicio() {
   return Object.keys(SERV).map((s) => {
@@ -260,8 +269,8 @@ function capturar(m, desdeOficina = false) {
     const v = Number(String(f.lectura.value).replace(/[^\d.]/g, ''));
     if (!f.lectura.value.trim() || !(v >= 0)) return decir('Escribe la lectura.', 'mal');
     if (!foto && !ya?.foto_path && !desdeOficina) return decir('Falta la foto del medidor.', 'mal');
-    if (v < ant) return decir(`La lectura (${n0(v)}) es menor que la anterior (${n0(ant)}). Revisa el número o que sea el medidor correcto.`, 'mal');
-    const c = v - ant, raro = nor != null && nor > 0 && c > nor * RARO;
+    if (ant != null && v < ant) return decir(`La lectura (${n0(v)}) es menor que la anterior (${n0(ant)}). Revisa el número o que sea el medidor correcto.`, 'mal');
+    const c = ant == null ? null : v - ant, raro = c != null && nor != null && nor > 0 && c > nor * RARO;
     if (raro && !avisado) {
       avisado = true; btn.textContent = 'Guardar de todos modos';
       return decir(`Consumo de ${n0(c)} ${S.unidad}: más del doble de lo normal (${n0(nor)}). Revisa el número; si está bien, guarda y el encargado lo verá marcado.`, 'ojo');
@@ -276,6 +285,7 @@ function capturar(m, desdeOficina = false) {
         : await db().from('lecturas').insert({ ...fila, org_id: estado.miembro.org_id, centro_id: m.centro_id, medidor_id: m.id, periodo: per(st.ym) }).select('*').single();
       if (error) throw error;
       lecturas = lecturas.filter((l) => l.id !== data.id).concat(data);
+      marcarBases();
       cerrarModal();
       toast(raro ? `Guardada · ${nombreUnidad(m)} queda para revisar` : `Guardada · ${nombreUnidad(m)} ${S.nombre.toLowerCase()} ✓`);
       pintar();
@@ -354,15 +364,16 @@ function pintarCuadre(el) {
   el.innerHTML = `<p class="nota" style="margin-bottom:12px">Lo que suman todos los medidores contra lo que cobró cada compañía al edificio en ${mesTxt(st.ym).toLowerCase()}.
       La diferencia es consumo que nadie está pagando: áreas comunes, una lectura mal tomada, un medidor dañado o alguien colgado.</p>
     <div class="lec-cuadre">${g.map((x) => {
-      const S = SERV[x.s], r = reciboDe(x.s), suma = x.hechos.reduce((a, m) => a + consumo(m), 0), falta = x.ms.length - x.hechos.length;
+      const S = SERV[x.s], r = reciboDe(x.s), conC = x.hechos.filter((m) => consumo(m) != null), suma = conC.reduce((a, m) => a + consumo(m), 0);
+      const bases = x.hechos.length - conC.length, falta = x.ms.length - x.hechos.length;
       const cobrado = x.hechos.reduce((a, m) => a + (importe(m) || 0), 0);
       const dif = r ? Number(r.consumo) - suma : null, pct = r && Number(r.consumo) ? dif / Number(r.consumo) * 100 : null;
-      const estadoTxt = !r ? '<span class="tag tag-suave">Falta capturar el recibo</span>' : falta ? `<span class="tag tag-suave">Faltan ${falta} lecturas</span>`
+      const estadoTxt = bases === x.hechos.length && bases ? '<span class="tag tag-azul">Mes de lecturas base: aún no hay consumo</span>' : !r ? '<span class="tag tag-suave">Falta capturar el recibo</span>' : falta ? `<span class="tag tag-suave">Faltan ${falta} lecturas</span>`
         : Math.abs(pct) <= 8 ? '<span class="tag tag-ok">Cuadra</span>' : `<span class="tag tag-aviso">No cuadra: ${Math.round(pct)} %</span>`;
       return `<section class="panel"><div class="panel-head"><h3>${S.nombre}</h3>${estadoTxt}</div>
         <dl class="lec-dl">
           <dt>Recibo ${esc(r?.compania || S.compania)}</dt><dd>${r ? `${n0(r.consumo)} ${S.unidad} · ${fmt(r.monto)}` : '—'}</dd>
-          <dt>Suma de los medidores</dt><dd>${n0(suma)} ${S.unidad}</dd>
+          <dt>Suma de los medidores</dt><dd>${n0(suma)} ${S.unidad}${bases ? ` <small>(${bases} con lectura base, sin consumo)</small>` : ''}</dd>
           <dt>Diferencia</dt><dd>${dif != null ? `<b>${n0(dif)} ${S.unidad}</b>${pct != null ? ` (${Math.round(pct)} %)` : ''}` : '—'}</dd>
           <dt>Se le cobra a las unidades</dt><dd>${fmt(cobrado)}</dd>
           <dt>Lo absorbe el edificio</dt><dd>${r ? fmt(Number(r.monto) - cobrado) : '—'}</dd>
@@ -419,31 +430,94 @@ function editarTarifa(s) {
 }
 
 // ----- cobro por unidad -----
-function pintarCobro(el) {
-  const filas = unidades.map((u) => {
+// Lo que le toca a cada unidad, el aviso en PDF, el mensaje de WhatsApp y el registro de quién ya pagó.
+const contratoU = (unidadId) => contratos.find((c) => c.unidad_id === unidadId);
+const pagadoU = (unidadId) => pagosSrv.filter((p) => p.unidad_id === unidadId).reduce((a, p) => a + Number(p.monto), 0);
+function filasCobro() {
+  return unidades.map((u) => {
     const ms = medidores.filter((m) => m.unidad_id === u.id);
     if (!ms.length) return null;
     const imp = Object.fromEntries(Object.keys(SERV).map((s) => { const m = ms.find((x) => x.servicio === s); return [s, m ? importe(m) : undefined]; }));
-    const falta = ms.some((m) => !lecturaDe(m) || importe(m) == null), revisar = ms.some((m) => lecturaDe(m)?.estado === 'revisar');
-    return { u, ms, imp, total: Object.values(imp).reduce((a, b) => a + (b || 0), 0), falta, revisar };
-  }).filter(Boolean).filter((r) => !st.q || normalizar(`${r.u.identificador} ${ocupante(r.u.id)}`).includes(normalizar(st.q)))
-    .sort((a, b) => a.u.identificador.localeCompare(b.u.identificador, 'es', { numeric: true }));
-  const listos = filas.filter((r) => !r.falta && !r.revisar);
-  el.innerHTML = `<div class="kpis kpis-3">
-      <div class="kpi"><span>A cobrar a las unidades</span><strong>${fmt(filas.reduce((a, r) => a + r.total, 0))}</strong><small>${mesTxt(st.ym)}</small></div>
-      <div class="kpi"><span>Listas para cobrar</span><strong>${listos.length} / ${filas.length}</strong><small>con sus lecturas completas y revisadas</small></div>
+    const base = ms.some((m) => esBase(m));
+    const falta = ms.some((m) => !lecturaDe(m) || (!esBase(m) && importe(m) == null)), revisar = ms.some((m) => lecturaDe(m)?.estado === 'revisar');
+    const total = Math.round(Object.values(imp).reduce((a, b) => a + (b || 0), 0) * 100) / 100, pagado = pagadoU(u.id);
+    const est = pagado > 0 && pagado >= total - 0.5 && total > 0 ? 'pagado' : pagado > 0 ? 'parcial' : total > 0 && !falta && !revisar ? 'pendiente' : base && !total ? 'base' : 'incompleto';
+    return { u, ms, imp, total, pagado, falta, revisar, base, est };
+  }).filter(Boolean).sort((a, b) => a.u.identificador.localeCompare(b.u.identificador, 'es', { numeric: true }));
+}
+const EST_COBRO = { pagado: '<span class="tag tag-ok">Pagado</span>', parcial: '<span class="tag tag-aviso">Abonado</span>', pendiente: '<span class="tag tag-suave">Por cobrar</span>',
+  base: '<span class="tag tag-azul">Lectura base</span>', incompleto: '<span class="tag tag-suave">Incompleto</span>' };
+
+// Mensaje para mandarle a cada inquilino lo que le toca
+function mensaje(r) {
+  const centro = estado.centros.find((c) => c.id === st.centro)?.nombre || '';
+  const quien = ocupante(r.u.id);
+  const lineas = r.ms.filter((m) => importe(m) != null).map((m) => `• ${SERV[m.servicio].nombre}: ${n0(consumo(m))} ${SERV[m.servicio].unidad} (lectura ${n0(anterior(m))} → ${n0(lecturaDe(m).lectura)}) = ${fmt(importe(m))}`);
+  return `Hola${quien ? ' ' + quien.split(' ')[0] : ''}, te compartimos tu consumo de servicios de ${mesTxt(st.ym).toLowerCase()} en ${centro}, ${r.u.identificador}:\n\n${lineas.join('\n')}\n\n*Total a pagar: ${fmt(r.total)}*`
+    + `${r.pagado ? `\nYa recibimos ${fmt(r.pagado)}; queda ${fmt(Math.max(0, r.total - r.pagado))}.` : ''}\n\nLas lecturas se tomaron con foto del medidor; si tienes dudas, con gusto te la mandamos. Gracias.`;
+}
+const telDe = (unidadId) => { const t = String(contratoU(unidadId)?.telefono || '').replace(/\D/g, ''); return t.length === 10 ? '52' + t : t.length >= 12 ? t : ''; };
+
+function pintarCobro(el) {
+  const todas = filasCobro();
+  const filas = todas.filter((r) => !st.q || normalizar(`${r.u.identificador} ${ocupante(r.u.id)}`).includes(normalizar(st.q)));
+  const listos = todas.filter((r) => ['pendiente', 'parcial', 'pagado'].includes(r.est));
+  const aCobrar = todas.reduce((a, r) => a + r.total, 0), cobrado = todas.reduce((a, r) => a + r.pagado, 0);
+  const soloBase = todas.length && todas.every((r) => r.est === 'base' || r.est === 'incompleto') && todas.some((r) => r.est === 'base');
+  el.innerHTML = `<div class="kpis">
+      <div class="kpi"><span>A cobrar a las unidades</span><strong>${fmt(aCobrar)}</strong><small>${mesTxt(st.ym)}</small></div>
+      <div class="kpi"><span>Cobrado</span><strong class="pos">${fmt(cobrado)}</strong><small>${todas.filter((r) => r.est === 'pagado').length} unidades pagadas</small></div>
+      <div class="kpi"><span>Listas para cobrar</span><strong>${listos.length} / ${todas.length}</strong><small>con lecturas completas y revisadas</small></div>
       <div class="kpi"><span>Recibos de las compañías</span><strong>${fmt(Object.keys(SERV).reduce((a, s) => a + Number(reciboDe(s)?.monto || 0), 0))}</strong><small>lo que paga el edificio</small></div>
     </div>
-    <section class="panel"><div class="panel-head"><h3>Aviso de cobro por unidad</h3>
+    ${soloBase ? `<div class="panel rs-aviso"><b>Este es el mes de las lecturas base.</b> Lo que se tome este mes es el punto de partida de cada medidor; el cobro empieza con el siguiente recorrido.</div>` : ''}
+    <section class="panel"><div class="panel-head"><h3>Cobro por unidad</h3>
       <input type="search" id="cb-q" placeholder="Buscar unidad o inquilino" value="${esc(st.q)}" aria-label="Buscar"></div>
-      <div class="tabla-wrap"><table class="tabla lec-t"><thead><tr><th>Unidad</th><th class="num">Luz</th><th class="num">Gas</th><th class="num">Agua</th><th class="num">Total</th><th></th></tr></thead>
+      <div class="tabla-wrap"><table class="tabla lec-t"><thead><tr><th>Unidad</th><th class="num">Luz</th><th class="num">Gas</th><th class="num">Agua</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead>
       <tbody>${filas.map((r) => `<tr><td data-l="Unidad"><b>${esc(r.u.identificador)}</b><br><small>${esc(ocupante(r.u.id) || 'Sin inquilino')}</small></td>
-        ${Object.keys(SERV).map((s) => `<td data-l="${SERV[s].nombre}" class="num">${r.imp[s] === undefined ? '<small>—</small>' : r.imp[s] == null ? '<small>falta</small>' : fmt(r.imp[s])}</td>`).join('')}
-        <td data-l="Total" class="num"><b>${fmt(r.total)}</b></td>
-        <td data-l="" class="nowrap">${r.revisar ? '<span class="tag tag-aviso">Revisar</span> ' : r.falta ? '<span class="tag tag-suave">Incompleto</span> ' : ''}<button class="btn btn-sm btn-ghost" data-aviso="${r.u.id}">PDF</button></td></tr>`).join('')}</tbody></table></div>
+        ${Object.keys(SERV).map((s) => `<td data-l="${SERV[s].nombre}" class="num">${r.imp[s] === undefined ? '<small>—</small>' : r.imp[s] == null ? `<small>${r.ms.some((m) => m.servicio === s && esBase(m)) ? 'base' : 'falta'}</small>` : fmt(r.imp[s])}</td>`).join('')}
+        <td data-l="Total" class="num"><b>${fmt(r.total)}</b>${r.pagado && r.est !== 'pagado' ? `<br><small>pagó ${fmt(r.pagado)}</small>` : ''}</td>
+        <td data-l="Estado">${r.revisar ? '<span class="tag tag-aviso">Revisar</span>' : EST_COBRO[r.est]}</td>
+        <td data-l="" class="nowrap">${r.total > 0 ? `<button class="btn btn-sm btn-ghost" data-aviso="${r.u.id}">PDF</button>
+          <button class="btn btn-sm btn-wa" data-wa="${r.u.id}">WhatsApp</button>
+          ${r.est !== 'pagado' && tieneRol(['administracion', 'cobranza']) ? `<button class="btn btn-sm btn-ghost" data-pago="${r.u.id}">Pagó</button>` : ''}` : ''}</td></tr>`).join('')}</tbody></table></div>
+      <p class="nota" style="margin-top:10px">WhatsApp abre el mensaje ya escrito con lo que le toca, listo para mandar. Si el inquilino no tiene teléfono, el mensaje se copia para pegarlo donde quieras.</p>
     </section>`;
   el.querySelector('#cb-q').addEventListener('change', (e) => { st.q = e.target.value; pintarCobro(el); });
   el.querySelectorAll('[data-aviso]').forEach((b) => b.addEventListener('click', () => avisoCobro(unidades.find((u) => u.id === b.dataset.aviso))));
+  el.querySelectorAll('[data-wa]').forEach((b) => b.addEventListener('click', async () => {
+    const r = todas.find((x) => x.u.id === b.dataset.wa), txt = mensaje(r), tel = telDe(r.u.id);
+    if (tel) { window.open(`https://wa.me/${tel}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener'); return; }
+    try { await navigator.clipboard.writeText(txt); toast('No tiene teléfono: copié el mensaje para que lo pegues'); }
+    catch { abrirModal({ titulo: 'Mensaje', cuerpo: `<textarea rows="12" style="width:100%">${esc(txt)}</textarea>` }); }
+  }));
+  el.querySelectorAll('[data-pago]').forEach((b) => b.addEventListener('click', () => registrarPago(todas.find((x) => x.u.id === b.dataset.pago))));
+}
+
+function registrarPago(r) {
+  const falta = Math.max(0, Math.round((r.total - r.pagado) * 100) / 100);
+  const modal = abrirModal({
+    titulo: `Pago de servicios · ${r.u.identificador}`,
+    cuerpo: `<form class="form" id="ps" novalidate>
+      <p class="nota">${esc(ocupante(r.u.id) || 'Sin inquilino')} · ${mesTxt(st.ym)} · le toca ${fmt(r.total)}${r.pagado ? `, ya pagó ${fmt(r.pagado)}` : ''}</p>
+      <div class="form-2"><label>Monto<input type="number" name="monto" min="0" step="0.01" value="${falta}"></label>
+        <label>Fecha<input type="date" name="fecha" value="${hoyISO()}"></label></div>
+      <label>Forma de pago<select name="forma">${['Transferencia', 'Efectivo', 'Depósito', 'Tarjeta', 'Otro'].map((x) => `<option>${x}</option>`).join('')}</select></label></form>`,
+    pie: `<button class="btn btn-ghost" id="ps-no">Cancelar</button><button class="btn btn-primary" id="ps-si">Guardar pago</button>`,
+  });
+  const f = modal.querySelector('#ps');
+  modal.querySelector('#ps-no').addEventListener('click', cerrarModal);
+  modal.querySelector('#ps-si').addEventListener('click', async (ev) => {
+    const monto = Number(f.monto.value);
+    if (!(monto > 0)) return toast('Escribe el monto', true);
+    ev.currentTarget.disabled = true;
+    const c = contratoU(r.u.id);
+    const { data, error } = await db().from('pagos').insert({ org_id: estado.miembro.org_id, empresa_id: estado.centros.find((x) => x.id === st.centro)?.empresa_id || estado.empresas[0]?.id,
+      centro_id: st.centro, unidad_id: r.u.id, contrato_id: c?.id || null, concepto: 'servicios', periodo: per(st.ym), monto, moneda: 'MXN',
+      forma_pago: f.forma.value, fecha: f.fecha.value || hoyISO(), notas: `Luz, gas y agua ${mesTxt(st.ym)}`, capturado_por: estado.miembro.nombre }).select('id, unidad_id, contrato_id, monto, fecha, forma_pago').single();
+    if (error) { ev.currentTarget.disabled = false; return toast('No se pudo guardar: ' + error.message, true); }
+    pagosSrv.push(data); cerrarModal(); toast('Pago guardado ✓'); pintar();
+  });
 }
 
 async function avisoCobro(u) {
