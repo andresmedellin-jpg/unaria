@@ -2,6 +2,7 @@
 // Antes de guardar se enseña qué entra y qué tiene errores; nada se guarda hasta que el dueño le da "Importar".
 // Lo que ya existe (misma unidad en el mismo edificio, mismo empleado, mismo medidor) no se duplica.
 import { db, todo, estado, esc, toast, normalizar, hoyISO } from '../lib.js';
+import { MARCA } from '../config.js';
 
 const XLSX_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
 const TIPOS_UNIDAD = { local: 'local', depto: 'depto', departamento: 'depto', oficina: 'oficina', bodega: 'bodega', casa: 'casa', terreno: 'terreno', loft: 'loft', otro: 'otro' };
@@ -9,18 +10,29 @@ const SERVICIOS = { luz: 'luz', electricidad: 'luz', gas: 'gas', agua: 'agua' };
 
 // Hojas de la plantilla: columnas (la primera fila del Excel) y un renglón de ejemplo
 const HOJAS = {
-  Unidades:   { cols: ['Edificio', 'Unidad', 'Tipo', 'Metros'], ej: ['Torre 1', 'Depto 301', 'depto', 85],
-                ayuda: 'Cada local, oficina o departamento. Tipo: local, depto, oficina, bodega, casa, terreno, loft u otro.' },
+  Unidades:   { cols: ['Edificio', 'Unidad', 'Tipo', 'Metros', 'Propietario', 'Amueblado'], ej: ['Torre 1', 'Depto 301', 'depto', 85, 'Inversionista A', 'Sí'],
+                ayuda: 'Cada local, oficina o departamento. Tipo: local, depto, oficina, bodega, casa, terreno, loft u otro. Propietario y Amueblado son opcionales.' },
   Inquilinos: { cols: ['Edificio', 'Unidad', 'Inquilino', 'Renta', 'Día de pago', 'Teléfono', 'Correo', 'Inicio', 'Fin'],
                 ej: ['Torre 1', 'Depto 301', 'Juan Pérez', 14500, 5, '8112345678', 'juan@correo.com', '2026-01-01', '2026-12-31'],
-                ayuda: 'Un renglón por contrato de renta vigente. Si la unidad no está en la hoja Unidades, se crea.' },
+                ayuda: 'Un renglón por contrato vigente. La renta y el día de pago pueden ir vacíos y capturarse después. Si la unidad no está en la hoja Unidades, se crea.' },
   Empleados:  { cols: ['Nombre', 'Puesto', 'Centro', 'Sueldo semanal', 'Días por semana', 'Fecha de ingreso', 'Entrada', 'Salida'],
                 ej: ['María López', 'Limpieza', 'Torre 1', 2800, 6, '2024-03-15', '08:00', '17:00'],
                 ayuda: 'Centro = dónde trabaja (debe existir). Fecha de ingreso cuenta para vacaciones.' },
   Medidores:  { cols: ['Edificio', 'Unidad', 'Servicio', 'Serie', 'Lectura inicial', 'Dónde está', 'Orden'],
                 ej: ['Torre 1', 'Depto 301', 'luz', 'L1234567', 15230, 'Cuarto de medidores', 1],
                 ayuda: 'Servicio: luz, gas o agua. Lectura inicial = la última lectura tomada antes de empezar.' },
+  // Directorio de residentes (módulo Residentes): un renglón por persona, por auto y por mascota
+  Residentes: { cols: ['Edificio', 'Unidad', 'Nombre', 'Teléfono', 'Correo', 'Es el arrendatario'], ej: ['Torre 1', 'Depto 301', 'Ana Pérez', '8112345678', 'ana@correo.com', 'Sí'],
+                ayuda: 'Quién vive en cada unidad. Un renglón por persona.', modulo: 'residentes' },
+  Vehículos:  { cols: ['Edificio', 'Unidad', 'Placas', 'Modelo', 'Color'], ej: ['Torre 1', 'Depto 301', 'ABC123D', 'Mazda 3', 'Gris'],
+                ayuda: 'Autos de los residentes, para la caseta.', modulo: 'residentes' },
+  Mascotas:   { cols: ['Edificio', 'Unidad', 'Tipo', 'Nombre'], ej: ['Torre 1', 'Depto 301', 'Perro', 'Toby'],
+                ayuda: 'Mascotas por unidad.', modulo: 'residentes' },
 };
+// Las hojas de residentes solo se ofrecen si el cliente tiene ese módulo
+for (const [h, x] of Object.entries(HOJAS)) if (x.modulo && !(MARCA.modulos || []).includes(x.modulo)) delete HOJAS[h];
+const SI = (v) => ['si', 'sí', 'x', '1', 'true', 'verdadero'].includes(normalizar(v));
+const AMUEBLADO = (v) => (txt(v) === '' ? null : SI(v));
 
 let raiz, plan = null;
 
@@ -92,7 +104,7 @@ async function leer(file) {
       hojas[h] = filas.map((f, i) => ({ n: i + 2, v: Object.fromEntries(Object.entries(f).map(([k, x]) => [clave(k), x])) }))
         .filter((r) => Object.values(r.v).some((x) => txt(x) !== ''));
     }
-    if (!Object.keys(hojas).length) throw new Error('No encontré hojas con los nombres de la plantilla (Unidades, Inquilinos, Empleados, Medidores).');
+    if (!Object.keys(hojas).length) throw new Error(`No encontré hojas con los nombres de la plantilla (${Object.keys(HOJAS).join(', ')}).`);
     raiz.querySelector('#im-file-txt').textContent = `${file.name} · toca para cambiar de archivo`;
     plan = await revisar(hojas);
     pintarRevision();
@@ -117,11 +129,13 @@ async function revisar(hojas) {
     hojas.Medidores ? todo(() => db().from('medidores').select('id, unidad_id, servicio')) : { data: [] },
   ]);
   const unidades = u.data || [], empleados = e.data || [], medidores = m.data || [];
-  const p = { Unidades: [], Inquilinos: [], Empleados: [], Medidores: [], unidadesNuevas: new Map() };
+  const p = { Unidades: [], Inquilinos: [], Empleados: [], Medidores: [], Residentes: [], Vehículos: [], Mascotas: [], unidadesNuevas: new Map(), cambiosUnidad: [] };
   const keyU = (c, id) => `${c}|${clave(id)}`;
   const existeU = (c, id) => unidades.find((x) => x.centro_id === c && clave(x.identificador) === clave(id));
   // unidad que pide otra hoja: si no existe ni viene en Unidades, se crea
   const pedirUnidad = (c, id, tipo = 'otro') => { if (!existeU(c, id) && !p.unidadesNuevas.has(keyU(c, id))) p.unidadesNuevas.set(keyU(c, id), { centro_id: c, identificador: txt(id), tipo, superficie_m2: null }); };
+  // Propietario y amueblado: si la unidad ya existe, se le actualizan
+  const extrasU = (v) => ({ ...(txt(v.propietario) ? { propietario: txt(v.propietario) } : {}), ...(AMUEBLADO(v.amueblado) != null ? { amueblado: AMUEBLADO(v.amueblado) } : {}) });
 
   for (const r of hojas.Unidades || []) {
     const v = r.v, c = centroDe(v.edificio), errs = [];
@@ -132,19 +146,21 @@ async function revisar(hojas) {
     const m2 = num(v.metros); if (Number.isNaN(m2)) errs.push('Metros no es número');
     const ya = c && existeU(c.id, v.unidad);
     p.Unidades.push({ n: r.n, desc: `${txt(v.edificio)} · ${txt(v.unidad)}`, errs, ya: !!ya || (c && p.unidadesNuevas.has(keyU(c.id, v.unidad))) });
-    if (!errs.length && !ya) p.unidadesNuevas.set(keyU(c.id, v.unidad), { centro_id: c.id, identificador: txt(v.unidad), tipo, superficie_m2: m2 });
+    if (!errs.length && !ya) p.unidadesNuevas.set(keyU(c.id, v.unidad), { centro_id: c.id, identificador: txt(v.unidad), tipo, superficie_m2: m2, ...extrasU(v) });
+    else if (!errs.length && ya && Object.keys(extrasU(v)).length) p.cambiosUnidad.push({ id: ya.id, ...extrasU(v) });
   }
   for (const r of hojas.Inquilinos || []) {
     const v = r.v, c = centroDe(v.edificio), errs = [];
     if (!c) errs.push(txt(v.edificio) ? `No existe "${txt(v.edificio)}"` : 'Falta el edificio');
     if (!txt(v.unidad)) errs.push('Falta la unidad');
     if (!txt(v.inquilino)) errs.push('Falta el inquilino');
-    const renta = num(v.renta); if (renta == null || Number.isNaN(renta)) errs.push('Renta no es número');
+    const renta = num(v.renta); if (Number.isNaN(renta)) errs.push('Renta no es número');
     const dia = num(v.diadepago); if (dia != null && (Number.isNaN(dia) || dia < 1 || dia > 31)) errs.push('Día de pago entre 1 y 31');
     const ini = fecha(v.inicio), fin = fecha(v.fin); if (ini === 'mal' || fin === 'mal') errs.push('Fecha no válida (usa 2026-01-31 o 31/01/2026)');
-    if (!errs.length) pedirUnidad(c.id, v.unidad);
+    if (!errs.length) { pedirUnidad(c.id, v.unidad); const ex = extrasU(v), nu = p.unidadesNuevas.get(keyU(c.id, v.unidad)), ya = existeU(c.id, v.unidad);
+      if (nu) Object.assign(nu, ex); else if (ya && Object.keys(ex).length) p.cambiosUnidad.push({ id: ya.id, ...ex }); }
     p.Inquilinos.push({ n: r.n, desc: `${txt(v.unidad)} · ${txt(v.inquilino)}`, errs,
-      fila: errs.length ? null : { centro_id: c.id, unidad: txt(v.unidad), arrendatario: txt(v.inquilino), monto: renta, moneda: 'MXN', dia_pago: dia || null,
+      fila: errs.length ? null : { centro_id: c.id, unidad: txt(v.unidad), arrendatario: txt(v.inquilino), monto: renta || 0, moneda: 'MXN', dia_pago: dia || null,
         telefono: txt(v.telefono) || null, email: txt(v.correo) || null, fecha_inicio: ini, fecha_fin: fin, activo: true } });
   }
   for (const r of hojas.Empleados || []) {
@@ -175,6 +191,34 @@ async function revisar(hojas) {
       fila: errs.length || ya ? null : { centro_id: c.id, unidad: txt(v.unidad), servicio: serv, serie: txt(v.serie) || null, lectura_inicial: ini || 0,
         zona: txt(v.dondeesta) || null, orden: orden ?? 0, activo: true } });
   }
+  // Residentes, vehículos y mascotas: lo que ya está (mismo nombre / misma placa en la unidad) no se duplica
+  const [er, ev, em] = await Promise.all(['Residentes', 'Vehículos', 'Mascotas'].map((h, i) => hojas[h]
+    ? todo(() => db().from(['residentes', 'vehiculos', 'mascotas'][i]).select('id, unidad_id, ' + ['nombre', 'placas', 'tipo, nombre'][i]).eq('activo', true)) : { data: [] }));
+  const placa = (s) => txt(s).toUpperCase().replace(/^PLACAS?\s*:?/, '').replace(/[^A-Z0-9]/g, '');
+  const vistos = new Set();
+  const hojaDir = (h, campo, armar, igual, previos) => {
+    for (const r of hojas[h] || []) {
+      const v = r.v, c = centroDe(v.edificio), errs = [];
+      if (!c) errs.push(txt(v.edificio) ? `No existe "${txt(v.edificio)}"` : 'Falta el edificio');
+      if (!txt(v.unidad)) errs.push('Falta la unidad');
+      const fila = armar(v, errs);
+      const uni = c && existeU(c.id, v.unidad);
+      const k = `${h}|${c?.id}|${clave(v.unidad)}|${igual(fila)}`;
+      const ya = !errs.length && (vistos.has(k) || (uni && previos.some((x) => x.unidad_id === uni.id && igual(x) === igual(fila))));
+      if (!errs.length) vistos.add(k);
+      if (!errs.length && !ya) pedirUnidad(c.id, v.unidad);
+      p[h].push({ n: r.n, desc: `${txt(v.unidad)} · ${txt(fila?.[campo]) || '—'}`, errs, ya, fila: errs.length || ya ? null : { centro_id: c.id, unidad: txt(v.unidad), ...fila } });
+    }
+  };
+  hojaDir('Residentes', 'nombre', (v, e) => { if (!txt(v.nombre)) e.push('Falta el nombre');
+    return { nombre: txt(v.nombre), telefono: txt(v.telefono) || null, email: txt(v.correo).toLowerCase() || null, es_titular: SI(v.eselarrendatario) }; },
+    (x) => clave(x?.nombre), er.data || []);
+  hojaDir('Vehículos', 'placas', (v, e) => { if (!placa(v.placas) && !txt(v.modelo)) e.push(txt(v.placas) ? `Placas "${txt(v.placas)}" no válidas y sin modelo` : 'Faltan placas o modelo');
+    return { placas: placa(v.placas) || null, modelo: txt(v.modelo) || null, color: txt(v.color) || null }; },
+    (x) => x?.placas || clave(x?.modelo), ev.data || []);
+  hojaDir('Mascotas', 'tipo', (v, e) => { if (!txt(v.tipo)) e.push('Falta el tipo'); else if (['no', 'sinmascota', 'ninguna'].includes(clave(v.tipo))) e.push('Dice que no tiene mascota');
+    return { tipo: txt(v.tipo), nombre: txt(v.nombre) || null }; },
+    (x) => clave(x?.tipo) + clave(x?.nombre), em.data || []);
   p.hojas = Object.keys(hojas);
   p.unidades = unidades;
   return p;
@@ -185,7 +229,7 @@ function pintarRevision() {
   const res = p => ({ ok: p.filter((r) => !r.errs.length && !r.ya).length, ya: p.filter((r) => r.ya && !r.errs.length).length, mal: p.filter((r) => r.errs.length) });
   const hojas = plan.hojas.map((h) => ({ h, ...res(plan[h]) }));
   const nuevasUnidades = plan.unidadesNuevas.size;
-  const total = hojas.reduce((a, x) => a + (x.h === 'Unidades' ? 0 : x.ok), 0) + nuevasUnidades;
+  const total = hojas.reduce((a, x) => a + (x.h === 'Unidades' ? 0 : x.ok), 0) + nuevasUnidades + plan.cambiosUnidad.length;
   const errores = hojas.flatMap((x) => x.mal.map((r) => ({ h: x.h, ...r })));
   el.innerHTML = `<section class="panel">
     <div class="panel-head"><h3>3 · Revisa y confirma</h3>
@@ -223,6 +267,12 @@ async function importar(ev) {
     if (contratos.length) { await insertar('contratos', contratos); hecho.push(`${contratos.length} inquilinos`); }
     const emps = plan.Empleados.filter((r) => r.fila).map((r) => ({ ...r.fila, org_id: org }));
     if (emps.length) { await insertar('empleados', emps); hecho.push(`${emps.length} empleados`); }
+    for (const ch of plan.cambiosUnidad) { const { id, ...d } = ch; const { error } = await db().from('unidades').update(d).eq('id', id); if (error) throw new Error('unidades: ' + error.message); }
+    if (plan.cambiosUnidad.length) hecho.push(`${plan.cambiosUnidad.length} unidades actualizadas`);
+    for (const [h, tabla, nom] of [['Residentes', 'residentes', 'residentes'], ['Vehículos', 'vehiculos', 'vehículos'], ['Mascotas', 'mascotas', 'mascotas']]) {
+      const filas = plan[h].filter((r) => r.fila).map(({ fila: { unidad, centro_id, ...f } }) => ({ ...f, org_id: org, unidad_id: idU(centro_id, unidad) }));
+      if (filas.length) { await insertar(tabla, filas); hecho.push(`${filas.length} ${nom}`); }
+    }
     const meds = plan.Medidores.filter((r) => r.fila).map(({ fila: { unidad, ...f } }) => ({ ...f, org_id: org, unidad_id: idU(f.centro_id, unidad) }));
     if (meds.length) { await insertar('medidores', meds); hecho.push(`${meds.length} medidores`); }
     toast(hecho.length ? `Importado: ${hecho.join(', ')} ✓` : 'No había nada nuevo que importar');

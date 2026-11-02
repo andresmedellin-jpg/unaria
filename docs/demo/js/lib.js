@@ -1,7 +1,10 @@
-import { SUPABASE_URL, SUPABASE_KEY, ESQUEMA } from './config.js';
+import { SUPABASE_URL, SUPABASE_KEY, ESQUEMA, CLIENTE } from './config.js';
 
 export const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true,
+    // Clientes que comparten base con Unaria (unaria.mx/<cliente>/): cada uno guarda su sesión aparte,
+    // para que entrar a uno no abra el otro con el usuario equivocado.
+    ...(CLIENTE && CLIENTE.id !== 'unaria' ? { storageKey: `sb-unaria-${CLIENTE.id}` } : {}) },
 });
 export const db = () => sb.schema(ESQUEMA);
 

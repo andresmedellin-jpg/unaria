@@ -28,6 +28,7 @@
     cuentas_por_cobrar: { moneda: 'MXN' },
     nomina_lineas: { dias_trabajados: 0, sueldo: 0, extras: 0, descuentos: 0, abono_prestamo: 0 },
     nomina_periodos: { estado: 'borrador' },
+    residentes: { activo: true, es_titular: false }, vehiculos: { activo: true }, mascotas: { activo: true },
   };
   const SIN_ID = ['miembros', 'tipo_cambio'];
   function nuevaFila(t, v) {

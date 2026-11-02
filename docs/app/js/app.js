@@ -17,6 +17,7 @@ const vistas = {
   prospectos: () => import('./modulos/prospectos.js'),
   lecturas: () => import('./modulos/lecturas.js'),
   importar: () => import('./modulos/importar.js'),
+  residentes: () => import('./modulos/residentes.js'),
 };
 
 // ================= MARCA =================

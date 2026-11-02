@@ -47,3 +47,15 @@ PARA UN CLIENTE NUEVO
 - Antes de cada commit que cambie docs/app o docs/demo: python3 publicar.py (sube la versión para que todos vean el cambio).
 - Clientes: docs/app/clientes/<cliente>.js (Galcor ya tiene su archivo, aún sin base).
 - Funciones del servidor (proyecto unaria): supabase/functions/chat, asistente y usuarios.
+
+==== CLIENTES REALES ====
+ARBORETUM (torre de 66 departamentos; primer cliente) → unaria.mx/arboretum/
+- Entrada: docs/arboretum/index.html (usa los archivos de /app/) + docs/app/clientes/arboretum.js (marca, color, módulos).
+- Sus datos viven por ahora en la base de Unaria, en su propia organización "Arboretum" (cada usuario solo ve su organización).
+  Su sesión se guarda aparte de la de unaria.mx/app (storageKey por cliente en js/lib.js).
+- Se cargó su Excel BASE_DATOS_RESIDENTES_ARBORETUM_2026: 66 unidades, 65 contratos (sin renta todavía), 98 residentes, 126 autos.
+  Los datos personales NO van en este repositorio (es público): solo en la base.
+- Módulo nuevo para él: Residentes (js/modulos/residentes.js) → directorio por depto, autos (búsqueda de placas para caseta),
+  mascotas, propietario (Edifica / JAGC), amueblado y vencimientos de contrato. Tablas: residentes, vehiculos, mascotas;
+  columnas nuevas en unidades: propietario, amueblado. Se prende para cualquier cliente con 'residentes' en sus módulos.
+- Importar datos ahora acepta hojas Residentes, Vehículos y Mascotas, y la renta puede ir vacía.

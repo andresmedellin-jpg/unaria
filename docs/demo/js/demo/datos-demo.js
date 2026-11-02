@@ -42,8 +42,8 @@
     nombre: 'Inmobiliaria Galcor · Administración',
     marca: ['Galcor', 'Inmobiliaria'],
     logos: [{ src: logoInm.replaceAll(encodeURIComponent(COLOR), encodeURIComponent(COLOR_INM)), alt: 'Inmobiliaria Galcor', clase: 'logo-demo' }],
-    modulos: ['inicio', 'prospectos', 'rentas', 'servicios', 'lecturas', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
-    menu: [{ id: 'inicio' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'gastos' }, { id: 'personal', corto: 'RR. HH.' }, { id: 'patrimonio' }],
+    modulos: ['inicio', 'prospectos', 'rentas', 'servicios', 'lecturas', 'residentes', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
+    menu: [{ id: 'inicio' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'residentes' }, { id: 'gastos' }, { id: 'personal', corto: 'RR. HH.' }, { id: 'patrimonio' }],
     ajustes: ['usuarios', 'importar'],
     centrosPersonal: ['Torre Cumbres', 'Torre Valle'], titulos: { personal: 'Recursos humanos' },
     rentaParcial: true, ocupacion: true,
@@ -734,12 +734,35 @@
         { id: id('tar'), org_id: ORG, centro_id: torre.id, servicio: 'agua', modo: 'tarifa', precio: 31.5, cargo_fijo: 45 });
     }
 
+    // ---------- residentes, autos y mascotas de los departamentos (generador aparte para no mover los demás números) ----------
+    const residentes = [], vehiculos = [], mascotas = [];
+    {
+      let sem = 77; const r2 = () => ((sem = (sem * 1664525 + 1013904223) % 4294967296) / 4294967296);
+      const en = (a, b) => Math.round(a + r2() * (b - a)), el = (l) => l[Math.floor(r2() * l.length)];
+      const L = 'ABCDEFGHJKLMNPRSTUVWXYZ';
+      const placa = () => el(['R', 'S', 'T', 'F']) + el(L.split('')) + el(L.split('')) + en(100, 999) + el(L.split(''));
+      const AUTOS = ['Mazda 3', 'Honda CR-V', 'Nissan Versa', 'VW Jetta', 'Kia Seltos', 'Toyota RAV4', 'Chevrolet Onix', 'Hyundai Creta', 'BMW 320i', 'Jeep Compass', 'MG ZS', 'Seat Ibiza'];
+      const COLORES = ['Blanco', 'Gris', 'Negro', 'Plata', 'Azul', 'Rojo', 'Gris oxford'];
+      const DUENOS = ['Inversionista Garza', 'Grupo Rocha Leal', 'Inmobiliaria Galcor'];
+      unidades.forEach((u) => {
+        if (u.tipo !== 'depto') return;
+        u.propietario = el(DUENOS); u.amueblado = r2() < 0.45;
+        const c = contratos.find((x) => x.activo && x.unidad_id === u.id);
+        if (!c) return;
+        const tel = () => '81' + en(10000000, 99999999);
+        residentes.push({ id: id('res'), org_id: ORG, unidad_id: u.id, nombre: c.arrendatario, telefono: (c.telefono || '').replace(/\D/g, ''), email: null, es_titular: true, activo: true });
+        for (let k = en(0, 3); k > 0; k--) residentes.push({ id: id('res'), org_id: ORG, unidad_id: u.id, nombre: `${el(NOMBRES)} ${el(APELLIDOS)}`, telefono: r2() < 0.7 ? tel() : null, email: null, es_titular: false, activo: true });
+        for (let k = en(0, 2) + (r2() < 0.2 ? 1 : 0); k > 0; k--) vehiculos.push({ id: id('veh'), org_id: ORG, unidad_id: u.id, placas: placa(), modelo: el(AUTOS), color: el(COLORES), notas: null, activo: true });
+        if (r2() < 0.25) mascotas.push({ id: id('mas'), org_id: ORG, unidad_id: u.id, tipo: el(['Perro', 'Perro', 'Gato']), nombre: el(['Toby', 'Luna', 'Max', 'Kira', 'Rocky', 'Nala']), notas: null, activo: true });
+      });
+    }
+
     const todoJunto = {
       organizaciones: [{ id: ORG, nombre: 'Galcor', plan: 'demo' }],
       miembros,
       empresas: [E, E2], centros, productos, inventario_movs, ingresos, gastos, cuentas_por_cobrar, pagos, empleados,
       nomina_periodos, nomina_lineas, asistencia, vacaciones, prestamos, prestamo_abonos, tareas_plantilla, tareas,
-      cotizaciones, contratos, unidades, cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
+      cotizaciones, contratos, unidades, residentes, vehiculos, mascotas, cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
     };
     if (MEDCO) {            // las dos empresas juntas, con los nombres de Treme y MEDCO
       E.nombre = 'Desarrollos y Proyectos MEDCO'; E.nombre_corto = 'MEDCO';
@@ -754,6 +777,8 @@
     const cen = new Set(D.centros.map((c) => c.id));
     ['gastos', 'ingresos', 'pagos', 'cuentas_por_cobrar', 'empleados', 'nomina_periodos', 'productos', 'cotizaciones', 'prospectos', 'inversion_publicidad', 'activos', 'pasivos']
       .forEach((t) => { D[t] = porEmp(D[t]); });
+    const unis = new Set(D.unidades.filter((u) => cen.has(u.centro_id)).map((u) => u.id));
+    ['residentes', 'vehiculos', 'mascotas'].forEach((t) => { D[t] = D[t].filter((r) => unis.has(r.unidad_id)); });
     ['unidades', 'contratos', 'tareas_plantilla', 'tareas', 'medidores', 'lecturas', 'recibos_servicio', 'tarifas_servicio'].forEach((t) => { D[t] = D[t].filter((r) => cen.has(r.centro_id)); });
     const emps = new Set(D.empleados.map((e) => e.id));
     ['nomina_lineas', 'asistencia', 'vacaciones', 'prestamos'].forEach((t) => { D[t] = D[t].filter((r) => emps.has(r.empleado_id)); });

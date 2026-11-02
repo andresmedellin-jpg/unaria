@@ -122,6 +122,7 @@ function enlazarNav(el) {
 function pintarRentas(el) {
   const y = st.anio, m = st.mes, per = periodo(y, m);
   const activas = contratos.filter((r) => r.activo && Number(r.monto) > 0);
+  const sinMonto = contratos.filter((r) => r.activo && !Number(r.monto)).length;
   let esperado = 0, cobrado = 0, cobradoUsd = 0, atrasados = 0, pagadas = 0;
   activas.forEach((r) => {
     if (r.moneda !== 'USD') esperado += Number(r.monto);
@@ -167,6 +168,7 @@ function pintarRentas(el) {
       <div class="kpi"><span>${atrasados ? 'Atrasadas' : 'Al corriente'}</span><strong class="${atrasados ? 'neg' : 'pos'}">${atrasados || `${pagadas}/${activas.length}`}</strong><small>${atrasados ? (PARCIAL ? 'sin pago o incompletas' : 'rentas sin pago') : 'rentas pagadas'}</small></div>
     </div>
     ${semana}
+    ${sinMonto ? `<div class="panel rs-aviso"><b>${sinMonto} contrato${sinMonto === 1 ? '' : 's'} sin renta capturada.</b> No aparecen aquí hasta que les pongas la renta y el día de pago. <button class="btn btn-sm btn-ghost" id="r-sinm">Capturar en Contratos</button></div>` : ''}
     <section class="panel">
       <div class="panel-head">
         <div class="segmento">${[['todos','Todas'],['atrasado','Atrasadas'], ...(PARCIAL ? [['parcial','Abonadas']] : []),['porv','Por vencer'],['pendiente','Pendientes'],['pagado','Pagadas']]
@@ -184,6 +186,7 @@ function pintarRentas(el) {
     </section>`;
 
   enlazarNav(el);
+  el.querySelector('#r-sinm')?.addEventListener('click', () => { st.tab = 'contratos'; pintar(); });
   el.querySelectorAll('[data-filtro]').forEach((b) => b.addEventListener('click', () => { st.filtro = b.dataset.filtro; pintar(); }));
   el.querySelector('#r-centro').addEventListener('change', (e) => { st.centro = e.target.value; pintar(); });
   const q = el.querySelector('#r-q');
@@ -505,12 +508,13 @@ function editarContrato(r, preUnidad = null) {
       <label>Desarrollo<select name="centro" required><option value="">Elige…</option>
         ${centros.map((c) => `<option value="${c.id}" ${r?.centro_id === c.id ? 'selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select></label>
       ${OCUPACION ? '<label>Unidad<select name="unidad"></select></label>' : ''}
+      <label>Renta mensual<input type="number" name="monto" min="0" step="0.01" value="${r && Number(r.monto) ? Number(r.monto) : ''}"></label>
       <div class="form-2">
-        <label>Renta mensual<input type="number" name="monto" min="0" step="0.01" value="${r ? Number(r.monto) : ''}"></label>
         <label>Moneda<select name="moneda"><option>MXN</option><option ${r?.moneda === 'USD' ? 'selected' : ''}>USD</option></select></label>
+        <label>Día de pago<input type="number" name="dia" min="1" max="31" value="${r?.dia_pago || ''}"></label>
       </div>
       <div class="form-2">
-        <label>Día de pago<input type="number" name="dia" min="1" max="31" value="${r?.dia_pago || ''}" required></label>
+        <label>Inicio del contrato<input type="date" name="inicio" value="${r?.fecha_inicio || ''}"></label>
         <label>Vence el contrato<input type="date" name="fin" value="${r?.fecha_fin || ''}"></label>
       </div>
       <div class="form-2">
@@ -541,10 +545,11 @@ function editarContrato(r, preUnidad = null) {
     const dia = parseInt(f.dia.value);
     if (!f.arrendatario.value.trim()) return toast('Escribe el arrendatario', true);
     if (!f.centro.value) return toast('Elige el desarrollo', true);
-    if (!(dia >= 1 && dia <= 31)) return toast('El día de pago va de 1 a 31', true);
+    // Sin renta todavía (p. ej. se dio de alta con la lista de residentes), el día de pago puede esperar
+    if (Number(f.monto.value) > 0 && !(dia >= 1 && dia <= 31)) return toast('El día de pago va de 1 a 31', true);
     btn.disabled = true;
     const datos = { arrendatario: f.arrendatario.value.trim(), centro_id: f.centro.value, monto: Number(f.monto.value) || 0,
-      moneda: f.moneda.value, dia_pago: dia, fecha_fin: f.fin.value || null, telefono: f.telefono.value.trim() || null,
+      moneda: f.moneda.value, dia_pago: dia >= 1 && dia <= 31 ? dia : null, fecha_inicio: f.inicio.value || null, fecha_fin: f.fin.value || null, telefono: f.telefono.value.trim() || null,
       email: f.email.value.trim() || null, notas: f.notas.value.trim() || null, activo: f.activo.checked,
       ...(f.unidad ? { unidad_id: f.unidad.value || null } : {}) };
     const { error } = r ? await db().from('contratos').update(datos).eq('id', r.id)
