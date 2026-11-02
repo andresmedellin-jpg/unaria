@@ -28,6 +28,8 @@
     cuentas_por_cobrar: { moneda: 'MXN' },
     nomina_lineas: { dias_trabajados: 0, sueldo: 0, extras: 0, descuentos: 0, abono_prestamo: 0 },
     nomina_periodos: { estado: 'borrador' },
+    solicitudes: { estado: 'abierta', origen: 'oficina' }, paquetes: { recibido_en: () => new Date().toISOString() },
+    rondin_marcas: { hora: () => new Date().toISOString(), ronda: 1 }, bitacora_turno: { creado_en: () => new Date().toISOString() }, puntos_rondin: { activo: true },
     residentes: { activo: true, es_titular: false }, vehiculos: { activo: true }, mascotas: { activo: true },
   };
   const SIN_ID = ['miembros', 'tipo_cambio'];
@@ -179,6 +181,11 @@
     equipo_de: ({ p_centro }) => T('empleados').filter((e) => e.centro_id === p_centro && e.activo)
       .sort((a, b) => a.nombre.localeCompare(b.nombre))
       .map(({ id, nombre, puesto, hora_entrada, hora_salida, tolerancia_min, dias_laborales }) => ({ id, nombre, puesto, hora_entrada, hora_salida, tolerancia_min, dias_laborales })),
+    mi_empleado: () => { const m = miembro(), e = m?.empleado_id && T('empleados').find((x) => x.id === m.empleado_id);
+      return e ? [{ id: e.id, nombre: e.nombre, puesto: e.puesto, centro_id: e.centro_id, hora_entrada: e.hora_entrada, hora_salida: e.hora_salida,
+        tolerancia_min: e.tolerancia_min, dias_laborales: e.dias_laborales, telefono: e.telefono || null }] : []; },
+    asistencia_foto: ({ p_asistencia, p_tipo, p_url }) => { const a = T('asistencia').find((x) => x.id === p_asistencia); if (a) a['foto_' + p_tipo] = p_url; return null; },
+    reporte_residente: () => 'ok', centro_publico: () => 'Torre',
     usuarios_lista: () => T('miembros').map((m) => ({ ...m, correo: m.usuario + '@usuarios.demo', ultimo_acceso: m.ultimo_acceso || new Date().toISOString() })),
     asistencia_marcar: ({ p_empleado, p_fecha, p_accion }) => {
       const e = T('empleados').find((x) => x.id === p_empleado);

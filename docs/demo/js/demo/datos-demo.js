@@ -42,10 +42,10 @@
     nombre: 'Inmobiliaria Galcor · Administración',
     marca: ['Galcor', 'Inmobiliaria'],
     logos: [{ src: logoInm.replaceAll(encodeURIComponent(COLOR), encodeURIComponent(COLOR_INM)), alt: 'Inmobiliaria Galcor', clase: 'logo-demo' }],
-    modulos: ['inicio', 'prospectos', 'rentas', 'servicios', 'lecturas', 'residentes', 'propietarios', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
-    menu: [{ id: 'inicio' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'residentes' }, { id: 'propietarios' }, { id: 'gastos' }, { id: 'personal', corto: 'RR. HH.' }, { id: 'patrimonio' }],
+    modulos: ['turno', 'inicio', 'prospectos', 'rentas', 'servicios', 'lecturas', 'residentes', 'propietarios', 'gastos', 'personal', 'patrimonio', 'importar', 'usuarios'],
+    menu: [{ id: 'turno' }, { id: 'inicio' }, { id: 'prospectos' }, { titulo: 'Rentas', modulos: ['rentas', 'servicios', 'lecturas'] }, { id: 'residentes' }, { id: 'propietarios' }, { id: 'gastos' }, { id: 'personal', corto: 'Equipo' }, { id: 'patrimonio' }],
     ajustes: ['usuarios', 'importar'],
-    centrosPersonal: ['Torre Cumbres', 'Torre Valle'], titulos: { personal: 'Recursos humanos' },
+    centrosPersonal: ['Torre Cumbres', 'Torre Valle'], titulos: { personal: 'Equipo de las torres' }, ocultarPestanas: ['rondin'],
     rentaParcial: true, ocupacion: true,
     reciboEmpresa: 'Inmobiliaria Galcor', reciboLogo: logoInm.replaceAll(encodeURIComponent(COLOR), encodeURIComponent(COLOR_INM)), reciboColor: COLOR_INM,
     centroPersonal: 'Torre Cumbres',
@@ -757,12 +757,61 @@
       });
     }
 
+    // ---------- equipo de la torre: puntos de rondín, turnos de vigilancia, lo que pasó hoy (generador aparte) ----------
+    const puntos_rondin = [], rondin_marcas = [], turnos = [], solicitudes = [], paquetes = [], bitacora_turno = [];
+    {
+      const vig = empleados.filter((e) => e.centro_id === torreA.id && /Vigilante/.test(e.puesto));
+      const limp = empleados.filter((e) => e.centro_id === torreA.id && /Limpieza/.test(e.puesto));
+      const mant = empleados.find((e) => e.centro_id === torreA.id && /Mantenimiento/.test(e.puesto));
+      ['Lobby', 'Estacionamiento 1', 'Estacionamiento 2', 'Cuarto de bombas', 'Gas', 'Roof garden', 'Gimnasio', 'Azotea']
+        .forEach((nombre, k) => puntos_rondin.push({ id: id('pto'), org_id: ORG, centro_id: torreA.id, nombre, orden: k + 1, activo: true }));
+      // vigilancia 24 h: uno de día y uno de noche, toda la semana
+      const lun = (() => { const d = new Date(HOY); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return iso(d); })();
+      for (let k = -1; k < 14; k++) {
+        const f = sumar(lun, k), dow = (k + 7) % 7;
+        if (vig[0]) turnos.push({ id: id('tur'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[0].id, fecha: f, descanso: dow === 3, hora_inicio: dow === 3 ? null : '07:00', hora_fin: dow === 3 ? null : '19:00', lugar: 'Caseta' });
+        if (vig[1]) turnos.push({ id: id('tur'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[1].id, fecha: f, descanso: dow === 4, hora_inicio: dow === 4 ? null : '19:00', hora_fin: dow === 4 ? null : '07:00', lugar: 'Caseta' });
+      }
+      const t = (h, m) => { const d = new Date(HOY); d.setHours(h, m, 0, 0); return d.toISOString(); };
+      const ahoraH = new Date().getHours();
+      if (vig[0] && ahoraH >= 9) {
+        [[1, 7, 40], [2, 9, 10]].forEach(([r, h, m]) => puntos_rondin.forEach((p, k) => { if (t(h, m + k * 3) < new Date().toISOString()) rondin_marcas.push({ id: id('rnd'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[0].id, punto_id: p.id, fecha: hoy, ronda: r, hora: t(h, m + k * 3), foto_path: null, nota: null }); }));
+        if (ahoraH >= 11) puntos_rondin.slice(0, 7).forEach((p, k) => rondin_marcas.push({ id: id('rnd'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[0].id, punto_id: p.id, fecha: hoy, ronda: 3, hora: t(10, 40 + k * 3), foto_path: null, nota: null }));
+        bitacora_turno.push({ id: id('bit'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[1]?.id, recibe_id: vig[0].id, nota: 'Paquete para Depto 402 en caseta. Portón eléctrico lento.', creado_en: t(6, 58) });
+      }
+      const dep = (n) => unidades.find((u) => u.identificador === 'Depto ' + n);
+      const conT = (n) => contratos.find((c) => c.activo && c.unidad_id === dep(n)?.id);
+      solicitudes.push({ id: id('sol'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(305)?.id, unidad_txt: 'Depto 305', reporta: conT(305)?.arrendatario, telefono: conT(305)?.telefono,
+        descripcion: 'Fuga en el baño', categoria: 'Plomería / fuga', origen: 'whatsapp', estado: 'asignada', asignado_a: mant?.id, creado_en: t(10, 32), asignado_en: t(10, 40), registrado_por: 'Rosa María Quiroga' });
+      solicitudes.push({ id: id('sol'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(602)?.id, unidad_txt: 'Depto 602', reporta: conT(602)?.arrendatario, telefono: conT(602)?.telefono,
+        descripcion: 'Ruido de bomba en la noche', categoria: 'Áreas comunes', origen: 'qr', estado: 'abierta', creado_en: new Date(HOY.getTime() - 26 * 3600e3).toISOString(), registrado_por: 'Residente (QR)' });
+      solicitudes.push({ id: id('sol'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(408)?.id, unidad_txt: 'Depto 408', reporta: conT(408)?.arrendatario, descripcion: 'Foco fundido en el pasillo',
+        categoria: 'Electricidad', origen: 'caseta', estado: 'resuelta', asignado_a: mant?.id, creado_en: new Date(HOY.getTime() - 50 * 3600e3).toISOString(), resuelto_en: new Date(HOY.getTime() - 46 * 3600e3).toISOString(), nota_cierre: 'Se cambió el foco' });
+      paquetes.push({ id: id('paq'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(402)?.id, paqueteria: 'Amazon', descripcion: 'Caja mediana', recibido_por: vig[1]?.nombre, recibido_en: t(5, 50) });
+      paquetes.push({ id: id('paq'), org_id: ORG, centro_id: torreA.id, unidad_id: dep(701)?.id, paqueteria: 'Mercado Libre', descripcion: null, recibido_por: vig[0]?.nombre, recibido_en: t(9, 35) });
+      // tareas fijas de la torre por puesto
+      [['Lobby y elevadores', 'Limpieza', 'Limpieza'], ['Pasillos y escaleras', 'Limpieza', 'Limpieza'], ['Sacar basura', 'Limpieza', 'Limpieza'],
+       ['Recibir turno y revisar cámaras', 'Seguridad', 'Vigilante'], ['Revisar cuarto de bombas', 'Mantenimiento', 'Mantenimiento'], ['Revisar elevadores', 'Mantenimiento', 'Mantenimiento']]
+        .forEach(([tarea, categoria, puesto]) => tareas_plantilla.push({ id: id('tpl'), org_id: ORG, centro_id: torreA.id, empleado_id: null, puesto, tarea, categoria, frecuencia: 'diaria', dia_semana: null, activo: true }));
+      if (limp[0] && ahoraH >= 10) tareas.push({ id: id('tar'), org_id: ORG, centro_id: torreA.id, empleado_id: limp[0].id, fecha: hoy, tipo: 'tarea', tarea: 'Lobby y elevadores', categoria: 'Limpieza', estado: 'hecho', hora_registro: t(9, 48), registrado_por: limp[0].nombre });
+      if (vig[0] && ahoraH >= 8) tareas.push({ id: id('tar'), org_id: ORG, centro_id: torreA.id, empleado_id: vig[0].id, fecha: hoy, tipo: 'tarea', tarea: 'Recibir turno y revisar cámaras', categoria: 'Seguridad', estado: 'hecho', hora_registro: t(7, 5), registrado_por: vig[0].nombre });
+      // la asistencia de hoy de los vigilantes, de acuerdo con sus turnos (día 7–19, noche 19–7)
+      const fijar = (e, f, ent, sal) => { let r = asistencia.find((x) => x.empleado_id === e.id && x.fecha === f);
+        if (!r) { r = { id: id('asi'), org_id: ORG, empleado_id: e.id, fecha: f, minutos_salida_temprano: 0, registrado_por: e.nombre }; asistencia.push(r); }
+        Object.assign(r, { estado: 'presente', hora_entrada: ent, hora_salida: sal, minutos_tarde: 0, horas_descontadas: 0, monto_descuento: 0 }); };
+      const ayerD = sumar(hoy, -1), tA = (h, m) => { const d = new Date(HOY); d.setDate(d.getDate() - 1); d.setHours(h, m, 0, 0); return d.toISOString(); };
+      if (vig[0]) { const i = asistencia.findIndex((x) => x.empleado_id === vig[0].id && x.fecha === hoy); if (i >= 0) asistencia.splice(i, 1); if (ahoraH >= 7) fijar(vig[0], hoy, t(6, 54), null); }
+      if (vig[1]) { const i = asistencia.findIndex((x) => x.empleado_id === vig[1].id && x.fecha === hoy); if (i >= 0) asistencia.splice(i, 1); fijar(vig[1], ayerD, tA(18, 52), ahoraH >= 7 ? t(7, 3) : null); }
+      // vista del celular del vigilante: ?demo=inmobiliaria&rol=equipo
+      if (/[?&]rol=equipo/.test(location.search) && vig[0]) { miembros[0].rol = 'equipo'; miembros[0].empleado_id = vig[0].id; miembros[0].nombre = vig[0].nombre; }
+    }
+
     const todoJunto = {
       organizaciones: [{ id: ORG, nombre: 'Galcor', plan: 'demo' }],
       miembros,
       empresas: [E, E2], centros, productos, inventario_movs, ingresos, gastos, cuentas_por_cobrar, pagos, empleados,
       nomina_periodos, nomina_lineas, asistencia, vacaciones, prestamos, prestamo_abonos, tareas_plantilla, tareas,
-      cotizaciones, contratos, unidades, residentes, vehiculos, mascotas, cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
+      cotizaciones, contratos, unidades, residentes, vehiculos, mascotas, puntos_rondin, rondin_marcas, turnos, solicitudes, paquetes, bitacora_turno, cuotas: [], medidores, lecturas, recibos_servicio, tarifas_servicio, activos, pasivos, tipo_cambio: [], prospectos, inversion_publicidad,
     };
     if (MEDCO) {            // las dos empresas juntas, con los nombres de Treme y MEDCO
       E.nombre = 'Desarrollos y Proyectos MEDCO'; E.nombre_corto = 'MEDCO';
@@ -779,7 +828,7 @@
       .forEach((t) => { D[t] = porEmp(D[t]); });
     const unis = new Set(D.unidades.filter((u) => cen.has(u.centro_id)).map((u) => u.id));
     ['residentes', 'vehiculos', 'mascotas'].forEach((t) => { D[t] = D[t].filter((r) => unis.has(r.unidad_id)); });
-    ['unidades', 'contratos', 'tareas_plantilla', 'tareas', 'medidores', 'lecturas', 'recibos_servicio', 'tarifas_servicio'].forEach((t) => { D[t] = D[t].filter((r) => cen.has(r.centro_id)); });
+    ['unidades', 'contratos', 'tareas_plantilla', 'tareas', 'puntos_rondin', 'rondin_marcas', 'turnos', 'solicitudes', 'paquetes', 'bitacora_turno', 'medidores', 'lecturas', 'recibos_servicio', 'tarifas_servicio'].forEach((t) => { D[t] = D[t].filter((r) => cen.has(r.centro_id)); });
     const emps = new Set(D.empleados.map((e) => e.id));
     ['nomina_lineas', 'asistencia', 'vacaciones', 'prestamos'].forEach((t) => { D[t] = D[t].filter((r) => emps.has(r.empleado_id)); });
     const pres = new Set(D.prestamos.map((p) => p.id));

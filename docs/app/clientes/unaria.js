@@ -15,9 +15,10 @@ window.__CLIENTE = {
     logos: [],
     color: '#BF4D17', color2: '#9A3D11', colorSuave: '#F6E7DD',
     // Módulos generales (sirven a cualquier giro). El paquete inmobiliario (rentas, ocupación, lecturas, patrimonio) se prende por cliente.
-    modulos: ['inicio', 'prospectos', 'cotizaciones', 'inventario', 'obras', 'gastos', 'personal', 'importar', 'usuarios'],
+    modulos: ['turno', 'inicio', 'prospectos', 'cotizaciones', 'inventario', 'obras', 'gastos', 'personal', 'importar', 'usuarios'],
     // Menú corto: lo que va junto se muestra como pestañas; Configuración va abajo, junto al nombre
     menu: [
+      { id: 'turno' },
       { id: 'inicio' },
       { titulo: 'Ventas', modulos: ['prospectos', 'cotizaciones', 'inventario'] },
       { id: 'obras' },

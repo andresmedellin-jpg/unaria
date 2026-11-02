@@ -65,3 +65,16 @@ ARBORETUM (torre de 66 departamentos; primer cliente) → unaria.mx/arboretum/
   Cobro por unidad: PDF, WhatsApp con el mensaje ya escrito y "Pagó" (pagos con concepto 'servicios').
 - Propietarios (js/modulos/propietarios.js): reporte mensual a Edifica y JAGC (ocupación, rentas cobradas/pendientes, servicios,
   contratos por renovar) y liquidación (cobrado − comisión de administración). PDF y WhatsApp. Tabla propietarios (contacto, comisión).
+
+==== EQUIPO DE LA TORRE (personal de piso) ====
+- Personal → pestaña "Hoy" (js/modulos/equipo.js): quién está ahorita, "Hoy en la torre" (entradas con foto, rondines, tareas,
+  reportes, paquetes, cambios de turno), pendientes, reportes de residentes, paquetes, turnos de la semana (con huecos de caseta) y nómina.
+  Pestañas nuevas: Turnos, Rondines (puntos con placa QR "PTO:<id>"), Reportes, Paquetes. La vieja "Rondín" se llama "Supervisión".
+- "Mi turno" (js/modulos/turno.js): la pantalla del celular del personal (rol "equipo"): checar con selfie, rondín por QR,
+  pendientes con foto, reportes asignados, paquetes, buscar placa, reportar, entregar turno con nota.
+  Acceso: Personal → Empleados → "📱 Dar acceso" (solo el dueño). El usuario queda ligado a su ficha (miembros.empleado_id).
+  Un usuario "equipo" sin ficha (celular compartido de caseta) pregunta "¿Quién eres?".
+- QR del elevador: Reportes → "QR para el elevador" → app/reportar.html (público, solo crea el reporte: función reporte_residente).
+- Tablas: turnos, puntos_rondin, rondin_marcas, solicitudes, paquetes, bitacora_turno; asistencia.foto_entrada/foto_salida;
+  empleados.telefono. Funciones: puede_checar, asistencia_foto, mi_empleado, reporte_residente, centro_publico.
+- Demo: ?demo=inmobiliaria&rol=equipo abre la vista del vigilante.

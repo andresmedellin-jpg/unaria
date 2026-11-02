@@ -30,6 +30,7 @@ const ICONOS = {
   lecturaqr:  svg('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>'),
   residentes: svg('<path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M14 9h5a1 1 0 0 1 1 1v11M2 21h20"/><path d="M7.5 8h3M7.5 12h3M7.5 16h3M17 13v.01M17 17v.01"/>'),
   propietarios: svg('<circle cx="8" cy="8" r="3"/><path d="M3 19a5 5 0 0 1 10 0"/><path d="M14 21V11l4-3 4 3v10M17 21v-3h2v3"/>'),
+  turno:      svg('<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4M9 8.5l2 2 4-4"/>'),
   importar:   svg('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/>'),
   prestamos:  svg('<path d="M3 10h18M5 10V20M19 10V20M9.5 10V20M14.5 10V20M2 21h20M12 3l9 5H3z"/>'),
   empleados:  svg('<rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M15 10h3M15 14h3"/>'),
@@ -79,7 +80,9 @@ export const MODULOS = [
   { id: 'cobranza',   grupo: 'Finanzas',  titulo: 'Cobranza Elysium', icono: ICONOS.cobranza,   roles: ['dueno','administracion','cobranza'], listo: true },
   { id: 'rentas',     grupo: 'Finanzas',  titulo: 'Rentas',           icono: ICONOS.rentas,     roles: ['dueno','administracion','cobranza'], listo: true },
   // Directorio de residentes, autos y mascotas por unidad (paquete inmobiliario; el encargado de la caseta también lo ve)
-  { id: 'residentes', grupo: 'Operación', titulo: 'Residentes', icono: ICONOS.residentes, roles: ['dueno','administracion','cobranza','encargado'], listo: true, opcional: true },
+  { id: 'residentes', grupo: 'Operación', titulo: 'Residentes', icono: ICONOS.residentes, roles: ['dueno','administracion','cobranza','encargado','equipo'], listo: true, opcional: true },
+  // La pantalla del celular del personal de piso (solo la ve quien tiene el rol "equipo")
+  { id: 'turno', grupo: 'Operación', titulo: 'Mi turno', icono: ICONOS.turno, roles: ['equipo'], soloRoles: ['equipo'], listo: true, opcional: true },
   // Reporte y liquidación mensual a los dueños de las unidades (paquete inmobiliario)
   { id: 'propietarios', grupo: 'Finanzas', titulo: 'Propietarios', icono: ICONOS.propietarios, roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'obras',      grupo: 'Finanzas',  titulo: 'Obras',            icono: ICONOS.obras,      roles: ['dueno','administracion'], listo: true },
@@ -98,7 +101,7 @@ export const MODULOS = [
   { id: 'vacaciones',  grupo: 'Personal', titulo: 'Vacaciones',  icono: ICONOS.vacaciones,  roles: ['dueno','administracion'], listo: true, opcional: true, vista: 'personal', tab: 'vacaciones' },
   { id: 'prestamos',   grupo: 'Personal', titulo: 'Préstamos',   icono: ICONOS.prestamos,   roles: ['dueno','administracion'], listo: true, opcional: true, vista: 'personal', tab: 'prestamos' },
   // Luz, gas y agua por medidor (opcionales: solo para edificios que reparten un recibo entre sus unidades)
-  { id: 'lecturas',  grupo: 'Servicios', titulo: 'Toma de lecturas', icono: ICONOS.lecturaqr, roles: ['dueno','administracion','operacion','encargado'], listo: true, opcional: true, vista: 'lecturas', tab: 'recorrido' },
+  { id: 'lecturas',  grupo: 'Servicios', titulo: 'Toma de lecturas', icono: ICONOS.lecturaqr, roles: ['dueno','administracion','operacion','encargado','equipo'], listo: true, opcional: true, vista: 'lecturas', tab: 'recorrido' },
   { id: 'servicios', grupo: 'Servicios', titulo: 'Luz, gas y agua',  icono: ICONOS.medidor,   roles: ['dueno','administracion','cobranza'], listo: true, opcional: true, vista: 'lecturas' },
   { id: 'importar',   grupo: 'Operación', titulo: 'Importar datos',  icono: ICONOS.importar,  roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'usuarios',   grupo: 'Operación', titulo: 'Usuarios',         icono: ICONOS.usuarios,   roles: ['dueno'], listo: true },
@@ -116,6 +119,8 @@ const PERFILES_TODOS = [
     desc: CLIENTE ? 'Captura y consulta gastos.' : 'Captura y consulta gastos de obra y oficina.' },
   { id: 'encargado', titulo: 'Encargado de sitio',         rol: 'encargado', roles: [],
     desc: 'Tareas, rondines, incidencias y asistencia de su personal. No ve dinero.' },
+  { id: 'equipo',    titulo: 'Equipo (vigilancia, limpieza)', rol: 'equipo', roles: [],
+    desc: 'Desde su celular: checa con foto, hace su rondín, marca sus pendientes, recibe paquetes y busca placas. No ve dinero. Mejor dale acceso desde Equipo → Empleados para ligarlo a su ficha.' },
   { id: 'admin',     titulo: 'Administración',             rol: 'administracion', roles: [],
     desc: CLIENTE ? 'Todo, incluida la nómina, menos dar de alta usuarios.' : 'Todo, incluidos Casa, Socios y nómina, menos Patrimonio y Usuarios.' },
 ];
