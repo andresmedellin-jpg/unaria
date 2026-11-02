@@ -30,7 +30,8 @@ const ahoraMin = () => { const d = new Date(); return d.getHours() * 60 + d.getM
 
 // Horario de una persona en un día: el turno asignado o, si no hay, su horario normal (días laborales)
 export function horarioDe(e, fecha, turnos) {
-  const t = turnos.find((x) => x.empleado_id === e.id && x.fecha === fecha);
+  // un turno sin horas ni descanso es "su horario normal" (así se regresa, sin borrar)
+  const t = turnos.find((x) => x.empleado_id === e.id && x.fecha === fecha && (x.descanso || x.hora_inicio));
   if (t) return t.descanso ? { descanso: true, turno: t } : { ini: t.hora_inicio || e.hora_entrada, fin: t.hora_fin || e.hora_salida, lugar: t.lugar, turno: t };
   if (!String(e.dias_laborales || '').split(',').includes(codigoDia(fecha))) return { descanso: true, auto: true };
   return { ini: e.hora_entrada, fin: e.hora_salida };
@@ -174,7 +175,7 @@ export async function hoy(el, ctx) {
 
   const pct = pend.length ? Math.round(hechas / pend.length * 100) : 0;
   const acc = document.getElementById('page-actions');
-  acc.innerHTML = `${nomina ? `<button class="btn btn-primary" id="eq-nom">Nómina de la semana · ${fmt(nomina.total)}</button>` : ''}`;
+  acc.innerHTML = `${nomina?.n ? `<button class="btn btn-primary" id="eq-nom">Nómina de la semana · ${fmt(nomina.total)}</button>` : ''}`;
   acc.querySelector('#eq-nom')?.addEventListener('click', () => ctx.irA('nomina'));
 
   el.innerHTML = `
@@ -190,7 +191,7 @@ export async function hoy(el, ctx) {
       </div>`).join('')}</div>` : `<div class="vacio">Todavía no hay personal en este edificio. Agrégalo en la pestaña Empleados.</div>`}
     <div class="eq-grid">
       <div>
-        <section class="panel"><div class="panel-head"><h3>Hoy en la torre</h3><span class="sub-meta">se llena solo con lo que hace el equipo desde su celular</span></div>
+        <section class="panel"><div class="panel-head"><h3>Hoy en ${esc(estado.centros.find((c) => c.id === centro)?.nombre || 'la torre')}</h3><span class="sub-meta">se llena solo con lo que hace el equipo desde su celular</span></div>
           ${ev.length ? `<ul class="eq-tl">${ev.slice(0, 40).map((x) => `<li><span class="h">${hora(x.t)}</span><span class="ic ${x.ic}">${x.s}</span>
             <span class="tx">${x.txt}${x.sub ? `<small>${x.sub}</small>` : ''}</span>${x.foto ? `<button class="eq-foto" data-foto="${esc(x.foto)}" style="background-image:url('${esc(x.foto)}')" title="Ver foto"></button>` : ''}</li>`).join('')}</ul>`
           : '<div class="vacio">Todavía no hay movimientos hoy. Aquí aparecen las entradas con foto, los rondines, las tareas terminadas, los reportes y los paquetes.</div>'}
@@ -213,7 +214,7 @@ export async function hoy(el, ctx) {
         <section class="panel"><div class="panel-head"><h3>Paquetes en caseta</h3><span class="sub-meta">${porEntregar.length} por entregar</span></div>
           ${porEntregar.slice(0, 4).map((p) => `<div class="eq-rep"><b>${esc(unidadTxt(p, ctx))}</b>${p.paqueteria ? ' · ' + esc(p.paqueteria) : ''}<div class="m"><span>${esc(p.descripcion || 'Paquete')}</span><span>${haceCuanto(p.recibido_en)}</span></div></div>`).join('') || '<p class="nota">No hay paquetes esperando.</p>'}
         </section>
-        ${nomina ? `<section class="panel"><div class="panel-head"><h3>Nómina de la semana</h3><span class="sub-meta">se calcula sola</span></div>
+        ${nomina?.n ? `<section class="panel"><div class="panel-head"><h3>Nómina de la semana</h3><span class="sub-meta">se calcula sola</span></div>
           <div class="eq-nom"><div><strong>${fmt(nomina.total)}</strong><small>${nomina.n} personas · ${nomina.faltas} falta${nomina.faltas === 1 ? '' : 's'} · ${nomina.retardos} retardo${nomina.retardos === 1 ? '' : 's'}</small></div>
           <button class="btn btn-primary" data-ir="nomina">Revisar y pagar</button></div></section>` : ''}
       </div>
@@ -480,7 +481,7 @@ function editarTurno(e, fecha, ctx) {
   const f = modal.querySelector('#tf');
   modal.querySelector('#tf-no').addEventListener('click', cerrarModal);
   modal.querySelector('#tf-normal')?.addEventListener('click', async () => {
-    const { error } = await db().from('turnos').delete().eq('id', h.turno.id);
+    const { error } = await db().from('turnos').update({ descanso: false, hora_inicio: null, hora_fin: null, lugar: null }).eq('id', h.turno.id);
     if (error) return toast(error.message, true);
     cerrarModal(); ctx.repintar();
   });
@@ -568,7 +569,7 @@ export function darAcceso(e, despues) {
     const msg = error ? (await error.context?.json?.().catch(() => null))?.error || error.message : data?.error;
     if (msg) { ev.currentTarget.disabled = false; return toast(msg, true); }
     const link = location.origin + location.pathname;
-    const txt = `Hola ${primerNombre(e.nombre)}, ya tienes acceso a la app de ${estado.centros[0]?.nombre || 'la torre'}:\n${link}\nUsuario: ${f.u.value.trim().toLowerCase()}\nContraseña: ${f.p.value}\nÁbrela en tu celular y guárdala en tu pantalla de inicio.`;
+    const txt = `Hola ${primerNombre(e.nombre)}, ya tienes acceso a la app de ${MARCA.nombre || 'la torre'}:\n${link}\nUsuario: ${f.u.value.trim().toLowerCase()}\nContraseña: ${f.p.value}\nÁbrela en tu celular y guárdala en tu pantalla de inicio.`;
     abrirModal({ titulo: 'Acceso creado ✓', cuerpo: `<p class="nota">Mándale sus datos:</p><textarea rows="6" style="width:100%">${esc(txt)}</textarea>`,
       pie: `${e.telefono ? `<a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/52${String(e.telefono).replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(txt)}">Mandar por WhatsApp</a>` : ''}<button class="btn btn-primary" data-cerrar>Listo</button>` });
     despues?.();

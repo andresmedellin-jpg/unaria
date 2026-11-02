@@ -33,11 +33,14 @@
   <div class="c" id="app"><p>Cargando…</p></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script>
+    // window.REPORTAR_DEFECTO = { supabaseUrl, supabaseKey, marca: { color } } para una instalación sin clientes (p. ej. app.medco.mx)
     (function () {
       var q = new URLSearchParams(location.search), cliente = (q.get('cliente') || '').replace(/[^a-z0-9-]/g, ''), centro = q.get('c') || '';
       var app = document.getElementById('app');
       var falla = function (t) { app.innerHTML = '<div class="ok"><p>' + t + '</p></div>'; };
-      if (!cliente || !/^[0-9a-f-]{36}$/.test(centro)) return falla('Este código no es válido. Pide ayuda en caseta.');
+      if (!/^[0-9a-f-]{36}$/.test(centro)) return falla('Este código no es válido. Pide ayuda en caseta.');
+      // Sin cliente: la instalación propia de esta página (REPORTAR_DEFECTO), si tiene
+      if (!cliente) { if (!window.REPORTAR_DEFECTO) return falla('Este código no es válido. Pide ayuda en caseta.'); window.__CLIENTE = window.REPORTAR_DEFECTO; return iniciar(); }
       var s = document.createElement('script');
       s.src = 'clientes/' + cliente + '.js';
       s.onerror = function () { falla('Este código no es válido. Pide ayuda en caseta.'); };
@@ -46,6 +49,7 @@
 
       function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
       async function iniciar() {
+        if (iniciar.ya) return; iniciar.ya = true;
         var C = window.__CLIENTE; if (!C || !C.supabaseUrl) return falla('Este código no es válido.');
         if (C.marca && C.marca.color) document.documentElement.style.setProperty('--p', C.marca.color);
         var db = window.supabase.createClient(C.supabaseUrl, C.supabaseKey, { auth: { persistSession: false } }).schema('app');
