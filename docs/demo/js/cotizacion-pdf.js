@@ -11,7 +11,7 @@ const larga = (iso) => { const d = new Date(iso + 'T12:00:00'); return `${d.getD
 async function comoDato(src) {
   if (!src || src.startsWith('data:')) return src || '';
   try {
-    const b = await (await fetch(new URL(src, location.href))).blob();
+    const b = await (await fetch(new URL(src, document.baseURI))).blob();
     return await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); });
   } catch { return ''; }
 }
@@ -26,7 +26,7 @@ export async function pdfCotizacion(c, empresaDe) {
   const color = MARCA.color || '#8B1A1A';
   const vence = (() => { const d = new Date(c.fecha + 'T12:00:00'); d.setDate(d.getDate() + Number(c.vigencia_dias || 15)); return d.toISOString().slice(0, 10); })();
   const archivo = `Cotizacion ${c.folio} ${c.cliente}`.replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim() + '.pdf';
-  const libPDF = new URL('js/vendor/html2pdf.bundle.min.js', location.href).href;
+  const libPDF = new URL('js/vendor/html2pdf.bundle.min.js', document.baseURI).href;
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(c.folio)} · ${esc(c.cliente)}</title>
 <style>
   @page{size:letter;margin:0} *{box-sizing:border-box}

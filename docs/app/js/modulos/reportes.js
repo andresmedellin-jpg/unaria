@@ -1,7 +1,7 @@
 // Reporte mensual de Torre Elysium (mantenimiento cobrado vs. gasto del edificio).
 // Reemplaza la página "Reporte mensual". Se arma como documento aparte (iframe) para que
 // se vea igual en tema claro u oscuro y salga limpio al guardarlo como PDF.
-import { MESES, MARCA } from '../config.js';
+import { MESES, MARCA, CLIENTE } from '../config.js';
 const CONDOMINIO = MARCA.condominio || 'Torre Elysium';
 const EMISOR = MARCA.reciboEmpresa || 'Treme Grupo Inmobiliario';
 import { db, todo, estado, fmtFecha, esc, toast, normalizar } from '../lib.js';
@@ -125,7 +125,7 @@ async function cargar() {
     pagosMes, operativos, totalNomina, totalOp, egresos, egresosPrev,
     personal: [...porPersona.values()].sort((x, y) => y.total - x.total),
   };
-  const logo = new URL(MARCA.reciboLogo || 'img/logo-treme.jpg', location.href).href;
+  const logo = MARCA.reciboLogo || !CLIENTE ? new URL(MARCA.reciboLogo || 'img/logo-treme.jpg', document.baseURI).href : '';
   raiz.querySelector('#r-doc').srcdoc = documento(datos, logo, st.inversionistas);
 }
 

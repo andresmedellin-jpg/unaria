@@ -26,7 +26,7 @@ const cache = {};
 async function incrustar(ruta) {
   if (cache[ruta] !== undefined) return cache[ruta];
   try {
-    const blob = await (await fetch(new URL(ruta, location.href))).blob();
+    const blob = await (await fetch(new URL(ruta, document.baseURI))).blob();
     cache[ruta] = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(blob); });
   } catch { cache[ruta] = ''; }
   return cache[ruta];
@@ -46,7 +46,7 @@ async function fuentes() {
 export async function pintarRecibo(w, d) {
   const [img, ff] = await Promise.all([logo(), fuentes()]);
   const m = d.moneda || 'MXN';
-  const libPDF = new URL('js/vendor/html2pdf.bundle.min.js', location.href).href;
+  const libPDF = new URL('js/vendor/html2pdf.bundle.min.js', document.baseURI).href;
   const quien = (d.info.find(([k]) => /recib[ií] de/i.test(k)) || [])[1] || '';
   const archivo = (`Recibo ${d.folio || ''} ${quien}`.replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Recibo') + '.pdf';
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8">

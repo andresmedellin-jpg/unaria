@@ -1,6 +1,6 @@
 // Rentas Treme: contratos, cobro mensual por día pactado, adeudos, historial y recibos.
 // Reemplaza la página "Rentas — Treme".
-import { MESES, FORMAS_COBRO, MARCA } from '../config.js';
+import { MESES, FORMAS_COBRO, MARCA, CLIENTE } from '../config.js';
 import { pintarRecibo, abrirVentanaRecibo } from '../recibo.js';
 import { db, todo, estado, tieneRol, fmtFecha, hoyISO, esc, toast, abrirModal, cerrarModal } from '../lib.js';
 
@@ -591,8 +591,9 @@ function tipoEspacio(n) {
 let logoDataUrl = null;
 async function logo() {
   if (logoDataUrl) return logoDataUrl;
+  if (CLIENTE && !MARCA.reciboLogo) return (logoDataUrl = '');   // cliente sin logo: su nombre en letra, nunca el de Treme
   try {
-    const blob = await (await fetch(new URL('img/logo-treme.jpg', location.href))).blob();
+    const blob = await (await fetch(new URL(MARCA.reciboLogo || 'img/logo-treme.jpg', document.baseURI))).blob();
     logoDataUrl = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(blob); });
   } catch { logoDataUrl = ''; }
   return logoDataUrl;

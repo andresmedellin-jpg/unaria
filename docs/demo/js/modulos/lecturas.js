@@ -178,7 +178,7 @@ let jsQRCarga;
 const cargarJsQR = () => jsQRCarga ||= new Promise((ok, mal) => {
   if (window.jsQR) return ok(window.jsQR);
   const s = document.createElement('script');
-  s.src = new URL('js/vendor/jsQR.js', location.href).href;
+  s.src = new URL('js/vendor/jsQR.js', document.baseURI).href;
   s.onload = () => ok(window.jsQR); s.onerror = () => { jsQRCarga = null; mal(new Error('No se pudo cargar el lector de QR')); };
   document.head.appendChild(s);
 });
@@ -595,7 +595,7 @@ function imprimirPlacas() {
   const w = window.open('', '_blank');
   if (!w) return toast('Permite ventanas emergentes para ver las placas', true);
   const centro = estado.centros.find((c) => c.id === st.centro)?.nombre || '';
-  const qrLib = new URL('js/vendor/qrcode.min.js', location.href).href;
+  const qrLib = new URL('js/vendor/qrcode.min.js', document.baseURI).href;
   w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Placas QR · ${esc(centro)}</title>
 <style>@page{size:letter;margin:10mm} body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#fff}
 .barra{position:sticky;top:0;background:#141414;color:#fff;padding:10px;display:flex;gap:10px;align-items:center;justify-content:center;font-size:14px}

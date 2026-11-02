@@ -50,6 +50,9 @@ const vistas = {
   }
 })();
 const pendiente = () => import('./modulos/pendiente.js');
+// Liga a un módulo. Con la ruta de la página: las entradas de clientes (unaria.mx/<cliente>/) usan <base href="/app/">
+// y un "#/…" suelto mandaría a unaria.mx/app/.
+const ir = (id) => `${location.pathname}${location.search}#/${id}`;
 
 const $ = (id) => document.getElementById(id);
 
@@ -226,7 +229,7 @@ function pintarNav() {
   const mios = modulosDelUsuario();
   if (MARCA.menu) {
     entradas = entradasMenu();
-    const liga = (e) => `<a href="#/${e.subs[0].id}" data-mod="${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}">
+    const liga = (e) => `<a href="${ir(e.subs[0].id)}" data-mod="${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}">
         <span class="nav-ico">${e.icono}</span>${esc(e.titulo)}</a>`;
     $('nav').innerHTML = `<div class="nav-grupo">${entradas.filter((e) => !e.abajo).map(liga).join('')}</div>`;
     let abajo = document.getElementById('nav-abajo');
@@ -239,7 +242,7 @@ function pintarNav() {
       document.body.appendChild(barra); document.body.classList.add('con-barra'); }
     const principales = entradas.filter((e) => !e.abajo);
     const enBarra = principales.length <= 5 ? principales : principales.slice(0, 4);
-    barra.innerHTML = enBarra.map((e) => `<a href="#/${e.subs[0].id}" data-subs="${e.subs.map((m) => m.id).join(' ')}"><span class="nav-ico">${e.icono}</span><span>${esc(e.corto || e.titulo)}</span></a>`).join('')
+    barra.innerHTML = enBarra.map((e) => `<a href="${ir(e.subs[0].id)}" data-subs="${e.subs.map((m) => m.id).join(' ')}"><span class="nav-ico">${e.icono}</span><span>${esc(e.corto || e.titulo)}</span></a>`).join('')
       + (principales.length > 5 || entradas.some((e) => e.abajo) ? `<button type="button" id="barra-mas"><span class="nav-ico">${ICONO_MAS}</span><span>Más</span></button>` : '');
     barra.querySelector('#barra-mas')?.addEventListener('click', () => $('sidebar').classList.toggle('open'));
     return;
@@ -249,7 +252,7 @@ function pintarNav() {
     <div class="nav-grupo">
       ${grupos.length > 1 ? `<span class="nav-titulo">${esc(g)}</span>` : ''}
       ${mios.filter((m) => m.grupo === g).map((m) => `
-        <a href="#/${m.id}" data-mod="${m.id}">
+        <a href="${ir(m.id)}" data-mod="${m.id}">
           <span class="nav-ico">${m.icono}</span>${esc(m.titulo)}
           ${m.listo ? '' : '<span class="nav-tag">pronto</span>'}
         </a>`).join('')}
@@ -285,7 +288,7 @@ async function navegar() {
       $('view').innerHTML = '<div class="vacio">Tu usuario todavía no tiene módulos asignados. Pídele al administrador que te dé acceso.</div>';
       return;
     }
-    history.replaceState(null, '', '#/' + mod.id);
+    history.replaceState(null, '', ir(mod.id));
   }
   const enMenu = (a) => a.dataset.subs ? a.dataset.subs.split(' ').includes(mod.id) : a.dataset.mod === mod.id;
   document.querySelectorAll('#nav a, #nav-abajo a, #barra-movil a').forEach((a) => a.classList.toggle('active', enMenu(a)));
@@ -304,7 +307,7 @@ async function navegar() {
   if (grupo) {
     const pest = document.createElement('div');
     pest.className = 'sub-modulos';
-    pest.innerHTML = `<div class="tabs" role="tablist">${grupo.subs.map((m) => `<a role="tab" href="#/${m.id}" aria-selected="${m.id === mod.id}">${esc(m.titulo)}</a>`).join('')}</div>`;
+    pest.innerHTML = `<div class="tabs" role="tablist">${grupo.subs.map((m) => `<a role="tab" href="${ir(m.id)}" aria-selected="${m.id === mod.id}">${esc(m.titulo)}</a>`).join('')}</div>`;
     view.replaceChildren(pest, caja);
   } else view.replaceChildren(caja);
   try {
