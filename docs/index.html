@@ -42,22 +42,11 @@
   --f-mono: 'JetBrains Mono', ui-monospace, 'Courier New', monospace;
   --ancho: 1180px;
   --radio: 6px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --papel: #111214; --superficie: #1A1C1F; --tinta: #F2F1EE; --texto: #D9D8D4; --gris: #A3A6AB;
-    --linea: #2C2F33; --acento: #E9682C; --acento-suave: #2A1B13; --sobre-acento: #111214; --sobre-tinta: #111214;
-    --marcador: #3A3014; --marcador-texto: #F5DB8A; --sombra: rgba(0,0,0,.6); color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --papel: #111214; --superficie: #1A1C1F; --tinta: #F2F1EE; --texto: #D9D8D4; --gris: #A3A6AB;
-  --linea: #2C2F33; --acento: #E9682C; --acento-suave: #2A1B13; --sobre-acento: #111214; --sobre-tinta: #111214;
-  --marcador: #3A3014; --marcador-texto: #F5DB8A; --sombra: rgba(0,0,0,.6); color-scheme: dark;
+  color-scheme: light; /* la página siempre en claro, aunque el equipo esté en modo oscuro */
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 84px; }
-/* La burbuja del chat toma los colores de la página (y su tema claro u oscuro) */
+/* La burbuja del chat toma los colores de la página */
 :root { --uc-acento: var(--acento); --uc-sobre-acento: var(--sobre-acento); --uc-superficie: var(--superficie); --uc-fondo: var(--papel);
   --uc-tinta: var(--tinta); --uc-sobre-tinta: var(--sobre-tinta); --uc-gris: var(--gris); --uc-linea: var(--linea); --uc-texto: var(--texto); --uc-fuente: var(--f-texto); }
 body { margin: 0; background: var(--papel); color: var(--texto); font: 400 17px/1.6 var(--f-texto); -webkit-font-smoothing: antialiased; }
