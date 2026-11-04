@@ -39,6 +39,9 @@ const ICONOS = {
   inventario: svg('<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'),
   cotizaciones: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 12h6M10 16h6M4 7v14h10" opacity=".9"/>'),
   prospectos: svg('<path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/>'),
+  bandeja:    svg('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/>'),
+  eventos:    svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3v3H8z"/>'),
+  anuncios:   svg('<path d="M3 11v3a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'),
 };
 
 // Marca de la plataforma. Por omisión, Treme / MEDCO. Otra instalación (o el demo, con ?demo) la cambia
@@ -93,6 +96,10 @@ export const MODULOS = [
   { id: 'propietarios', grupo: 'Finanzas', titulo: 'Propietarios', icono: ICONOS.propietarios, roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'obras',      grupo: 'Finanzas',  titulo: 'Obras',            icono: ICONOS.obras,      roles: ['dueno','administracion'], listo: true },
   { id: 'prospectos', grupo: 'Ventas',    titulo: 'Prospectos',       icono: ICONOS.prospectos, roles: ['dueno','administracion'], listo: true },
+  // Paquete de mensajes y eventos (restaurantes con eventos, p. ej. Chilabike): bandeja de WhatsApp, Instagram y Facebook, calendario y anuncios
+  { id: 'bandeja',    grupo: 'Ventas',    titulo: 'Mensajes',         icono: ICONOS.bandeja,    roles: ['dueno','administracion'], listo: true, opcional: true },
+  { id: 'eventos',    grupo: 'Ventas',    titulo: 'Eventos',          icono: ICONOS.eventos,    roles: ['dueno','administracion'], listo: true, opcional: true },
+  { id: 'anuncios',   grupo: 'Ventas',    titulo: 'Anuncios',         icono: ICONOS.anuncios,   roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'cotizaciones', grupo: 'Ventas',  titulo: 'Cotizaciones',     icono: ICONOS.cotizaciones, roles: ['dueno','administracion','cobranza'], listo: true, opcional: true },
   { id: 'inventario', grupo: 'Ventas',    titulo: 'Inventario',       icono: ICONOS.inventario, roles: ['dueno','administracion','operacion'], listo: true, opcional: true },
   { id: 'patrimonio', grupo: 'Finanzas',  titulo: 'Patrimonio',       icono: ICONOS.patrimonio, roles: ['dueno','socio'], listo: true },

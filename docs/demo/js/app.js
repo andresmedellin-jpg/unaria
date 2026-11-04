@@ -22,6 +22,9 @@ const vistas = {
   propietarios: () => import('./modulos/propietarios.js'),
   caseta: () => import('./modulos/caseta.js'),
   whatsapp: () => import('./modulos/whatsapp.js'),
+  bandeja: () => import('./modulos/bandeja.js'),
+  eventos: () => import('./modulos/eventos.js'),
+  anuncios: () => import('./modulos/anuncios.js'),
 };
 
 // ================= MARCA =================

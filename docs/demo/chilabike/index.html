@@ -1,0 +1,474 @@
+<!doctype html>
+<!-- DEMO de Unaria para Chilabike: página de eventos con datos de ejemplo. No es la página oficial del negocio.
+     Lo que se envía en el formulario se guarda solo en este navegador y aparece en el calendario del demo
+     (unaria.mx/demo/?demo=chilabike#/eventos). Precios y paquetes con [$__] = pendientes de Javi. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chilabike · Eventos (demo)</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Demo de la página de eventos de Chilabike: cotiza chilaquiles para tu evento.">
+<meta name="theme-color" content="#121110">
+<meta name="color-scheme" content="light only">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root {
+  --negro: #121110; --negro-2: #1D1B19; --crema: #FBF6EF; --papel: #FFFFFF; --linea: #E9E1D6;
+  --naranja: #F26B1D; --naranja-osc: #C9500C; --naranja-suave: #FDE8DA; --texto: #2B2724; --gris: #6E6760;
+  --verde-wa: #1F8F55;
+  --f-disp: 'Bricolage Grotesque', 'Arial Black', Arial, sans-serif;
+  --f-txt: 'DM Sans', Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--crema); color: var(--texto); font: 400 17px/1.55 var(--f-txt); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--f-disp); color: var(--negro); margin: 0; letter-spacing: -0.02em; line-height: 1.02; }
+.c { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* banda del demo */
+.demo { background: #FFF3C4; color: #5C4300; font-size: 13.5px; text-align: center; padding: 7px 16px; }
+.demo b { font-weight: 700; }
+
+/* encabezado */
+.top { position: sticky; top: 0; z-index: 20; background: rgba(18,17,16,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.top .c { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.marca { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-family: var(--f-disp); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+.marca i { width: 34px; height: 34px; border-radius: 50%; background: var(--naranja); display: grid; place-items: center; font-style: normal; font-size: 15px; color: var(--negro); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 2px solid transparent;
+  font: 700 16px var(--f-txt); text-decoration: none; cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.btn:active { transform: scale(.97); }
+.btn-n { background: var(--naranja); color: var(--negro); }
+.btn-n:hover { background: #FF7D30; }
+.btn-l { background: transparent; color: #fff; border-color: rgba(255,255,255,.55); }
+.btn-wa { background: var(--verde-wa); color: #fff; }
+.top .btn { min-height: 40px; padding: 0 18px; font-size: 15px; }
+
+/* portada */
+.hero { background: var(--negro); color: #EFE8DF; position: relative; overflow: hidden; }
+.hero::after { content: ""; position: absolute; right: -180px; top: -120px; width: 560px; height: 560px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(242,107,29,.45), rgba(242,107,29,0) 65%); pointer-events: none; }
+.hero .c { position: relative; z-index: 1; padding-top: 56px; padding-bottom: 64px; }
+.eti { display: inline-block; font: 700 13px var(--f-txt); letter-spacing: .14em; text-transform: uppercase; color: var(--naranja); }
+.hero h1 { color: #fff; font-size: clamp(48px, 13vw, 104px); margin: 14px 0 18px; }
+.hero h1 span { color: var(--naranja); }
+.hero p.sub { font-size: 19px; max-width: 34em; margin: 0 0 28px; color: #D9D1C7; }
+.hero .acc { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .datos { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 34px; font-size: 15px; color: #BDB4A9; }
+.hero .datos b { color: #fff; font-family: var(--f-disp); font-size: 22px; display: block; line-height: 1.1; }
+
+section.s { padding: 64px 0; }
+.s h2 { font-size: clamp(34px, 8vw, 54px); margin: 10px 0 14px; }
+.s p.lead { font-size: 18px; color: var(--gris); margin: 0 0 30px; max-width: 36em; }
+
+/* tipos de evento */
+.tipos { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.tipo { background: var(--papel); border: 1px solid var(--linea); border-radius: 18px; padding: 20px 18px; display: flex; flex-direction: column; gap: 6px; }
+.tipo .ico { width: 46px; height: 46px; border-radius: 12px; background: var(--naranja-suave); display: grid; place-items: center; margin-bottom: 6px; }
+.tipo b { font-family: var(--f-disp); font-size: 21px; color: var(--negro); line-height: 1.1; }
+.tipo span { font-size: 15px; color: var(--gris); }
+
+/* pasos */
+.pasos { display: grid; gap: 14px; counter-reset: p; }
+.paso { display: grid; grid-template-columns: 56px 1fr; gap: 16px; align-items: start; background: var(--papel); border: 1px solid var(--linea); border-radius: 18px; padding: 20px; }
+.paso::before { counter-increment: p; content: counter(p); width: 56px; height: 56px; border-radius: 50%; background: var(--negro); color: var(--naranja);
+  font: 800 26px var(--f-disp); display: grid; place-items: center; }
+.paso b { font-family: var(--f-disp); font-size: 22px; color: var(--negro); display: block; margin-bottom: 2px; }
+.paso span { color: var(--gris); font-size: 16px; }
+
+/* paquetes */
+.oscuro { background: var(--negro); color: #EFE8DF; }
+.oscuro h2 { color: #fff; }
+.oscuro p.lead { color: #BDB4A9; }
+.paqs { display: grid; gap: 14px; }
+.paq { background: var(--negro-2); border: 1px solid #34302C; border-radius: 22px; padding: 26px 22px; display: flex; flex-direction: column; gap: 14px; }
+.paq.dest { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+.paq h3 { color: inherit; font-size: 28px; }
+.paq .precio { font: 800 34px var(--f-disp); letter-spacing: -0.02em; }
+.paq .precio small { font: 500 15px var(--f-txt); opacity: .8; }
+.paq ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; font-size: 16px; }
+.paq li { display: flex; gap: 10px; align-items: flex-start; }
+.paq li::before { content: ""; flex: none; width: 18px; height: 18px; margin-top: 3px; border-radius: 50%; background: var(--naranja) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23121110' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/12px no-repeat; }
+.paq.dest li::before { background-color: var(--negro); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F26B1D' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E"); }
+.paq .pill { align-self: flex-start; font: 700 12px var(--f-txt); letter-spacing: .1em; text-transform: uppercase; background: var(--negro); color: var(--naranja); border-radius: 999px; padding: 5px 12px; }
+.paq .btn { margin-top: auto; }
+.paq.dest .btn-n { background: var(--negro); color: #fff; }
+.pend { background: #FFF3C4; color: #6B4E00; border-radius: 4px; padding: 0 .3em; font-family: var(--f-txt); font-weight: 700; font-size: .7em; vertical-align: .15em; letter-spacing: 0; }
+.nota-paq { font-size: 14px; color: #8F867B; margin-top: 18px; }
+
+/* galería */
+.gal { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.foto { aspect-ratio: 4 / 5; border-radius: 16px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 14px;
+  background: repeating-linear-gradient(135deg, #1D1B19 0 16px, #24211E 16px 32px); color: #fff; }
+.foto:nth-child(3n+2) { background: repeating-linear-gradient(135deg, #F26B1D 0 16px, #F47A33 16px 32px); color: var(--negro); }
+.foto:nth-child(3n) { background: repeating-linear-gradient(135deg, #E9E1D6 0 16px, #F1EAE0 16px 32px); color: var(--negro); }
+.foto b { font-family: var(--f-disp); font-size: 19px; line-height: 1.1; display: block; }
+.foto small { font-size: 13px; opacity: .8; }
+.foto .tag { position: absolute; top: 12px; left: 12px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: rgba(255,255,255,.88); color: var(--negro); border-radius: 999px; padding: 4px 10px; }
+
+/* sucursales */
+.sucs { display: flex; flex-wrap: wrap; gap: 10px; }
+.suc { background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 10px 16px; font-weight: 500; font-size: 16px; display: inline-flex; gap: 8px; align-items: center; }
+.suc::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--naranja); }
+
+/* preguntas */
+.faq { display: grid; gap: 10px; }
+.faq details { background: var(--papel); border: 1px solid var(--linea); border-radius: 16px; padding: 0 20px; }
+.faq summary { cursor: pointer; list-style: none; padding: 18px 0; font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; gap: 14px; color: var(--negro); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font: 800 24px/1 var(--f-disp); color: var(--naranja); }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { margin: 0 0 18px; color: var(--gris); }
+
+/* formulario */
+.form-caja { background: var(--papel); border-radius: 26px; padding: 26px 20px; border: 1px solid var(--linea); box-shadow: 0 30px 60px -40px rgba(18,17,16,.45); }
+form { display: grid; gap: 16px; }
+.campo { display: grid; gap: 6px; }
+.campo > span, fieldset legend { font-weight: 700; font-size: 15px; color: var(--negro); }
+.campo small { color: var(--gris); font-size: 13px; font-weight: 400; }
+input, select, textarea { width: 100%; min-width: 0; font: 400 17px var(--f-txt); color: var(--texto); background: var(--crema); border: 1.5px solid var(--linea); border-radius: 12px; padding: 13px 14px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--naranja); background: #fff; box-shadow: 0 0 0 4px rgba(242,107,29,.18); }
+textarea { min-height: 96px; resize: vertical; }
+.dos { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips label { position: relative; }
+.chips input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.chips span { display: inline-flex; min-height: 44px; align-items: center; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--linea); background: var(--crema); font-weight: 500; font-size: 15.5px; transition: all .15s; }
+.chips input:checked + span { background: var(--negro); color: #fff; border-color: var(--negro); }
+.chips input:focus-visible + span { box-shadow: 0 0 0 4px rgba(242,107,29,.3); }
+.form-pie { font-size: 13.5px; color: var(--gris); text-align: center; }
+.error { color: #B42318; font-size: 14px; font-weight: 600; min-height: 1em; }
+
+/* gracias */
+.gracias { display: none; gap: 18px; }
+.gracias.on { display: grid; animation: sube .4s ease both; }
+@keyframes sube { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.gracias h3 { font-size: 32px; }
+.gracias .ok { width: 64px; height: 64px; border-radius: 50%; background: var(--naranja); display: grid; place-items: center; }
+.aviso-javi { background: #EFEAE2; border-radius: 18px; padding: 16px; display: grid; gap: 10px; }
+.aviso-javi .t { font: 700 12.5px var(--f-txt); letter-spacing: .1em; text-transform: uppercase; color: #6B5F52; }
+.burbuja { background: #fff; border-radius: 4px 14px 14px 14px; padding: 12px 14px; font-size: 15px; line-height: 1.45; box-shadow: 0 1px 1px rgba(0,0,0,.08); white-space: pre-line; }
+.burbuja small { display: block; color: #8A8178; font-size: 12px; margin-top: 4px; text-align: right; }
+
+/* pie */
+footer { background: var(--negro); color: #A79E93; padding: 40px 0 110px; font-size: 15px; }
+footer .c { display: grid; gap: 14px; }
+footer a { color: #fff; }
+footer .unaria { font-size: 13px; color: #7C746B; }
+
+/* botón flotante */
+.flota { position: fixed; z-index: 30; left: 16px; right: 16px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 10px; transition: opacity .2s, transform .2s; }
+.flota .btn { flex: 1; box-shadow: 0 14px 30px -12px rgba(0,0,0,.55); }
+.flota.fuera { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+.toast { position: fixed; z-index: 50; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--negro); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 15px; max-width: calc(100% - 32px); transition: all .25s; pointer-events: none; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+
+@media (min-width: 760px) {
+  .c { padding: 0 32px; }
+  .hero .c { padding-top: 96px; padding-bottom: 104px; }
+  section.s { padding: 96px 0; }
+  .tipos { grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .pasos { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .paso { grid-template-columns: 1fr; }
+  .paqs { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .gal { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .cot { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 56px; align-items: start; }
+  .form-caja { padding: 34px; }
+  .flota { display: none; }
+  footer { padding-bottom: 48px; }
+}
+</style>
+</head>
+<body>
+
+<div class="demo"><b>Demo de Unaria</b> · página de ejemplo para Chilabike. Precios y fotos son de muestra.</div>
+
+<header class="top">
+  <div class="c">
+    <a class="marca" href="#"><i>🌶</i>Chilabike</a>
+    <a class="btn btn-n" href="#cotiza">Cotizar</a>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="c">
+    <span class="eti">Eventos · Monterrey</span>
+    <h1>Llévanos a tu <span>evento.</span></h1>
+    <p class="sub">Chilaquiles hechos al momento para tu boda, cumpleaños o evento de la empresa. Cotiza en un minuto y nosotros nos encargamos del resto.</p>
+    <div class="acc">
+      <a class="btn btn-n" href="#cotiza">Cotiza tu evento</a>
+      <a class="btn btn-l" href="#" data-wa>Escríbenos por WhatsApp</a>
+    </div>
+    <div class="datos">
+      <div><b>8 sucursales</b>en Monterrey y San Pedro</div>
+      <div><b>De 20 a 500+</b>personas</div>
+      <div><b>Respuesta</b>el mismo día</div>
+    </div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="c">
+    <span class="eti">Para cualquier evento</span>
+    <h2>Si los pruebas, repites.</h2>
+    <p class="lead">Desde la reunión con los compas hasta el evento de toda la empresa.</p>
+    <div class="tipos">
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M5 21v-8h14v8M12 13V9M9 6c0-1.5 3-3 3-3s3 1.5 3 3a3 3 0 0 1-6 0z"/></svg></div><b>Cumpleaños</b><span>La fiesta con algo que sí se acaba.</span></div>
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="14" r="5"/><circle cx="15.5" cy="14" r="5"/><path d="M10 4l2 3 2-3"/></svg></div><b>Bodas y XV</b><span>El tornafiesta más pedido.</span></div>
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></div><b>Empresariales</b><span>Desayunos, juntas y aniversarios.</span></div>
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg></div><b>Reuniones</b><span>Para 20 personas también vamos.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" style="padding-top:0">
+  <div class="c">
+    <span class="eti">Cómo funciona</span>
+    <h2>Tres pasos y listo.</h2>
+    <div class="pasos" style="margin-top:26px">
+      <div class="paso"><div><b>Cotiza</b><span>Llenas el formulario en un minuto: fecha, lugar y cuántos son.</span></div></div>
+      <div class="paso"><div><b>Te escribimos</b><span>Te mandamos por WhatsApp el paquete que te queda y el precio.</span></div></div>
+      <div class="paso"><div><b>Apartas y llegamos</b><span>Con tu anticipo queda tu fecha. El día del evento llegamos con todo.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="s oscuro">
+  <div class="c">
+    <span class="eti">Paquetes</span>
+    <h2>Escoge cómo los quieres.</h2>
+    <p class="lead">Todos incluyen servicio en tu evento. Te armamos uno a la medida si lo necesitas.</p>
+    <div class="paqs">
+      <div class="paq">
+        <h3>Reunión</h3>
+        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
+        <ul><li>Chilaquiles rojos y verdes</li><li>2 proteínas a escoger</li><li>Desde <span class="pend">__</span> personas</li></ul>
+        <a class="btn btn-n" href="#cotiza" data-paquete="Reunión">Cotizar este</a>
+      </div>
+      <div class="paq dest">
+        <span class="pill">El más pedido</span>
+        <h3>Fiesta</h3>
+        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
+        <ul><li>Barra de chilaquiles con todo</li><li>3 proteínas y toppings</li><li>Bebidas incluidas</li><li>Servicio de <span class="pend">__</span> horas</li></ul>
+        <a class="btn btn-n" href="#cotiza" data-paquete="Fiesta">Cotizar este</a>
+      </div>
+      <div class="paq">
+        <h3>Empresarial</h3>
+        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
+        <ul><li>Desayuno para tu equipo</li><li>Montaje en tu oficina</li><li>Factura</li></ul>
+        <a class="btn btn-n" href="#cotiza" data-paquete="Empresarial">Cotizar este</a>
+      </div>
+    </div>
+    <p class="nota-paq">Paquetes y precios de ejemplo: los reales los define Chilabike.</p>
+  </div>
+</section>
+
+<section class="s">
+  <div class="c">
+    <span class="eti">Así se ven</span>
+    <h2>Eventos donde ya fuimos.</h2>
+    <p class="lead">Aquí van las fotos y videos reales de sus eventos.</p>
+    <div class="gal">
+      <div class="foto"><span class="tag">Foto</span><div><b>Boda</b><small>San Pedro · 250 personas</small></div></div>
+      <div class="foto"><span class="tag">Video</span><div><b>Tornafiesta XV</b><small>Cumbres · 180 personas</small></div></div>
+      <div class="foto"><span class="tag">Foto</span><div><b>Desayuno de empresa</b><small>Valle Oriente · 60 personas</small></div></div>
+      <div class="foto"><span class="tag">Foto</span><div><b>Cumpleaños</b><small>Mitras · 40 personas</small></div></div>
+      <div class="foto"><span class="tag">Video</span><div><b>Festival</b><small>Fundidora · 1,000+ personas</small></div></div>
+      <div class="foto"><span class="tag">Foto</span><div><b>Reunión de amigos</b><small>Centro · 25 personas</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" style="padding-top:0">
+  <div class="c">
+    <span class="eti">Llegamos a toda la ciudad</span>
+    <h2>Te atiende la sucursal más cercana.</h2>
+    <div class="sucs" style="margin-top:22px">
+      <span class="suc">San Pedro</span><span class="suc">San Jerónimo</span><span class="suc">Mitras</span><span class="suc">San Pedro de Pinta</span>
+      <span class="suc">Cumbres</span><span class="suc">Centro</span><span class="suc">Venustiano Carranza</span><span class="suc">Tec</span>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="cotiza" style="padding-top:0">
+  <div class="c cot">
+    <div>
+      <span class="eti">Cotiza tu evento</span>
+      <h2>Cuéntanos de tu evento.</h2>
+      <p class="lead">Te contestamos por WhatsApp con el paquete y el precio. Sin compromiso.</p>
+      <div class="faq">
+        <details><summary>¿Con cuánta anticipación aparto?</summary><p>Lo ideal es con [__] semanas. Si es para esta semana, escríbenos y vemos si hay lugar.</p></details>
+        <details><summary>¿Cuál es el mínimo de personas?</summary><p>Desde [__] personas. Para grupos más chicos te recomendamos pedir a domicilio.</p></details>
+        <details><summary>¿Cómo aparto la fecha?</summary><p>Con un anticipo del [__]% por transferencia. El resto se liquida el día del evento.</p></details>
+        <details><summary>¿Llegan a mi zona?</summary><p>Cubrimos Monterrey y su área metropolitana desde nuestras 8 sucursales. Fuera de la zona puede haber un costo de traslado.</p></details>
+        <details><summary>¿Dan factura?</summary><p>Sí, pídela al confirmar tu evento.</p></details>
+      </div>
+    </div>
+
+    <div class="form-caja">
+      <form id="f" novalidate>
+        <fieldset>
+          <legend>¿Qué vas a celebrar?</legend>
+          <div class="chips" id="tipos">
+            <label><input type="radio" name="tipo" value="Cumpleaños"><span>Cumpleaños</span></label>
+            <label><input type="radio" name="tipo" value="Boda o XV"><span>Boda o XV</span></label>
+            <label><input type="radio" name="tipo" value="Empresarial"><span>Empresarial</span></label>
+            <label><input type="radio" name="tipo" value="Reunión"><span>Reunión</span></label>
+            <label><input type="radio" name="tipo" value="Otro"><span>Otro</span></label>
+          </div>
+        </fieldset>
+        <div class="dos">
+          <label class="campo"><span>Fecha</span><input type="date" name="fecha" required></label>
+          <label class="campo"><span>Hora</span><input type="time" name="hora" value="10:00"></label>
+        </div>
+        <div class="dos">
+          <label class="campo"><span>Personas</span><input type="number" name="personas" inputmode="numeric" min="1" placeholder="Ej. 80" required></label>
+          <label class="campo"><span>Paquete</span>
+            <select name="paquete"><option value="">Aún no sé</option><option>Reunión</option><option>Fiesta</option><option>Empresarial</option></select></label>
+        </div>
+        <label class="campo"><span>¿Dónde es? <small>Colonia, salón o dirección</small></span><input type="text" name="direccion" placeholder="Ej. Salón Los Arcos, Cumbres" required></label>
+        <label class="campo"><span>Tu nombre</span><input type="text" name="nombre" autocomplete="name" required></label>
+        <label class="campo"><span>WhatsApp</span><input type="tel" name="telefono" inputmode="tel" autocomplete="tel" placeholder="81 1234 5678" required></label>
+        <label class="campo"><span>Comentarios <small>opcional</small></span><textarea name="comentarios" placeholder="Algo que debamos saber: alergias, montaje, horario…"></textarea></label>
+        <p class="error" id="err" role="alert"></p>
+        <button class="btn btn-n" type="submit" style="width:100%">Enviar y cotizar</button>
+        <p class="form-pie">Al enviar aceptas el <a href="#" data-pendiente>aviso de privacidad</a>. Solo usamos tus datos para cotizar tu evento.</p>
+      </form>
+
+      <div class="gracias" id="gracias" aria-live="polite">
+        <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#121110" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
+        <h3 id="g-titulo">¡Listo!</h3>
+        <p style="margin:0;color:var(--gris)">Recibimos tu solicitud. Te escribimos por WhatsApp hoy mismo con tu cotización.</p>
+        <div class="aviso-javi">
+          <span class="t">Demo · así le llega a Javi</span>
+          <div class="burbuja" id="g-aviso"></div>
+        </div>
+        <a class="btn btn-n" href="../?demo=chilabike#/eventos" style="width:100%">Ver la solicitud en el calendario</a>
+        <button class="btn" type="button" id="otra" style="background:transparent;border-color:var(--linea)">Enviar otra solicitud</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="c">
+    <a class="marca" href="#"><i>🌶</i>Chilabike</a>
+    <div>Instagram <a href="https://www.instagram.com/chilabike.mty/" target="_blank" rel="noopener">@chilabike.mty</a> · WhatsApp 81 2657 2155</div>
+    <div><a href="#" data-pendiente>Aviso de privacidad</a></div>
+    <div class="unaria">Demo hecho por Unaria · unaria.mx</div>
+  </div>
+</footer>
+
+<div class="flota" id="flota">
+  <a class="btn btn-wa" href="#" data-wa aria-label="WhatsApp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5z"/></svg>WhatsApp</a>
+  <a class="btn btn-n" href="#cotiza">Cotizar evento</a>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---------- configuración (al publicar la página real) ----------
+var CONFIG = {
+  demo: true,                    // en la página real: false (el formulario manda a la base de Chilabike)
+  whatsapp: '528126572155',      // número de eventos
+  pixelMeta: '',                 // ID del píxel de Meta (Instagram y Facebook)
+  googleTag: '',                 // ID de Google Ads / Analytics (AW-… o G-…)
+  guardarEn: ''                  // en la página real: función de Supabase de Chilabike que crea el evento
+};
+var CLAVE = 'chilabike-demo-solicitudes';
+
+// Píxel de Meta y etiqueta de Google: se cargan solo si tienen ID
+if (CONFIG.pixelMeta) {
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', CONFIG.pixelMeta); fbq('track', 'PageView');
+}
+if (CONFIG.googleTag) {
+  var gs = document.createElement('script'); gs.async = true; gs.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.googleTag; document.head.appendChild(gs);
+  window.dataLayer = window.dataLayer || []; window.gtag = function(){ dataLayer.push(arguments); }; gtag('js', new Date()); gtag('config', CONFIG.googleTag);
+}
+
+// De qué anuncio vino la persona (UTM, o el clic de Google / Meta)
+var origen = (function () {
+  var p = new URLSearchParams(location.search), o = {};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid','fbclid'].forEach(function (k) { if (p.get(k)) o[k] = p.get(k).slice(0, 120); });
+  try { if (Object.keys(o).length) sessionStorage.setItem('chb-utm', JSON.stringify(o)); else o = JSON.parse(sessionStorage.getItem('chb-utm') || '{}'); } catch (e) {}
+  return o;
+})();
+function canal() {
+  var s = (origen.utm_source || '').toLowerCase();
+  if (origen.gclid || /google/.test(s)) return 'Google';
+  if (/insta|^ig$/.test(s)) return 'Instagram';
+  if (origen.fbclid || /face|^fb$|meta/.test(s)) return 'Facebook';
+  if (/whats/.test(s)) return 'WhatsApp';
+  return 'Página';
+}
+
+var $ = function (id) { return document.getElementById(id); };
+function toast(t) { var el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 3200); }
+
+// WhatsApp: en el demo no se abre (para no escribirle de verdad al negocio)
+document.querySelectorAll('[data-wa]').forEach(function (a) {
+  a.href = 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent('Hola, quiero cotizar un evento');
+  a.addEventListener('click', function (e) { if (CONFIG.demo) { e.preventDefault(); toast('En la página real, esto abre el WhatsApp de eventos de Chilabike.'); } });
+});
+document.querySelectorAll('[data-pendiente]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); toast('Pendiente: aviso de privacidad con la razón social de Chilabike.'); }); });
+document.querySelectorAll('[data-paquete]').forEach(function (a) { a.addEventListener('click', function () { document.querySelector('[name=paquete]').value = a.dataset.paquete; }); });
+
+// Fecha mínima: mañana
+(function () { var d = new Date(); d.setDate(d.getDate() + 1); var iso = new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); var f = document.querySelector('[name=fecha]'); f.min = iso; })();
+
+// El botón flotante se esconde cuando el formulario está en pantalla
+var flota = $('flota');
+new IntersectionObserver(function (es) { es.forEach(function (e) { flota.classList.toggle('fuera', e.isIntersecting); }); }, { threshold: 0.15 }).observe($('cotiza'));
+
+function fechaBonita(iso, hora) {
+  if (!iso) return '';
+  var d = new Date(iso + 'T12:00:00');
+  var t = d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  return t.charAt(0).toUpperCase() + t.slice(1) + (hora ? ', ' + hora : '');
+}
+
+$('f').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var f = e.target, v = {};
+  new FormData(f).forEach(function (x, k) { v[k] = String(x).trim(); });
+  var falta = [];
+  if (!v.tipo) falta.push('qué vas a celebrar');
+  if (!v.fecha) falta.push('la fecha');
+  if (!v.personas) falta.push('cuántas personas');
+  if (!v.direccion) falta.push('dónde es');
+  if (!v.nombre) falta.push('tu nombre');
+  if ((v.telefono || '').replace(/\D/g, '').length < 10) falta.push('tu WhatsApp a 10 dígitos');
+  if (falta.length) { $('err').textContent = 'Falta ' + falta.join(', ') + '.'; return; }
+  $('err').textContent = '';
+
+  var sol = {
+    id: 'web-' + Date.now(), creado_en: new Date().toISOString(), estado: 'solicitud',
+    tipo: v.tipo, fecha: v.fecha, hora: v.hora || null, personas: Number(v.personas) || null, paquete: v.paquete || null,
+    direccion: v.direccion, nombre: v.nombre, telefono: v.telefono.replace(/\D/g, '').slice(-10), notas: v.comentarios || null,
+    canal: canal(), utm: origen, pagina: location.href.split('#')[0].slice(0, 300)
+  };
+  try { var l = JSON.parse(localStorage.getItem(CLAVE) || '[]'); l.push(sol); localStorage.setItem(CLAVE, JSON.stringify(l)); } catch (er) {}
+  // Conversión para los anuncios
+  if (window.fbq) fbq('track', 'Lead', { content_name: sol.tipo });
+  if (window.gtag) gtag('event', 'generate_lead', { event_category: 'eventos', event_label: sol.tipo });
+
+  $('g-titulo').textContent = '¡Listo, ' + v.nombre.split(' ')[0] + '!';
+  $('g-aviso').innerHTML = '';
+  $('g-aviso').textContent = '🎉 Nueva solicitud de evento\n' + sol.tipo + ' · ' + (sol.personas || '?') + ' personas\n' + fechaBonita(sol.fecha, sol.hora) + '\n📍 ' + sol.direccion + '\n👤 ' + sol.nombre + ' · ' + v.telefono + '\nVino de: ' + sol.canal;
+  var hora = document.createElement('small'); hora.textContent = new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); $('g-aviso').appendChild(hora);
+  f.style.display = 'none'; $('gracias').classList.add('on');
+  $('gracias').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+$('otra').addEventListener('click', function () { $('f').reset(); $('f').style.display = ''; $('gracias').classList.remove('on'); });
+</script>
+</body>
+</html>
