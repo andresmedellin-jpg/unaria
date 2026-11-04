@@ -64,30 +64,50 @@ Deno.serve(async (req: Request) => {
   const datos: Record<string, unknown> = {};
   const conv: any[] = mensajes.map(m => ({ role: m.role, content: m.content }));
   const system = CONFIG.prompt + (saludo ? '\n\nTu primer mensaje en la página (ya lo vio la persona): "' + saludo.slice(0, 400) + '"' : '');
-  let texto = '';
+  // Claude a veces escribe su respuesta en la misma vuelta en que guarda datos y, después del resultado
+  // de la herramienta, regresa vacío. Por eso se junta el texto de TODAS las vueltas, y si al final no
+  // hay nada que mostrar, se le pide una vuelta más sin herramientas para que conteste.
+  const partes: string[] = [];
+  let opciones: string[] = [];
+  const tomar = (t: string) => {
+    const lineas: string[] = [];
+    for (const l of t.split('\n')) {
+      const o = l.match(/^\s*OPCIONES:\s*(.+?)\s*$/i);
+      if (o) opciones = o[1].split('|').map(s => s.trim()).filter(Boolean).slice(0, 5);
+      else lineas.push(l);
+    }
+    const limpio = lineas.join('\n').trim();
+    if (limpio) partes.push(limpio);
+  };
   try {
-    for (let vuelta = 0; vuelta < LIM.vueltas; vuelta++) {
+    let sinHerramientas = false;
+    for (let vuelta = 0; vuelta <= LIM.vueltas; vuelta++) {
+      if (vuelta === LIM.vueltas) sinHerramientas = true;
+      const cuerpo: any = { model: CONFIG.modelo, max_tokens: CONFIG.maxTokens || 400, system, tools: herramientas, messages: conv };
+      if (sinHerramientas) cuerpo.tool_choice = { type: 'none' };
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': env('ANTHROPIC_API_KEY'), 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: CONFIG.modelo, max_tokens: CONFIG.maxTokens || 400, system, tools: herramientas, messages: conv })
+        body: JSON.stringify(cuerpo)
       });
       if (!r.ok) { console.error('anthropic', r.status, await r.text()); return json({ error: 'Sin respuesta' }, 502, h); }
       const j = await r.json();
       const bloques = j.content || [];
-      texto = bloques.filter((x: any) => x.type === 'text').map((x: any) => x.text).join('\n').trim();
+      tomar(bloques.filter((x: any) => x.type === 'text').map((x: any) => x.text).join('\n'));
       const usos = bloques.filter((x: any) => x.type === 'tool_use');
-      if (j.stop_reason !== 'tool_use' || !usos.length) break;
-      conv.push({ role: 'assistant', content: bloques });
-      conv.push({ role: 'user', content: usos.map((u: any) => ({ type: 'tool_result', tool_use_id: u.id, content: ejecutar(u, datos) })) });
+      if (j.stop_reason === 'tool_use' && usos.length && !sinHerramientas) {
+        conv.push({ role: 'assistant', content: bloques });
+        conv.push({ role: 'user', content: usos.map((u: any) => ({ type: 'tool_result', tool_use_id: u.id, content: ejecutar(u, datos) })) });
+        continue;
+      }
+      // Terminó sin nada que mostrar: una vuelta más, sin herramientas, para que conteste
+      if (!partes.length && !sinHerramientas && conv[conv.length - 1].role === 'user') { sinHerramientas = true; continue; }
+      break;
     }
   } catch (e) { console.error('chat', e); return json({ error: 'Sin respuesta' }, 502, h); }
 
-  // Botones de respuesta rápida: última línea "OPCIONES: a | b | c"
-  let opciones: string[] = [];
-  const m = texto.match(/\n?\s*OPCIONES:\s*(.+)\s*$/i);
-  if (m) { opciones = m[1].split('|').map(s => s.trim()).filter(Boolean).slice(0, 5); texto = texto.slice(0, m.index).trim(); }
-  if (!texto) texto = 'Perdón, ¿me lo repites?';
+  let texto = partes.join('\n\n');
+  if (!texto) { console.error('chat vacío', id); texto = 'Perdón, ¿me lo repites?'; }
 
   // Guardar en la base: los datos nuevos y la plática completa
   const historial = (saludo ? [{ role: 'assistant', content: saludo }] : []).concat(mensajes,
