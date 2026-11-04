@@ -177,10 +177,16 @@ export function estilos() {
   .chb-ia-caja { margin:12px 14px 0; border:1px solid #D9CCFB; background:linear-gradient(135deg,#F8F5FF,#FFF7F0); border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .chb-ia-caja p { margin:0; flex:1; min-width:200px; font-size:13.5px; color:#3F2A78; } .chb-ia-caja p b { display:block; font-size:14px; }
   .chb-hecho { margin:12px 14px 0; background:#ECFDF3; border:1px solid #ABEFC6; color:#05603A; border-radius:10px; padding:10px 14px; font-size:13.5px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
-  .chb-hilo { display:flex; flex-direction:column; gap:8px; padding:14px; background:#F4F1EC; margin:12px 14px; border-radius:10px; max-height:calc(100vh - 430px); min-height:220px; overflow:auto; }
+  .chb-hilo { display:flex; flex-direction:column; gap:8px; padding:14px; background:#F4F1EC; margin:12px 14px; border-radius:10px; max-height:calc(100vh - 520px); min-height:200px; overflow:auto; }
   .chb-b { max-width:78%; padding:8px 11px; border-radius:3px 12px 12px 12px; background:#fff; box-shadow:0 1px 1px rgba(0,0,0,.07); align-self:flex-start; font-size:14px; white-space:pre-wrap; overflow-wrap:anywhere; }
   .chb-b.javi { align-self:flex-end; border-radius:12px 3px 12px 12px; background:#FFE4D1; }
   .chb-b small { display:block; color:#8A8178; font-size:11px; margin-top:3px; }
+  .chb-resp { margin:0 14px 14px; display:grid; gap:8px; }
+  .chb-resp textarea { width:100%; font:inherit; font-size:14px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; resize:vertical; min-height:76px; background:#fff; }
+  .chb-resp textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft); }
+  .chb-sug { display:inline-flex; gap:6px; align-items:center; font-size:12.5px; font-weight:600; color:#5B21B6; }
+  .chb-sug + textarea { background:#FBF9FF; border-color:#D9CCFB; }
+  .chb-resp-pie { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; } .chb-resp-pie small { font-size:12px; flex:1; min-width:200px; }
   .chb-escucha { margin:0 14px 14px; display:flex; gap:10px; align-items:center; background:var(--surface-2); border:1px dashed #D0D5DD; border-radius:10px; padding:10px 12px; font-size:13px; color:var(--text-2); }
   .chb-cargando-ia { display:flex; gap:10px; align-items:center; color:#5B21B6; font-weight:600; font-size:14px; }
   .chb-cargando-ia i { width:18px; height:18px; border-radius:50%; border:2.5px solid #D9CCFB; border-top-color:#6D28D9; animation:chbgira .8s linear infinite; }

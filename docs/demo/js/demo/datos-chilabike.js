@@ -55,7 +55,7 @@
 
     const fBoda = finde(38), fCumple = finde(16), fPosada = (() => { const d = new Date(finde(36) + 'T12:00:00'); d.setDate(d.getDate() - 1); return iso(d); })(), fExa = finde(23), fBodaAna = finde(52);
 
-    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
+    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', sugerida: 'Va, un tornafiesta de 180 queda perfecto con el paquete Tornafiesta: llegamos a la 1 con cajitas calientitas de mixtos y las salsas aparte para tu tía 😅 Sale en $[__] por persona. Para apartar la fecha es un anticipo del [__]%. ¿Te paso los datos?', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
       extraccion: { tipo: 'Boda o XV', fecha: fBoda, hora: '01:00', personas: 180, direccion: 'Quinta Los Encinos, Santiago', paquete: 'Tornafiesta', sucursal: 'San Pedro',
         notas: 'Tornafiesta de la boda de su hermana. Quiere mixtos y salsas aparte para los que no aguantan picante.' } }, [
       ['cliente', 'Hola!! vi su anuncio en insta 😍 quiero cotizar sus cajitas para el tornafiesta de la boda de mi hermana', 3],
@@ -64,43 +64,43 @@
       ['cliente', 'Sería como a la 1 de la mañana. Los queremos mixtos, ¿cuánto sale por persona?', 2],
       ['cliente', 'Ah y si pueden llevar las salsas aparte, mi tía no aguanta nada de picante jaja', 0],
     ]);
-    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
+    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', sugerida: 'Holaa! Para 40 personas te queda el paquete Fiesta: estación con las 3 salsas y barra de toppings, en $[__] por persona. Sí hay vegetariano, la proteína es a elección 🌱 ¿Te aparto el sábado?', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
       extraccion: { tipo: 'Cumpleaños', fecha: fCumple, hora: '11:00', personas: 40, direccion: 'Casa en Cumbres 5° Sector', paquete: 'Fiesta', sucursal: 'Cumbres', notas: 'Brunch de cumpleaños 30. Pregunta por opción vegetariana (proteína a elección).' } }, [
       ['cliente', 'holaaa cuánto cuesta para un cumple de 40 personas?', 1],
       ['cliente', `es un brunch el sábado ${new Date(fCumple + 'T12:00:00').getDate()} en mi casa en cumbres, como a las 11`, 1],
       ['cliente', 'y tienen algo vegetariano? 🥲', 0],
     ]);
-    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
+    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', sugerida: 'Carlos, ya le mandé la cotización a su correo. Si le parece, con el anticipo le aparto el viernes a las 9 am. Cualquier duda aquí estoy.', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
       ['cliente', 'Buenas tardes, soy de Recursos Humanos de Grupo Industrial Norte. Queremos cotizar chilaquiles en cajita para el desayuno de la posada.', 6],
       ['javi', '¡Buenas tardes Carlos! Con gusto. ¿Cuántas personas serían y dónde?', 10],
       ['cliente', `Somos 120, en nuestras oficinas de Valle Oriente, el viernes ${new Date(fPosada + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} a las 9 am. Necesitamos factura.`, 15],
       ['javi', 'Perfecto. Para empresas está el Desayuno de oficina: cajita de verdes, rojos o mixtos con proteína y bebida, entregado a la hora que nos diga, con factura. Le mando la cotización por correo hoy mismo 📄', 30],
       ['cliente', 'Excelente, quedo atento.', 0],
     ]);
-    const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14 }, [
+    const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', sugerida: 'Hola Sofía! Claro, las mandamos desde San Jerónimo. Son 3 cajitas de rojos con pollo y 1 de verdes, $[__] más envío. ¿A qué dirección te las llevamos?', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14 }, [
       ['cliente', 'Hola, ¿me pueden mandar 3 cajitas de rojos con pollo y una de verdes a San Jerónimo? 🙏', 0],
     ]);
-    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
+    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto, el sábado a las 11 para 60 queda bien. Les propongo el paquete Fiesta en $[__] por persona. Cuando tengan la terraza me pasas la dirección y te aparto la fecha 🤘', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
       extraccion: { tipo: 'Reunión', fecha: fExa, hora: '11:00', personas: 60, direccion: 'Terraza en San Pedro (por confirmar)', paquete: 'Fiesta', sucursal: 'Tec', notas: 'Reunión de exalumnos del Tec, generación 2006. Lugar por confirmar.' } }, [
       ['cliente', 'Qué tal, estoy organizando la reunión de exalumnos de mi generación del Tec. Seríamos unos 60.', 2],
       ['javi', 'Qué buen plan Roberto 🤘 ¿Ya tienen fecha y lugar?', 40],
       ['cliente', `Sería el sábado ${new Date(fExa + 'T12:00:00').getDate()} como a las 11. El lugar todavía lo estamos viendo, probablemente una terraza en San Pedro.`, 0],
     ]);
-    const cAna = C({ canal: 'whatsapp', contacto: 'Ana Lucía Cantú', telefono: '8112098854', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 60 * 50, leida: true }, [
+    const cAna = C({ canal: 'whatsapp', contacto: 'Ana Lucía Cantú', sugerida: 'Recibido Ana Lucía ✅ Tu fecha ya está apartada. Unos días antes te escribo para confirmar el horario de llegada y el montaje. ¡Felicidades otra vez! 💍', telefono: '8112098854', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 60 * 50, leida: true }, [
       ['cliente', 'Hola! Me pasaron su contacto, quiero chilaquiles para mi boda 💍', 20],
       ['javi', '¡Felicidades Ana Lucía! 🎉 ¿Cuándo es y cuántos invitados?', 30],
       ['cliente', '250 invitados, en Hacienda San Miguel en Allende', 60],
       ['javi', 'Va, te quedaría el paquete Fiesta: estación de chilaquiles con las 3 salsas y barra de toppings. Para apartar la fecha es el anticipo por transferencia, te paso los datos 👇', 120],
       ['cliente', 'Listo, ya te mandé el comprobante del anticipo ✅', 0],
     ]);
-    const cLalo = C({ canal: 'instagram', contacto: '@lalo.mtz', anuncio_id: null, etiqueta: 'otro', hace: 95 }, [
+    const cLalo = C({ canal: 'instagram', contacto: '@lalo.mtz', sugerida: 'Qué onda Lalo! Gracias por la buena vibra 🙌 Mándanos tu nombre y tu número y te contacta el encargado de la sucursal más cercana.', anuncio_id: null, etiqueta: 'otro', hace: 95 }, [
       ['cliente', 'qué onda, ¿están contratando chilaqueros? me late mucho chambear con ustedes', 0],
     ]);
     const cFest = C({ canal: 'instagram', contacto: '@machacafest', anuncio_id: null, etiqueta: 'otro', hace: 60 * 9, leida: true }, [
       ['cliente', 'Hola Chilabike! Somos del equipo del festival, nos gustaría platicar otra colaboración para el sorteo de la próxima edición 🔥', 30],
       ['javi', '¡Claro! Nos fue increíble la vez pasada. ¿Les marco mañana?', 0],
     ]);
-    const cPaty = C({ canal: 'whatsapp', contacto: 'Paty Leal', telefono: '8126601173', anuncio_id: null, etiqueta: 'pedido', hace: 33 }, [
+    const cPaty = C({ canal: 'whatsapp', contacto: 'Paty Leal', sugerida: 'Hola Paty! Sí llegamos a Mitras, estamos en Celaya 3133, frente a Medicina 😉 Te enviamos de [__] a [__]. ¿Qué se te antoja?', telefono: '8126601173', anuncio_id: null, etiqueta: 'pedido', hace: 33 }, [
       ['cliente', '¿Tienen servicio a domicilio en Mitras? ¿Hasta qué hora? Somos de la Facultad de Medicina 🙃', 0],
     ]);
 

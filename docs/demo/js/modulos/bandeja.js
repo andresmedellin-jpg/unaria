@@ -1,13 +1,13 @@
 // Mensajes: WhatsApp, Instagram y Facebook en una sola bandeja. Cada conversación trae su canal, si vino de un anuncio
 // (Meta manda de cuál cuando el anuncio lleva a un mensaje) y una etiqueta que pone la IA: evento, pedido u otro.
-// Fase 1, modo escucha: el negocio sigue contestando desde sus apps; aquí se ve todo junto y una solicitud de evento
-// se vuelve ficha del calendario con un clic ("Crear evento desde esta conversación").
+// Se contesta desde aquí (la IA sugiere la respuesta; la persona la revisa y la manda) o desde las apps de siempre.
+// Una solicitud de evento se vuelve ficha del calendario con un clic ("Crear evento desde esta conversación").
 // Tablas: conversaciones, mensajes, anuncios, eventos.
 import { db, esc, toast } from '../lib.js';
 import { V, CANALES, estilos, icoIA, hace, fichaEvento, tagEstado, fechaCorta, ir, paramHash } from './eventos-comun.js';
 
 const ETIQ = { evento: 'Evento', pedido: 'Pedido a domicilio', otro: 'Otro' };
-const st = { sel: null, filtro: 'todos', canal: '' };
+const st = { sel: null, filtro: 'todos', canal: '', sugerir: null };
 let raiz, convs = [], msgs = [], anuncios = [], eventos = [];
 
 export async function render(view) {
@@ -65,13 +65,16 @@ function pintar() {
       </div>
       <div class="chb-chat">${sel ? chat(sel) : '<div class="vacio">Escoge una conversación.</div>'}</div>
     </div>
-    <p class="chb-nota">Fase 1 · modo escucha: ${esc(V.dueno)} sigue contestando desde WhatsApp Business, Instagram y Messenger como siempre; sus respuestas también aparecen aquí. El asistente todavía no contesta solo.</p>`;
+    <p class="chb-nota">${esc(V.dueno)} contesta los tres canales desde aquí o desde sus apps de siempre; todo queda en la misma conversación. La IA sugiere la respuesta, pero no manda nada sola.</p>`;
 
   raiz.querySelectorAll('[data-f]').forEach((b) => b.addEventListener('click', () => { st.filtro = b.dataset.f; pintar(); }));
   raiz.querySelectorAll('[data-c]').forEach((b) => b.addEventListener('click', () => { st.canal = b.dataset.c; pintar(); }));
   raiz.querySelectorAll('[data-conv]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.conv)));
   raiz.querySelector('.chb-volver')?.addEventListener('click', () => { st.sel = null; history.replaceState(null, '', ir('bandeja')); pintar(); });
   raiz.querySelector('#chb-crear')?.addEventListener('click', () => crearEvento(sel));
+  raiz.querySelector('#chb-enviar')?.addEventListener('click', () => enviar(sel));
+  raiz.querySelector('#chb-sugerir')?.addEventListener('click', () => { st.sugerir = sel.id; pintar(); raiz.querySelector('#chb-texto')?.focus(); });
+  raiz.querySelector('#chb-texto')?.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey)) enviar(sel); });
   raiz.querySelector('#chb-etiq')?.addEventListener('change', async (ev) => {
     const v = ev.target.value; await db().from('conversaciones').update({ etiqueta: v }).eq('id', sel.id); sel.etiqueta = v; toast('Etiqueta cambiada ✓'); pintar();
   });
@@ -104,7 +107,40 @@ function chat(c) {
     ${ev ? `<div class="chb-hecho"><span>✓ Ya está en el calendario: <b>${esc(ev.tipo)} · ${esc(ev.personas ?? '?')} personas · ${esc(fechaCorta(ev.fecha))}</b> ${tagEstado(ev.estado)}</span><a class="btn btn-ghost btn-sm" href="${ir('eventos', 'e=' + ev.id)}">Ver evento</a></div>`
       : c.etiqueta === 'evento' ? `<div class="chb-ia-caja" id="chb-ia-caja"><p><b>${icoIA} Esta conversación pide un evento</b>La IA puede llenar la ficha con lo que dice el chat: fecha, hora, personas, lugar y paquete.</p><button class="btn btn-primary" id="chb-crear">Crear evento desde esta conversación</button></div>` : ''}
     <div class="chb-hilo">${hilo.map((m) => `<div class="chb-b ${m.de}">${esc(m.texto)}<small>${m.de === 'javi' ? esc(V.dueno) + ' · ' : ''}${new Date(m.creado_en).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}</small></div>`).join('')}</div>
-    <div class="chb-escucha">👂 <span>Modo escucha: contesta desde ${c.canal === 'whatsapp' ? 'WhatsApp Business' : c.canal === 'instagram' ? 'Instagram' : 'Messenger'} como siempre. En la fase 2, aquí aparece la respuesta sugerida.</span></div>`;
+    ${responder(c)}`;
+}
+
+// Caja para contestar: sale por el mismo canal (WhatsApp con el número del negocio, DM de Instagram o Messenger).
+// La IA deja escrita una respuesta sugerida; la persona la revisa, la cambia si quiere y la manda. Nada sale solo.
+function responder(c) {
+  const ultCliente = [...msgs].reverse().find((m) => m.conversacion_id === c.id && m.de === 'cliente');
+  const horas = ultCliente ? (Date.now() - new Date(ultCliente.creado_en)) / 36e5 : 0;
+  const fuera = horas > (c.canal === 'whatsapp' ? 24 : 168);
+  const app = c.canal === 'whatsapp' ? 'WhatsApp' : c.canal === 'instagram' ? 'Instagram' : 'Messenger';
+  const sugerida = c.por_contestar || st.sugerir === c.id ? (c.sugerida || '') : '';
+  return `<div class="chb-resp">
+    ${sugerida ? `<span class="chb-sug">${icoIA} Respuesta sugerida por la IA · revísala y cámbiala si quieres</span>` : ''}
+    <textarea id="chb-texto" rows="3" placeholder="Escribe tu respuesta…">${esc(sugerida)}</textarea>
+    <div class="chb-resp-pie">
+      <small>${fuera ? (c.canal === 'whatsapp' ? 'Pasaron más de 24 h: WhatsApp solo deja mandar una plantilla aprobada.' : 'Pasaron más de 7 días: Meta ya no deja contestar este mensaje.')
+        : `Sale por ${app}${c.canal === 'whatsapp' ? ' con el número del negocio y también aparece en tu app de WhatsApp Business' : ''}.`}</small>
+      <span style="display:flex;gap:6px">${c.sugerida && !sugerida ? `<button class="btn btn-ghost btn-sm" id="chb-sugerir">${icoIA} Sugerir respuesta</button>` : ''}
+      <button class="btn btn-primary" id="chb-enviar">Enviar</button></span>
+    </div>
+  </div>`;
+}
+
+async function enviar(c) {
+  const caja = raiz.querySelector('#chb-texto'), texto = caja.value.trim();
+  if (!texto) return toast('Escribe la respuesta', true);
+  raiz.querySelector('#chb-enviar').disabled = true;
+  const ahora = new Date().toISOString();
+  const r = await db().from('mensajes').insert({ conversacion_id: c.id, de: 'javi', texto, creado_en: ahora, por: 'portal' }).select().single();
+  if (r.error) { raiz.querySelector('#chb-enviar').disabled = false; return toast(r.error.message, true); }
+  await db().from('conversaciones').update({ ultimo: texto, ultimo_en: ahora, por_contestar: false, leida: true, sugerida: null }).eq('id', c.id);
+  toast(`Enviado por ${(CANALES[c.canal] || CANALES.pagina).t} ✓`);
+  st.sugerir = null;
+  await cargar();
 }
 
 async function abrir(id) {
