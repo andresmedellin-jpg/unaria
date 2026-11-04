@@ -4,7 +4,7 @@ import { MARCA } from '../config.js';
 
 export const V = Object.assign({
   negocio: 'el negocio', dueno: 'el dueño', pagina: '',
-  sucursales: [], tipos: ['Cumpleaños', 'Boda o XV', 'Empresarial', 'Reunión', 'Otro'],
+  sucursales: [], tipos: ['Cumpleaños', 'Boda o XV', 'Empresarial', 'Reunión', 'Otro'], paquetes: ['Básico', 'Completo'],
 }, MARCA.chilabike || MARCA.eventos || {});
 
 export const ESTADOS = {
@@ -59,7 +59,7 @@ export function fichaEvento({ evento = {}, ia = [], titulo, alGuardar }) {
       </div>
       <div class="form-3">
         <label${marca('personas')}>Personas<input type="number" name="personas" min="1" value="${esc(e.personas ?? '')}"></label>
-        <label${marca('paquete')}>Paquete<select name="paquete"><option value="">Por definir</option>${op(['Reunión', 'Fiesta', 'Empresarial'], e.paquete)}</select></label>
+        <label${marca('paquete')}>Paquete<select name="paquete"><option value="">Por definir</option>${op(V.paquetes, e.paquete)}</select></label>
         <label${marca('sucursal')}>Sucursal que surte<select name="sucursal"><option value="">Por definir</option>${op(V.sucursales, e.sucursal)}</select></label>
       </div>
       <label${marca('direccion')}>Lugar o dirección<input type="text" name="direccion" value="${esc(e.direccion || '')}"></label>

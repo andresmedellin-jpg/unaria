@@ -114,6 +114,16 @@ section.s { padding: 64px 0; }
 /* sucursales */
 .sucs { display: flex; flex-wrap: wrap; gap: 10px; }
 .suc { background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 10px 16px; font-weight: 500; font-size: 16px; display: inline-flex; gap: 8px; align-items: center; }
+.suc small { color: var(--gris); font-size: 13.5px; font-weight: 400; }
+.salsas { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+.salsa { border-radius: 18px; padding: 22px 16px; display: flex; flex-direction: column; gap: 4px; min-height: 150px; justify-content: flex-end; color: #fff; }
+.salsa b { font-family: var(--f-disp); font-size: 25px; color: inherit; line-height: 1; }
+.salsa span { font-size: 14.5px; opacity: .9; }
+.salsa.verde { background: linear-gradient(160deg, #6E9F3B, #3F6B1F); }
+.salsa.roja { background: linear-gradient(160deg, #D9452B, #8F1F12); }
+.salsa.mixta { background: linear-gradient(110deg, #4F8A2B 0 50%, #B8321D 50% 100%); }
+.extras { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.extras > span { background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 8px 14px; font-size: 15px; font-weight: 500; }
 .suc::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--naranja); }
 
 /* preguntas */
@@ -202,14 +212,14 @@ footer .unaria { font-size: 13px; color: #7C746B; }
   <div class="c">
     <span class="eti">Eventos · Monterrey</span>
     <h1>Llévanos a tu <span>evento.</span></h1>
-    <p class="sub">Chilaquiles hechos al momento para tu boda, cumpleaños o evento de la empresa. Cotiza en un minuto y nosotros nos encargamos del resto.</p>
+    <p class="sub">Chilaquiles en cajita, verdes, rojos o mixtos, con tu proteína y muchos toppings. Para el desayuno de la oficina, el cumple o el tornafiesta. Cotiza en un minuto y nosotros llegamos con todo.</p>
     <div class="acc">
       <a class="btn btn-n" href="#cotiza">Cotiza tu evento</a>
       <a class="btn btn-l" href="#" data-wa>Escríbenos por WhatsApp</a>
     </div>
     <div class="datos">
       <div><b>8 sucursales</b>en Monterrey y San Pedro</div>
-      <div><b>De 20 a 500+</b>personas</div>
+      <div><b>450 g</b>por cajita</div>
       <div><b>Respuesta</b>el mismo día</div>
     </div>
   </div>
@@ -219,13 +229,27 @@ footer .unaria { font-size: 13px; color: #7C746B; }
   <div class="c">
     <span class="eti">Para cualquier evento</span>
     <h2>Si los pruebas, repites.</h2>
-    <p class="lead">Desde la reunión con los compas hasta el evento de toda la empresa.</p>
+    <p class="lead">Cada quien su cajita. Desde la reunión con los compas hasta el evento de toda la empresa.</p>
     <div class="tipos">
       <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M5 21v-8h14v8M12 13V9M9 6c0-1.5 3-3 3-3s3 1.5 3 3a3 3 0 0 1-6 0z"/></svg></div><b>Cumpleaños</b><span>La fiesta con algo que sí se acaba.</span></div>
-      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="14" r="5"/><circle cx="15.5" cy="14" r="5"/><path d="M10 4l2 3 2-3"/></svg></div><b>Bodas y XV</b><span>El tornafiesta más pedido.</span></div>
-      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></div><b>Empresariales</b><span>Desayunos, juntas y aniversarios.</span></div>
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="14" r="5"/><circle cx="15.5" cy="14" r="5"/><path d="M10 4l2 3 2-3"/></svg></div><b>Bodas y XV</b><span>El tornafiesta que todos esperan.</span></div>
+      <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg></div><b>Desayunos de oficina</b><span>Juntas, capacitaciones y cierres de mes.</span></div>
       <div class="tipo"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9500C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg></div><b>Reuniones</b><span>Para 20 personas también vamos.</span></div>
     </div>
+  </div>
+</section>
+
+<section class="s" style="padding-top:0">
+  <div class="c">
+    <span class="eti">El menú</span>
+    <h2>Escoge tu salsa.</h2>
+    <p class="lead">450 g de totopo de maíz bañado en salsa, con frijoles, queso fresco, crema, cebolla morada y cilantro. Tú escoges la proteína.</p>
+    <div class="salsas">
+      <div class="salsa verde"><b>Verdes</b><span>Los de siempre.</span></div>
+      <div class="salsa roja"><b>Rojos</b><span>Para los que sí aguantan.</span></div>
+      <div class="salsa mixta"><b>Mixtos</b><span>Mitad y mitad, sin pelear.</span></div>
+    </div>
+    <div class="extras"><span>+ Proteína a elección</span><span>+ Chiltepín</span><span>+ Toppings <span class="pend">por confirmar</span></span><span>+ Refrescos y agua</span></div>
   </div>
 </section>
 
@@ -245,26 +269,26 @@ footer .unaria { font-size: 13px; color: #7C746B; }
   <div class="c">
     <span class="eti">Paquetes</span>
     <h2>Escoge cómo los quieres.</h2>
-    <p class="lead">Todos incluyen servicio en tu evento. Te armamos uno a la medida si lo necesitas.</p>
+    <p class="lead">Cajitas por persona, servidas en tu evento. Te armamos uno a la medida si lo necesitas.</p>
     <div class="paqs">
       <div class="paq">
-        <h3>Reunión</h3>
+        <h3>Desayuno de oficina</h3>
         <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Chilaquiles rojos y verdes</li><li>2 proteínas a escoger</li><li>Desde <span class="pend">__</span> personas</li></ul>
-        <a class="btn btn-n" href="#cotiza" data-paquete="Reunión">Cotizar este</a>
+        <ul><li>Cajita de verdes, rojos o mixtos</li><li>Proteína a elección y bebida</li><li>Entrega a la hora de tu junta</li><li>Factura</li></ul>
+        <a class="btn btn-n" href="#cotiza" data-paquete="Desayuno de oficina">Cotizar este</a>
       </div>
       <div class="paq dest">
         <span class="pill">El más pedido</span>
         <h3>Fiesta</h3>
         <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Barra de chilaquiles con todo</li><li>3 proteínas y toppings</li><li>Bebidas incluidas</li><li>Servicio de <span class="pend">__</span> horas</li></ul>
+        <ul><li>Estación de chilaquiles con chilaqueros</li><li>Las 3 salsas y proteínas a escoger</li><li>Barra de toppings</li><li>Servicio de <span class="pend">__</span> horas</li></ul>
         <a class="btn btn-n" href="#cotiza" data-paquete="Fiesta">Cotizar este</a>
       </div>
       <div class="paq">
-        <h3>Empresarial</h3>
+        <h3>Tornafiesta</h3>
         <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Desayuno para tu equipo</li><li>Montaje en tu oficina</li><li>Factura</li></ul>
-        <a class="btn btn-n" href="#cotiza" data-paquete="Empresarial">Cotizar este</a>
+        <ul><li>Llegamos a media noche</li><li>Cajitas calientitas para todos</li><li>Salsas aparte para los que no aguantan</li></ul>
+        <a class="btn btn-n" href="#cotiza" data-paquete="Tornafiesta">Cotizar este</a>
       </div>
     </div>
     <p class="nota-paq">Paquetes y precios de ejemplo: los reales los define Chilabike.</p>
@@ -279,7 +303,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
     <div class="gal">
       <div class="foto"><span class="tag">Foto</span><div><b>Boda</b><small>San Pedro · 250 personas</small></div></div>
       <div class="foto"><span class="tag">Video</span><div><b>Tornafiesta XV</b><small>Cumbres · 180 personas</small></div></div>
-      <div class="foto"><span class="tag">Foto</span><div><b>Desayuno de empresa</b><small>Valle Oriente · 60 personas</small></div></div>
+      <div class="foto"><span class="tag">Foto</span><div><b>Desayuno de oficina</b><small>Valle Oriente · 60 cajitas</small></div></div>
       <div class="foto"><span class="tag">Foto</span><div><b>Cumpleaños</b><small>Mitras · 40 personas</small></div></div>
       <div class="foto"><span class="tag">Video</span><div><b>Festival</b><small>Fundidora · 1,000+ personas</small></div></div>
       <div class="foto"><span class="tag">Foto</span><div><b>Reunión de amigos</b><small>Centro · 25 personas</small></div></div>
@@ -290,10 +314,10 @@ footer .unaria { font-size: 13px; color: #7C746B; }
 <section class="s" style="padding-top:0">
   <div class="c">
     <span class="eti">Llegamos a toda la ciudad</span>
-    <h2>Te atiende la sucursal más cercana.</h2>
+    <h2>Te surte la sucursal más cercana.</h2>
     <div class="sucs" style="margin-top:22px">
-      <span class="suc">San Pedro</span><span class="suc">San Jerónimo</span><span class="suc">Mitras</span><span class="suc">San Pedro de Pinta</span>
-      <span class="suc">Cumbres</span><span class="suc">Centro</span><span class="suc">Venustiano Carranza</span><span class="suc">Tec</span>
+      <span class="suc">San Pedro <small>Benito Juárez 606</small></span><span class="suc">Tec <small>Fernando García Roel 2501</small></span><span class="suc">Mitras <small>Celaya 3133, frente a Medicina</small></span><span class="suc">Centro <small>Mariano Escobedo 636</small></span>
+      <span class="suc">San Jerónimo</span><span class="suc">San Pedro de Pinta</span><span class="suc">Cumbres</span><span class="suc">Venustiano Carranza</span>
     </div>
   </div>
 </section>
@@ -309,6 +333,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
         <details><summary>¿Cuál es el mínimo de personas?</summary><p>Desde [__] personas. Para grupos más chicos te recomendamos pedir a domicilio.</p></details>
         <details><summary>¿Cómo aparto la fecha?</summary><p>Con un anticipo del [__]% por transferencia. El resto se liquida el día del evento.</p></details>
         <details><summary>¿Llegan a mi zona?</summary><p>Cubrimos Monterrey y su área metropolitana desde nuestras 8 sucursales. Fuera de la zona puede haber un costo de traslado.</p></details>
+        <details><summary>¿Hay opción sin picante o vegetariana?</summary><p>Sí. Las salsas pueden ir aparte y la proteína es a elección.</p></details>
         <details><summary>¿Dan factura?</summary><p>Sí, pídela al confirmar tu evento.</p></details>
       </div>
     </div>
@@ -320,7 +345,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
           <div class="chips" id="tipos">
             <label><input type="radio" name="tipo" value="Cumpleaños"><span>Cumpleaños</span></label>
             <label><input type="radio" name="tipo" value="Boda o XV"><span>Boda o XV</span></label>
-            <label><input type="radio" name="tipo" value="Empresarial"><span>Empresarial</span></label>
+            <label><input type="radio" name="tipo" value="Desayuno de oficina"><span>Desayuno de oficina</span></label>
             <label><input type="radio" name="tipo" value="Reunión"><span>Reunión</span></label>
             <label><input type="radio" name="tipo" value="Otro"><span>Otro</span></label>
           </div>
@@ -332,12 +357,12 @@ footer .unaria { font-size: 13px; color: #7C746B; }
         <div class="dos">
           <label class="campo"><span>Personas</span><input type="number" name="personas" inputmode="numeric" min="1" placeholder="Ej. 80" required></label>
           <label class="campo"><span>Paquete</span>
-            <select name="paquete"><option value="">Aún no sé</option><option>Reunión</option><option>Fiesta</option><option>Empresarial</option></select></label>
+            <select name="paquete"><option value="">Aún no sé</option><option>Desayuno de oficina</option><option>Fiesta</option><option>Tornafiesta</option></select></label>
         </div>
         <label class="campo"><span>¿Dónde es? <small>Colonia, salón o dirección</small></span><input type="text" name="direccion" placeholder="Ej. Salón Los Arcos, Cumbres" required></label>
         <label class="campo"><span>Tu nombre</span><input type="text" name="nombre" autocomplete="name" required></label>
         <label class="campo"><span>WhatsApp</span><input type="tel" name="telefono" inputmode="tel" autocomplete="tel" placeholder="81 1234 5678" required></label>
-        <label class="campo"><span>Comentarios <small>opcional</small></span><textarea name="comentarios" placeholder="Algo que debamos saber: alergias, montaje, horario…"></textarea></label>
+        <label class="campo"><span>Comentarios <small>opcional</small></span><textarea name="comentarios" placeholder="Salsa favorita, si alguien no come picante, horario de la junta…"></textarea></label>
         <p class="error" id="err" role="alert"></p>
         <button class="btn btn-n" type="submit" style="width:100%">Enviar y cotizar</button>
         <p class="form-pie">Al enviar aceptas el <a href="#" data-pendiente>aviso de privacidad</a>. Solo usamos tus datos para cotizar tu evento.</p>
@@ -364,6 +389,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
     <a class="marca" href="#"><i>🌶</i>Chilabike</a>
     <div>Instagram <a href="https://www.instagram.com/chilabike.mty/" target="_blank" rel="noopener">@chilabike.mty</a> · WhatsApp 81 2657 2155</div>
     <div><a href="#" data-pendiente>Aviso de privacidad</a></div>
+    <div>Si los pruebas, repites · #aGrilearRaza</div>
     <div class="unaria">Demo hecho por Unaria · unaria.mx</div>
   </div>
 </footer>
