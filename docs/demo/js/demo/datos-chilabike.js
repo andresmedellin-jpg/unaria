@@ -1,4 +1,4 @@
-// Datos de ejemplo del demo de Grupo A.M, los negocios de Javi (unaria.mx/demo/?demo=chilabike): Chilabike, Curandero (Loyverse, en
+// Datos de ejemplo del demo de Grupo A.M, los negocios de Javier Andonie Moreno (unaria.mx/demo/?demo=chilabike): Chilabike, Curandero (Loyverse, en
 // js/demo/datos-loyverse.js), Lattico (sin Loyverse todavía) y Casa María (en preparación).
 // Chilabike: Todo es inventado y se acomoda a la fecha de hoy.
 // Fase 1: los mensajes de WhatsApp, Instagram y Facebook caen en una sola bandeja; los anuncios de Meta llevan directo
@@ -30,7 +30,7 @@
     ],
     ajustes: ['usuarios'],
     chilabike: {
-      negocio: 'Chilabike', dueno: 'Javi', pagina: './chilabike/',
+      negocio: 'Chilabike', dueno: 'Javier', pagina: './chilabike/',
       sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
       tipos: ['Cumpleaños', 'Boda o XV', 'Desayuno de oficina', 'Reunión', 'Festival', 'Otro'],
       paquetes: ['Desayuno de oficina', 'Fiesta', 'Tornafiesta'],
@@ -161,7 +161,7 @@
     } catch (e) { /* sin almacenamiento: solo los de ejemplo */ }
 
     const miembros = [
-      { org_id: ORG, user_id: 'demo-usuario', nombre: 'Javi', usuario: 'javi', rol: 'dueno', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z' },
+      { org_id: ORG, user_id: 'demo-usuario', nombre: 'Javier Andonie Moreno', usuario: 'javier', rol: 'dueno', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z' },
       { org_id: ORG, user_id: 'demo-u1', nombre: 'Jimmy', usuario: 'jimmy', rol: 'administracion', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z', ultimo_acceso: hace(180) },
     ];
     const E1 = { id: 'emp-chb', org_id: ORG, nombre: 'Chilabike', nombre_corto: 'Chilabike', color: COLOR, activo: true };
