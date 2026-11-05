@@ -62,6 +62,7 @@ button, input { font: inherit; }
 .envoltura { max-width: var(--ancho); margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 .etiqueta { font: 500 0.78rem/1.4 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--acento); }
 .lead { font-size: 1.15rem; color: var(--gris); max-width: 58ch; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .marcador { font: 500 0.85em var(--f-mono); background: var(--marcador); color: var(--marcador-texto); padding: 0.05em 0.35em; border-radius: 3px; white-space: nowrap; }
 
 /* Botones */
@@ -96,7 +97,8 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .notas { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.92rem; color: var(--gris); }
 .notas span { display: inline-flex; align-items: center; gap: 8px; }
 .notas span::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--acento); }
-@media (max-width: 960px) { .portada .envoltura { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 960px) { .portada .envoltura { grid-template-columns: minmax(0, 1fr); gap: 24px; } .portada .botones .btn-secundario { display: none; } .portada .lead { font-size: 1.05rem; } }
+@media (max-width: 560px) { .portada .notas { display: none; } .portada-texto { gap: 18px; } h1 { font-size: 2.35rem; } }
 
 /* Chat */
 .chat-lugar { min-width: 0; }
@@ -214,6 +216,23 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 @media (max-width: 960px) { .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .ruta { grid-template-columns: minmax(0, 1fr); } }
 
+/* Frase que cambia */
+.rota { display: block; color: var(--acento); }
+.rota-in { display: inline-block; position: relative; padding-bottom: .04em; background: linear-gradient(var(--acento), var(--acento)) left bottom / 100% .09em no-repeat; transition: opacity .28s ease, transform .28s ease, background-size .45s ease .1s; }
+.rota-in.sale { opacity: 0; transform: translateY(.18em); background-size: 0 .09em; }
+@media (prefers-reduced-motion: reduce) { .rota-in { transition: none; } }
+
+/* Ejemplos */
+.ejemplos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-bottom: 36px; }
+.ejemplo { display: grid; gap: 8px; border-top: 2px solid var(--tinta); padding-top: 16px; align-content: start; }
+.ejemplo .giro-s { font: 500 0.75rem/1.3 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--gris); }
+.ejemplo .giro-s b { color: var(--acento); font-weight: 500; }
+.ejemplo p { color: var(--gris); }
+.ver-demo { margin-top: 20px; }
+@media (max-width: 820px) { .ejemplos { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
+.con-chips { margin-top: 36px; display: grid; gap: 12px; }
+.con-chips p { font: 500 0.78rem/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--gris); }
+
 /* Precios */
 .planes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .plan { border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 24px 22px; display: grid; gap: 12px; align-content: start; position: relative; }
@@ -229,7 +248,9 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .arranque { margin-top: 12px; border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 22px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 32px; align-items: center; }
 .arranque .p-precio { font: 700 1.6rem/1 var(--f-display); color: var(--tinta); letter-spacing: -.02em; }
 .arranque p { color: var(--gris); }
-.incluye { margin-top: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; }
+.mas-precio { margin-top: 18px; border: 0; }
+.mas-precio summary { font-size: 1rem; padding: 14px 0; }
+.incluye { margin-top: 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; }
 .incluye h3 { font-size: 1rem; margin-bottom: 8px; }
 .incluye ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--gris); font-size: .97rem; }
 @media (max-width: 960px) { .planes, .incluye { grid-template-columns: minmax(0, 1fr); } .arranque { grid-template-columns: minmax(0, 1fr); } }
@@ -286,9 +307,9 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     </a>
     <nav class="nav" aria-label="Secciones">
       <a href="#como-funciona">Cómo funciona</a>
-      <a href="#situaciones">Situaciones</a>
-      <a href="#como-empezamos">Cómo empezamos</a>
+      <a href="#ejemplos">Ejemplos</a>
       <a href="#precios">Precios</a>
+      <a href="#nosotros">Equipo</a>
       <a href="#preguntas">Preguntas</a>
     </nav>
     <button class="btn btn-primario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
@@ -301,8 +322,8 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
   <div class="envoltura">
     <div class="portada-texto">
       <p class="etiqueta">Sistemas a la medida para PyMEs</p>
-      <h1>Captura una vez. <span class="acento">Lo demás se actualiza solo.</span></h1>
-      <p class="lead">Nos conectamos a lo que ya usas (ventas, facturación, los portales de tus clientes, Excel y WhatsApp) y lo juntamos en un sistema hecho a tu medida: todo tu negocio en un solo lugar, sin que dejes de usar lo que ya funciona.</p>
+      <h1>Captura una vez <span class="rota" aria-hidden="true"><span class="rota-in" id="rota">tus pedidos</span></span><span class="sr">tus pedidos, facturas, cobranza e inventario</span> y lo demás se actualiza solo.</h1>
+      <p class="lead">Conectamos lo que ya usas (ventas, facturación, Excel y WhatsApp) en un solo sistema hecho a tu medida. Sin dejar lo que ya te funciona.</p>
       <div class="botones">
         <a class="btn btn-primario" data-accion="clic_agendar" href="#contacto">Agenda una llamada de 30 min</a>
         <button class="btn btn-secundario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
@@ -331,122 +352,46 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
   </div>
 </section>
 
-<section class="problema borde-arriba" id="problema">
-  <div class="envoltura">
-    <div class="cabeza">
-      <p class="etiqueta">El problema</p>
-      <h2>Tu información vive en cinco lugares que no se hablan.</h2>
-      <p class="lead">El sistema de ventas, el de facturación, el portal que te exige tu cliente, el Excel de siempre y el grupo de WhatsApp. Cada uno funciona solo, y alguien de tu equipo pasa horas copiando de uno a otro.</p>
-    </div>
-    <div class="dolores">
-      <div class="dolor"><h3>El mismo dato, tres veces</h3><p>Se captura en ventas, otra vez en facturación y otra en el portal del cliente.</p></div>
-      <div class="dolor"><h3>Errores y horas perdidas</h3><p>Cada copia a mano es una oportunidad de equivocarse y un rato que no se usa en vender.</p></div>
-      <div class="dolor"><h3>Nadie ve el negocio completo</h3><p>La información está regada y el dueño decide con datos de la semana pasada.</p></div>
-    </div>
-    <figure class="objecion">
-      <div>
-        <blockquote>“Ya tengo muchos portales. No quiero uno más.”</blockquote>
-        <figcaption>Lo que nos dijo un cliente</figcaption>
-      </div>
-      <p>Tiene toda la razón. Por eso Unaria no es otro portal: nos conectamos a los que ya usas y los juntamos. No te pedimos que subas tu información otra vez ni que cambies cómo trabajas.</p>
-    </figure>
-  </div>
-</section>
-
 <section class="borde-arriba" id="como-funciona">
   <div class="envoltura">
     <div class="cabeza">
       <p class="etiqueta">Cómo funciona</p>
-      <h2>Tres pasos, empezando por lo que más te cuesta.</h2>
+      <h2>Tu información vive en cinco lugares que no se hablan. Nosotros los juntamos.</h2>
+      <p class="lead">No es un portal más: nos conectamos a lo que ya usas y nadie vuelve a pasar datos a mano.</p>
     </div>
     <div class="pasos">
-      <div class="paso"><h3>Entendemos tu operación</h3><p>Vemos cómo trabajas hoy, qué sistemas usas y dónde se captura lo mismo dos o tres veces.</p></div>
-      <div class="paso"><h3>Conectamos lo que ya usas</h3><p>Hacemos que tus sistemas se hablen entre sí. Lo que se captura en uno aparece solo en los demás.</p></div>
-      <div class="paso"><h3>Ves todo junto y medimos el ahorro</h3><p>Una sola pantalla para operar y decidir, y cuentas claras de cuántas horas y errores te estás ahorrando.</p></div>
+      <div class="paso"><h3>Entendemos tu operación</h3><p>Llamada de 30 minutos sin costo. Vemos dónde se captura lo mismo dos o tres veces y cuánto te cuesta.</p></div>
+      <div class="paso"><h3>Conectamos lo que ya usas</h3><p>Lo que se captura en un lado aparece solo en los demás. Empezamos por lo que más horas te ahorra.</p></div>
+      <div class="paso"><h3>Ves todo junto</h3><p>Una sola pantalla para operar y decidir, con cuentas claras de las horas que te ahorras.</p></div>
     </div>
-  </div>
-</section>
-
-<section class="medida borde-arriba" id="a-tu-medida">
-  <div class="envoltura">
-    <div style="display:grid;gap:22px;min-width:0">
-      <p class="etiqueta">Hecho a tu medida</p>
-      <p class="grande">Nos adaptamos a tu empresa. <span class="acento">No tú a nosotros.</span></p>
-      <p class="lead">Tengas cero sistemas o cinco, todo encaja en uno. Cada proyecto se diseña según cómo ya trabaja tu equipo, sin importar a qué se dedique tu empresa.</p>
-      <div class="industrias" aria-label="Industrias">
-        <span>Comercio</span><span>Distribución</span><span>Manufactura</span><span>Servicios</span><span>Construcción</span><span>Inmobiliarias</span><span>Tiendas en línea</span><span>Despachos</span><span class="otra">¿La tuya no está? También aplica</span>
-      </div>
-    </div>
-    <div class="principios">
-      <div class="principio">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M4 12h16M4 17h7"/><circle cx="17" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>
-        <h3>Nos adaptamos a ti</h3><p>No te pedimos que cambies tu forma de operar ni que dejes las herramientas que te funcionan.</p>
-      </div>
-      <div class="principio">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 9v9"/></svg>
-        <h3>Todo en un mismo lugar</h3><p>Ventas, cobranza, facturas, inventario y reportes en una pantalla, conectada a lo que ya existe.</p>
-      </div>
-      <div class="principio">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>
-        <h3>Capturar una vez</h3><p>Nadie vuelve a pasar datos a mano de un sistema a otro.</p>
+    <div class="con-chips">
+      <p>Nos conectamos con</p>
+      <div class="lista-con">
+        <span>Aspel</span><span>Facturación (SAT)</span><span>Excel y Google Sheets</span><span>WhatsApp</span><span>Shopify</span><span>CRMs</span><span>Portales de clientes</span><span>Correo</span><span class="mas">¿Usas otro? Pregúntanos</span>
       </div>
     </div>
   </div>
 </section>
 
-<section class="borde-arriba" id="situaciones">
+<section class="borde-arriba" id="ejemplos">
   <div class="envoltura">
     <div class="cabeza">
-      <p class="etiqueta">Situaciones que resolvemos</p>
+      <p class="etiqueta">Ejemplos</p>
       <h2>¿Te suena alguna?</h2>
-      <p class="lead">Pasa en negocios de todos los giros. Si te reconoces en alguna, platiquemos.</p>
     </div>
-    <div class="situaciones">
-      <div class="situacion"><p class="giro-s">Edificio de departamentos · <b>nuestro primer proyecto</b></p><h3>Cobra agua, luz y gas a cada departamento con cuentas a mano.</h3><p>Lectura de medidores con foto, cálculo automático por departamento y recibo enviado por WhatsApp o correo.</p></div>
-      <div class="situacion"><p class="giro-s">Comercio y distribución</p><h3>Captura el pedido en un sistema y la factura en otro.</h3><p>El pedido genera la factura sola, timbrada ante el SAT, y queda registrada para el contador.</p></div>
-      <div class="situacion"><p class="giro-s">Proveedor de grandes empresas</p><h3>Su cliente lo obliga a usar su propio CRM.</h3><p>Conectamos ese CRM con su sistema para que no capture dos veces.</p></div>
-      <div class="situacion"><p class="giro-s">Tienda en línea</p><h3>Lleva pedidos, inventario y entregas por separado.</h3><p>Los pedidos de la tienda alimentan inventario, entregas y reportes en un solo tablero.</p></div>
-      <div class="situacion"><p class="giro-s">Cualquier empresa</p><h3>El dueño no sabe cuánto le deben ni cuánto vendió esta semana.</h3><p>Un tablero con ventas, cobranza y pendientes, actualizado solo.</p></div>
-      <div class="situacion"><p class="giro-s">Empresas sin sistema</p><h3>Todo vive en libretas, Excel y WhatsApp.</h3><p>Empezamos desde ahí: ordenamos lo que ya tienen y lo pasamos a un sistema a su medida, paso a paso.</p></div>
+    <div class="ejemplos">
+      <div class="ejemplo"><p class="giro-s">Edificios y rentas · <b>proyecto real</b></p><h3>Caseta, mantenimiento y avisos por WhatsApp.</h3><p>Paquetes con foto, pases de visita y reportes de fallas que llegan solos al responsable.</p></div>
+      <div class="ejemplo"><p class="giro-s">Comercio y distribución</p><h3>El pedido en un sistema y la factura en otro.</h3><p>El pedido genera la factura sola, timbrada ante el SAT y lista para el contador.</p></div>
+      <div class="ejemplo"><p class="giro-s">Cualquier empresa</p><h3>No sabes cuánto vendiste ni cuánto te deben.</h3><p>Un tablero con ventas, cobranza y pendientes que se actualiza solo.</p></div>
     </div>
     <figure class="captura">
       <picture>
         <source srcset="img/sistema-cobro-servicios.webp" type="image/webp">
         <img src="img/sistema-cobro-servicios.jpg" width="1600" height="950" loading="lazy" decoding="async"
-             alt="Pantalla del sistema: cobro de luz, gas y agua por departamento, con el total de cada uno y su aviso de cobro en PDF">
+             alt="Pantalla del sistema de un edificio con el resumen de cada departamento">
       </picture>
-      <figcaption>Así se ve el sistema del edificio: cada lectura con foto se convierte en el cobro de luz, gas y agua de cada departamento, con su aviso listo para enviar. <span>Datos de ejemplo.</span></figcaption>
+      <figcaption>Así se ve un sistema de Unaria por dentro. Cada uno se diseña para el negocio. <span>Datos de ejemplo.</span></figcaption>
     </figure>
-  </div>
-</section>
-
-<section class="conexiones borde-arriba" id="conexiones">
-  <div class="envoltura">
-    <div style="display:grid;gap:16px;min-width:0">
-      <p class="etiqueta">Con qué nos conectamos</p>
-      <h2>Con lo que ya usas.</h2>
-      <p class="lead">Si tu equipo ya lo usa todos los días, lo conectamos. No tienes que cambiarlo.</p>
-    </div>
-    <div class="lista-con">
-      <span>Aspel</span><span>Facturación electrónica (SAT)</span><span>Excel y Google Sheets</span><span>WhatsApp</span><span>Shopify</span><span>CRMs</span><span>Portales de clientes</span><span>Portales de proveedores</span><span>Correo</span><span class="mas">¿Usas otro? Pregúntanos</span>
-    </div>
-  </div>
-</section>
-
-<section class="borde-arriba" id="como-empezamos">
-  <div class="envoltura">
-    <div class="cabeza">
-      <p class="etiqueta">Cómo empezamos</p>
-      <h2>Poco riesgo al principio. Resultados rápido.</h2>
-      <p class="lead">No te pedimos un proyecto enorme de entrada. Empezamos por lo que más horas te ahorra y crecemos área por área.</p>
-    </div>
-    <div class="ruta">
-      <div class="etapa primera"><span class="e-num">1 · 30 minutos</span><h3>Llamada</h3><span class="e-precio">Sin costo</span><p>Entendemos tu operación y dónde te duele. Sales sabiendo si podemos ayudarte.</p></div>
-      <div class="etapa"><span class="e-num">2 · Diagnóstico</span><h3>Mapa de tu operación</h3><span class="e-precio" id="precio-diagnostico">Incluido en el arranque</span><p>Mapeamos tus sistemas, dónde capturas doble y cuánto te cuesta. Te llevas un mapa con números y prioridades.</p></div>
-      <div class="etapa"><span class="e-num">3 · Primera conexión</span><h3>Resultados rápido</h3><span class="e-precio">Arranque desde $35,000</span><p>Construimos primero lo que más horas te ahorra, para que veas resultados pronto.</p></div>
-      <div class="etapa"><span class="e-num">4 · Cada mes</span><h3>Crece contigo</h3><span class="e-precio">Desde $4,500 al mes</span><p>Soporte, mejoras y nuevas conexiones, área por área.</p></div>
-    </div>
-    <p class="nota-precio"><b>Sin sorpresas:</b> siempre sabes cuánto vas a pagar, por escrito, antes de empezar. <a href="#precios">Ver precios</a></p>
   </div>
 </section>
 
@@ -455,7 +400,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     <div class="cabeza">
       <p class="etiqueta">Precios</p>
       <h2>Precios claros desde la primera llamada.</h2>
-      <p class="lead">Dos números: un arranque a precio fijo y una mensualidad con todo incluido. Sin cobro por hora, sin cobro por uso de la inteligencia artificial y sin cargos sorpresa.</p>
+      <p class="lead">Un arranque a precio fijo y una mensualidad con todo incluido. Sin cobro por hora ni cargos sorpresa. La primera llamada no cuesta.</p>
     </div>
     <div class="planes">
       <div class="plan">
@@ -497,6 +442,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
       <div class="p-precio"><span class="p-desde">Arranque, una sola vez</span>Desde $35,000 <small>+ IVA</small></div>
       <p>Diagnóstico, diseño, construcción, carga de tus datos y capacitación. Precio fijo y por escrito antes de empezar: 50% al firmar y 50% cuando ya lo estás usando.</p>
     </div>
+    <details class="mas-precio"><summary>Qué incluye la mensualidad y qué no</summary>
     <div class="incluye">
       <div>
         <h3>La mensualidad incluye</h3>
@@ -523,6 +469,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
         </ul>
       </div>
     </div>
+    </details>
     <p class="nota-precio">Precios en pesos mexicanos más IVA. Contrato mínimo de 6 meses. El plan lo definimos juntos en la llamada según lo que necesitas conectar.</p>
   </div>
 </section>
@@ -560,10 +507,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     <div class="preguntas">
       <details><summary>¿Tengo que dejar mis sistemas?</summary><p>No. Nos conectamos a los que ya usas y los juntamos en un solo lugar. Si alguno de verdad te estorba, te lo decimos, pero la decisión es tuya.</p></details>
       <details><summary>¿Y si no tengo ningún sistema?</summary><p>También es para ti. Empezamos con lo que tengas (Excel, libretas, WhatsApp) y lo convertimos en un sistema a tu medida, sin que tengas que aprender algo complicado.</p></details>
-      <details><summary>¿Mis datos son míos si dejo de trabajar con ustedes?</summary><p>Sí. Tu información es tuya. Cada cliente tiene su propia base de datos, separada de las demás, y si un día decides irte te la entregamos completa en un formato que puedas abrir, como Excel.</p></details>
-      <details><summary>¿Mis datos están seguros?</summary><p>Cada persona de tu equipo entra con su propio usuario y ve solo lo que le toca. Tu base de datos no se comparte con ningún otro cliente.</p></details>
-      <details><summary>¿Usan inteligencia artificial?</summary><p>Sí, cuando ayuda: por ejemplo, para leer facturas o documentos, ordenar información o automatizar tareas repetitivas. Pero no te vendemos inteligencia artificial; te vendemos menos trabajo repetido y la información junta.</p></details>
-      <details><summary>¿Qué pasa si mi sistema actual cambia?</summary><p>Ajustamos la conexión. Para eso es la mensualidad: soporte, mejoras y cambios conforme tu empresa y tus herramientas cambian.</p></details>
+      <details><summary>¿Mis datos son míos si dejo de trabajar con ustedes?</summary><p>Sí. Tu información es tuya. Cada cliente tiene su propia base de datos, separada de las demás, y si un día decides irte te la entregamos completa en un formato que puedas abrir, como Excel. Cada persona de tu equipo entra con su usuario y ve solo lo que le toca.</p></details>
       <details><summary>¿Cuánto tarda?</summary><p>Depende de lo que encontremos en el diagnóstico. Empezamos por una sola conexión para que veas resultados pronto, y la fecha de entrega te la damos por escrito antes de empezar.</p></details>
       <details><summary>¿Cuánto cuesta?</summary><p id="faq-precio">La llamada de 30 minutos no tiene costo. El arranque es desde $35,000 una sola vez e incluye el diagnóstico, y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA, según lo que conectemos. Te damos el precio exacto por escrito antes de empezar.</p></details>
       <details><summary>¿Sirve para mi industria?</summary><p>Sí. No trabajamos para un solo giro: diseñamos cada sistema según cómo opera tu empresa, sea comercio, servicios, manufactura, construcción o cualquier otra.</p></details>
@@ -633,6 +577,19 @@ const CONFIG = {
     $('precio-diagnostico').textContent = 'Desde ' + CONFIG.precioDiagnostico;
     $('faq-precio').textContent = 'La llamada de 30 minutos no tiene costo. El diagnóstico cuesta desde ' + CONFIG.precioDiagnostico + ', y la primera conexión tiene precio fijo que te damos por escrito antes de empezar.';
   }
+  // Frase que cambia en la portada
+  (function () {
+    const el = $('rota'); if (!el) return;
+    const palabras = ['tus pedidos', 'tus facturas', 'tu cobranza', 'tu inventario', 'tus clientes', 'tus citas'];
+    if (reduce) return;
+    let i = 0;
+    setInterval(() => {
+      if (document.hidden) return;
+      el.classList.add('sale');
+      setTimeout(() => { i = (i + 1) % palabras.length; el.textContent = palabras[i]; el.classList.remove('sale'); }, 300);
+    }, 2400);
+  })();
+
   // Fotos: si todavía no existen, se queda la inicial
   document.querySelectorAll('.foto img').forEach(img => {
     const quitar = () => { const f = img.parentElement; img.remove(); f.textContent = f.dataset.inicial; };
