@@ -17,7 +17,9 @@
     negocios: [
       { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', color: '#C9500C', empresa_id: 'emp-chb',
         modulos: ['bandeja', 'eventos', 'anuncios'], titulos: { bandeja: 'Mensajes' } },
-      { id: 'curandero', nombre: 'Curandero', giro: 'Café · Mitras', inicial: 'Cu', color: '#2F5D50', empresa_id: 'emp-cur', modulos: ['ventas'] },
+      { id: 'curandero', nombre: 'Curandero', giro: 'Café y pan · Mitras', inicial: 'Cu', empresa_id: 'emp-cur', modulos: ['ventas'],
+        // Manual de identidad (Uncommon Studio): #2e3526 · #697148 · #D1C9B3; letras King Graphics y Bicyclette
+        color: '#697148', color2: '#2e3526', colorSuave: '#ECE8DC', colorFondo: '#697148', colorTinta: '#D1C9B3', isotipo: 'img/clientes/curandero-isotipo.svg' },
       { id: 'lattico', nombre: 'Lattico', giro: 'Por conectar', inicial: 'La', color: '#6B4FA0', empresa_id: 'emp-lat', modulos: ['ventas'],
         notaLoyverse: 'Lattico todavía no tiene Loyverse. En cuanto lo contrate, aquí se conecta con su propio token y sus ventas quedan separadas de las de Curandero.' },
       { id: 'casamaria', nombre: 'Casa María', giro: 'Rentas', inicial: 'CM', color: '#8A6D1F', empresa_id: 'emp-cm', modulos: ['preparacion'],
@@ -163,7 +165,7 @@
       { org_id: ORG, user_id: 'demo-u1', nombre: 'Jimmy', usuario: 'jimmy', rol: 'administracion', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z', ultimo_acceso: hace(180) },
     ];
     const E1 = { id: 'emp-chb', org_id: ORG, nombre: 'Chilabike', nombre_corto: 'Chilabike', color: COLOR, activo: true };
-    const empresas = [E1, { id: 'emp-cur', org_id: ORG, nombre: 'Curandero', nombre_corto: 'Curandero', color: '#2F5D50', activo: true },
+    const empresas = [E1, { id: 'emp-cur', org_id: ORG, nombre: 'Curandero', nombre_corto: 'Curandero', color: '#697148', activo: true },
       { id: 'emp-lat', org_id: ORG, nombre: 'Lattico', nombre_corto: 'Lattico', color: '#6B4FA0', activo: true },
       { id: 'emp-cm', org_id: ORG, nombre: 'Casa María', nombre_corto: 'Casa María', color: '#8A6D1F', activo: true }];
     const lv = window.__DEMO_LOYVERSE ? window.__DEMO_LOYVERSE(ORG) : {};

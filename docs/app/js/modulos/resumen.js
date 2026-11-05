@@ -18,7 +18,7 @@ export async function render(view) {
     <p class="rs-fecha">${esc(fecha.charAt(0).toUpperCase() + fecha.slice(1))}</p>
     <div class="rs-negocios">${tarjetas.map(({ n, lineas, aviso }) => `
       <a class="rs-neg" href="${ir(n.id + '-' + (n.modulos || [])[0])}" style="--c:${n.color || 'var(--primary)'}">
-        <span class="rs-top"><span class="neg-ico" style="background:${n.color || 'var(--primary)'};width:34px;height:34px;font-size:15px;border-radius:9px">${esc(n.inicial || n.nombre.charAt(0))}</span>
+        <span class="rs-top">${(n.insignia || '').replace('class="neg-ico"', 'class="neg-ico" data-grande')}
           <span><b>${esc(n.nombre)}</b><small>${esc(n.giro || '')}</small></span><span class="rs-ir">Abrir ›</span></span>
         ${aviso ? `<span class="rs-aviso">${esc(aviso)}</span>` : ''}
         <span class="rs-datos">${lineas.map(([v, t, alerta]) => `<span class="${alerta ? 'al' : ''}"><b>${v}</b><small>${esc(t)}</small></span>`).join('')}</span>
@@ -59,6 +59,8 @@ function estilos() {
   .rs-neg { display:grid; gap:12px; align-content:start; background:var(--surface); border:1px solid var(--border); border-top:4px solid var(--c); border-radius:12px; padding:16px 18px; color:var(--text); text-decoration:none; transition:box-shadow .15s; }
   .rs-neg:hover { box-shadow:0 6px 22px -12px rgba(0,0,0,.25); }
   .rs-top { display:flex; gap:12px; align-items:center; } .rs-top > span:nth-child(2) { flex:1; display:grid; } .rs-top b { font-size:17px; } .rs-top small { font-size:12.5px; }
+  .rs-top .neg-ico[data-grande] { width:38px; height:38px; font-size:15px; border-radius:10px; }
+  .rs-logo { height:30px; width:auto; }
   .rs-ir { font-size:13px; font-weight:600; color:var(--c); }
   .rs-datos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
   .rs-datos > span { background:var(--surface-2); border-radius:8px; padding:9px 11px; display:grid; gap:1px; } .rs-datos b { font-size:20px; } .rs-datos small { font-size:12px; color:var(--text-2); }

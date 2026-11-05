@@ -201,7 +201,11 @@ if (MARCA.negocios) {
     MODULOS.push({ ...b, id, grupo: n.nombre, titulo: (n.titulos || {})[mid] || b.titulo, vista: b.vista || mid, negocio: n, opcional: true });
     ids.push(id);
   }));
-  const insignia = (n) => `<span class="neg-ico" style="background:${n.color || 'var(--primary)'}">${n.inicial || n.nombre.charAt(0)}</span>`;
+  // Ícono del negocio: su isotipo (SVG de una tinta, se pinta con sus colores) o sus iniciales
+  const insignia = (n) => n.isotipo
+    ? `<span class="neg-ico" style="background:${n.colorFondo || n.color || 'var(--primary)'}"><i style="background:${n.colorTinta || '#fff'};-webkit-mask:url(${n.isotipo}) center/contain no-repeat;mask:url(${n.isotipo}) center/contain no-repeat"></i></span>`
+    : `<span class="neg-ico" style="background:${n.color || 'var(--primary)'}">${n.inicial || n.nombre.charAt(0)}</span>`;
+  MARCA.negocios.forEach((n) => { n.insignia = insignia(n); });
   MARCA.modulos = [...(MARCA.menuGeneral || []).map((e) => e.id), ...ids, ...(MARCA.ajustes || [])];
   MARCA.menu = [...(MARCA.menuGeneral || []),
     ...MARCA.negocios.map((n) => ({ titulo: n.nombre, modulos: (n.modulos || []).map((m) => `${n.id}-${m}`), iconoHtml: insignia(n), siempreGrupo: true, negocio: true }))];

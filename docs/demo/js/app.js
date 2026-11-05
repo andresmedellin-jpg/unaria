@@ -314,8 +314,9 @@ async function navegar() {
   // Cada negocio con su color (MARCA.negocios[].color); fuera de un negocio, el de la marca
   {
     const r = document.documentElement.style, c = mod.negocio?.color || MARCA.color;
-    if (c) { r.setProperty('--primary', c); r.setProperty('--primary-2', mod.negocio?.color ? `color-mix(in srgb, ${c} 82%, black)` : (MARCA.color2 || c));
-      r.setProperty('--primary-soft', mod.negocio?.color ? `color-mix(in srgb, ${c} 12%, white)` : (MARCA.colorSuave || '')); }
+    const n = mod.negocio;
+    if (c) { r.setProperty('--primary', c); r.setProperty('--primary-2', n?.color ? (n.color2 || `color-mix(in srgb, ${c} 82%, black)`) : (MARCA.color2 || c));
+      r.setProperty('--primary-soft', n?.color ? (n.colorSuave || `color-mix(in srgb, ${c} 12%, white)`) : (MARCA.colorSuave || '')); }
   }
   // Cada vez que se abre un módulo se le da una caja nueva. Si una carga anterior sigue en camino
   // (doble clic, cambio rápido de pantalla, sesión que se renueva), termina en su caja vieja y no estorba.
