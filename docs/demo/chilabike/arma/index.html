@@ -85,6 +85,16 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
 .ubi { width:100%; font:inherit; font-weight:700; font-size:15px; background:var(--papel); border:2px dashed var(--linea); border-radius:14px; padding:12px; cursor:pointer; color:var(--negro); }
 .ubi.on { border-style:solid; border-color:#7BC47F; background:#EEF8EE; }
 .op.fila { flex-direction:row; align-items:center; justify-content:space-between; gap:10px; min-height:0; padding-right:40px; } .op.fila small { display:block; }
+.busca { position:relative; }
+.sug { display:none; position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:9; background:var(--papel); border:2px solid var(--negro); border-radius:14px; overflow:hidden; box-shadow:0 16px 32px -14px rgba(0,0,0,.45); }
+.sug.on { display:block; }
+.sug button { display:block; width:100%; text-align:left; font:inherit; background:none; border:0; border-bottom:1px solid var(--linea); padding:10px 12px 10px 38px; cursor:pointer; position:relative; color:var(--texto); }
+.sug button::before { content:"📍"; position:absolute; left:12px; top:11px; font-size:15px; }
+.sug button b { display:block; font-size:15px; font-weight:700; } .sug button small { color:var(--gris); font-size:12.5px; font-weight:400; }
+.sug button.on, .sug button:hover { background:var(--suave); }
+.sug-pie { font-size:10.5px; color:var(--gris); text-align:right; padding:4px 10px; font-weight:400; }
+.ok-dir { margin:-4px 0 6px; font-size:13.5px; font-weight:700; color:#2E7D32; }
+.ubi.mal { border-color:#F5C77E; background:#FFFAEB; color:#7A4B00; }
 .incl { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
 .incl li { display:flex; gap:12px; align-items:flex-start; background:var(--papel); border:1px solid var(--linea); border-radius:14px; padding:10px 12px; font-size:14px; color:var(--gris); }
 .incl li span { font-size:22px; line-height:1.1; } .incl li b { display:block; color:var(--negro); font-size:15px; }
@@ -106,6 +116,7 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
 <script>
 // ---------- configuración (producción: la función de Supabase de Chilabike) ----------
 var CONFIG = {
+  mapsKey: '',      // llave de Google Maps (Places). Sin llave, las sugerencias salen de OpenStreetMap (Photon)
   menuUrl: '',      // GET → el menú publicado (tabla app.menus)
   pedidoUrl: '',    // POST → crea el pedido (tabla app.pedidos) y lo liga a la conversación
 };
@@ -196,7 +207,7 @@ var ENTREGA = { listo: function () { return (st.entrega === 'recoger' && !!st.su
   return '<h1>¿Cómo te lo damos?</h1><p class="ayuda">A domicilio te llega con uno de nuestros choferes.</p><div class="grid g2">' +
     '<button class="op' + (st.entrega === 'domicilio' ? ' on' : '') + '" data-ent="domicilio"><span class="ico">🛵</span><b>A domicilio</b><span class="p">' + (M.envio ? '+' + dinero(M.envio) : 'Sin costo') + '</span></button>' +
     '<button class="op' + (st.entrega === 'recoger' ? ' on' : '') + '" data-ent="recoger"><span class="ico">🏪</span><b>Paso por él</b><span class="p">Sin costo</span></button></div>' +
-    (st.entrega === 'domicilio' ? '<div style="margin-top:14px"><label class="campo">Dirección<input id="dir" value="' + esc(st.direccion) + '" placeholder="Calle, número y colonia" autocomplete="street-address"></label></div>' : '') +
+    (st.entrega === 'domicilio' ? '<div style="margin-top:14px"><label class="campo">Dirección<div class="busca"><input id="dir" value="' + esc(st.direccion) + '" placeholder="Escribe tu calle y número" autocomplete="off"><div class="sug" id="dir-sug"></div></div></label>' + (st.dirMapa ? '<p class="ok-dir">📍 Ubicación exacta guardada</p>' : '<p class="nota" style="text-align:left;margin:-4px 0 0">Escribe y escoge tu dirección de la lista.</p>') + '</div>' : '') +
     (st.entrega === 'recoger' ? '<div class="seccion" style="margin-top:18px">¿En qué sucursal?</div><div class="sucs">' + M.sucursales.map(function (s) {
       var u = ubic(s), cerrada = !abreHoy(s);
       return '<div class="suc' + (s === st.sucursal ? ' on' : '') + (cerrada ? ' cerrada' : '') + '" data-suc="' + esc(s) + '"><div><b>' + esc(s) + '</b>' +
@@ -226,14 +237,14 @@ var EVENTOS = [
       '<div class="seccion">Horario</div><div class="grid g2">' + (EV().horarios || []).map(function (h) {
         return '<button class="op' + (st.ev.horario === h.id ? ' on' : '') + '" data-ev-hor="' + h.id + '"><span class="ico">' + (ico[h.id] || '🕒') + '</span><b>' + esc(h.nombre) + '</b><span class="p">Mínimo ' + h.minimo + ' órdenes</span></button>'; }).join('') + '</div>' +
       (st.ev.horario ? '<label class="campo" style="margin-top:14px">Hora aproximada<input type="time" id="ev-hora" value="' + esc(st.ev.hora) + '"></label>' : ''); } },
-  { listo: function () { return st.ev.personas >= minimo() && st.ev.lugar.trim().length > 3 && (!(EV().zonas || []).length || !!st.ev.zona); }, al: function () { if (st.ev.personas < minimo()) st.ev.personas = minimo(); }, html: function () {
+  { listo: function () { return st.ev.personas >= minimo() && (st.ev.lugar.trim().length > 3 || !!st.ev.ubicacion) && (!(EV().zonas || []).length || !!st.ev.zona); }, al: function () { if (st.ev.personas < minimo()) st.ev.personas = minimo(); }, html: function () {
     var E = st.ev, m = minimo(), pp = EV().precioPersona;
     return '<h1>¿Cuántos y dónde?</h1><p class="ayuda">Una orden por persona.</p>' +
       '<div class="cant"><button data-ev-pers="-5" aria-label="Menos">−</button><b id="ev-pers-n">' + E.personas + '</b><span>personas<br><small>mínimo ' + m + ' en este horario</small></span><button data-ev-pers="5" aria-label="Más">+</button></div>' +
       '<div class="rango" style="margin:10px 0 4px"><input type="range" id="ev-pers" min="' + m + '" max="' + Math.max(500, m * 4) + '" step="1" value="' + E.personas + '"></div>' +
       (pp ? '<p class="ayuda" id="ev-estim">' + E.personas + ' × ' + dinero(pp) + ' = <b>' + dinero(pp * E.personas) + '</b></p>' : '') +
-      '<label class="campo">¿Dónde es? <small style="font-weight:400;color:var(--gris)">colonia, salón o dirección</small><input id="ev-lugar" value="' + esc(E.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago"></label>' +
-      '<button class="ubi' + (E.ubicacion ? ' on' : '') + '" id="ev-ubi">' + (E.ubicacion ? '✅ Ubicación compartida' : '📍 Compartir la ubicación exacta') + '</button>' +
+      '<label class="campo">¿Dónde es? <small style="font-weight:400;color:var(--gris)">escribe y escoge de la lista</small><div class="busca"><input id="ev-lugar" value="' + esc(E.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago" autocomplete="off"><div class="sug" id="ev-sug"></div></div></label>' +
+      (E.ubicacion ? '<p class="ok-dir">📍 Ubicación exacta guardada' + (E.km != null ? ' · a ' + E.km + ' km de Monterrey' : '') + '</p>' : '<button class="ubi" id="ev-ubi">📍 Estoy en el lugar: usar mi ubicación</button>') +
       ((EV().zonas || []).length ? '<div class="seccion">¿Por qué zona? <small>para el traslado</small></div><div class="grid">' + EV().zonas.map(function (z) {
         return '<button class="op fila' + (E.zona === z.id ? ' on' : '') + '" data-ev-zona="' + z.id + '"><div><b>' + esc(z.nombre) + '</b>' + (z.detalle ? '<small>' + esc(z.detalle) + '</small>' : '') + '</div><span class="p">' + rango(z) + '</span></button>'; }).join('') + '</div>' : ''); } },
   { siFactura: true, listo: function () { return st.ev.factura !== null; }, auto: true, html: function () {
@@ -252,6 +263,44 @@ var EVENTOS = [
       '<div class="seccion">El servicio incluye</div>' + listaIncluye() +
       (X.condiciones ? '<p class="nota" style="text-align:left">' + esc(X.condiciones) + '</p>' : ''); } },
 ];
+// ---------- buscador de direcciones (como Google Maps: escribes y escoges) ----------
+var MTY = { lat: 25.6866, lng: -100.3161 };
+function km(a, b) { var r = Math.PI / 180, x = (b.lng - a.lng) * r * Math.cos((a.lat + b.lat) / 2 * r), y = (b.lat - a.lat) * r; return Math.round(Math.sqrt(x * x + y * y) * 6371); }
+function zonaPorKm(k) { var z = EV().zonas || []; if (!z.length) return null; return (k <= 22 ? z[0] : k <= 60 ? z[1] || z[0] : z[2] || z[z.length - 1]).id; }
+var etiqueta = function (p) { var a = [p.name, [p.street, p.housenumber].filter(Boolean).join(' ')].filter(Boolean); if (a[0] && a[1] && a[1].indexOf(a[0]) === 0) a.shift();
+  return { t: a.join(', ') || p.city || '', d: [p.district || p.locality, p.city, p.state].filter(Boolean).filter(function (x, i, l) { return l.indexOf(x) === i; }).join(', ') }; };
+function sugerencias(q) {
+  if (CONFIG.mapsKey && window.google && google.maps && google.maps.places) return new Promise(function (ok) {
+    new google.maps.places.AutocompleteService().getPlacePredictions({ input: q, componentRestrictions: { country: 'mx' }, locationBias: { center: MTY, radius: 80000 } }, function (r) {
+      ok((r || []).map(function (x) { return { t: x.structured_formatting.main_text, d: x.structured_formatting.secondary_text, id: x.place_id }; })); }); });
+  return fetch('https://photon.komoot.io/api/?limit=6&lat=25.6866&lon=-100.3161&bbox=-101.6,24.6,-99.4,26.6&q=' + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (j) {
+    return (j.features || []).map(function (f) { var e = etiqueta(f.properties); return { t: e.t, d: e.d, lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] }; }); });
+}
+function detalle(x) {
+  if (!x.id) return Promise.resolve(x);
+  return new Promise(function (ok) { new google.maps.places.PlacesService(document.createElement('div')).getDetails({ placeId: x.id, fields: ['geometry', 'formatted_address'] }, function (p) {
+    ok(p ? { t: x.t, d: p.formatted_address, lat: p.geometry.location.lat(), lng: p.geometry.location.lng() } : x); }); });
+}
+// Conecta un campo con su lista de sugerencias; alElegir recibe { t, d, lat, lng }
+function buscador(input, lista, alEscribir, alElegir) {
+  var t, ult = '', marcado = -1, res = [];
+  var cerrar = function () { lista.innerHTML = ''; lista.classList.remove('on'); };
+  var pinta = function () { lista.innerHTML = res.map(function (x, i) { return '<button type="button" data-i="' + i + '"' + (i === marcado ? ' class="on"' : '') + '><b>' + esc(x.t) + '</b><small>' + esc(x.d) + '</small></button>'; }).join('') +
+    '<div class="sug-pie">' + (CONFIG.mapsKey ? 'Google Maps' : '© OpenStreetMap') + '</div>'; lista.classList.toggle('on', res.length > 0);
+    lista.querySelectorAll('[data-i]').forEach(function (b) { b.onmousedown = function (e) { e.preventDefault(); elegir(res[+b.dataset.i]); }; }); };
+  var elegir = function (x) { cerrar(); detalle(x).then(function (y) { input.value = y.t + (y.d ? ', ' + y.d : ''); alElegir(y); }); };
+  input.addEventListener('input', function () { alEscribir(input.value); clearTimeout(t); var q = input.value.trim(); if (q.length < 3) return cerrar();
+    t = setTimeout(function () { ult = q; sugerencias(q).then(function (r) { if (ult !== q) return; res = r; marcado = -1; pinta(); }).catch(cerrar); }, 280); });
+  input.addEventListener('keydown', function (e) { if (!res.length || !lista.classList.contains('on')) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); marcado = (marcado + (e.key === 'ArrowDown' ? 1 : -1) + res.length) % res.length; pinta(); }
+    if (e.key === 'Enter' && marcado >= 0) { e.preventDefault(); elegir(res[marcado]); } });
+  input.addEventListener('blur', function () { setTimeout(cerrar, 150); });
+}
+function inverso(lat, lng) {
+  return fetch('https://photon.komoot.io/reverse?lat=' + lat + '&lon=' + lng).then(function (r) { return r.json(); }).then(function (j) { var f = (j.features || [])[0]; if (!f) return ''; var e = etiqueta(f.properties); return e.t + (e.d ? ', ' + e.d : ''); }).catch(function () { return ''; });
+}
+if (CONFIG.mapsKey) { var gm = document.createElement('script'); gm.src = 'https://maps.googleapis.com/maps/api/js?libraries=places&language=es&region=MX&key=' + encodeURIComponent(CONFIG.mapsKey); gm.async = true; document.head.appendChild(gm); }
+var mapa = function (lat, lng) { return 'https://maps.google.com/?q=' + (+lat).toFixed(6) + ',' + (+lng).toFixed(6); };
 var zona = function () { return (EV().zonas || []).filter(function (z) { return z.id === st.ev.zona; })[0] || null; };
 var rango = function (z) { return z.min === z.max ? dinero(z.min) : dinero(z.min) + '–' + dinero(z.max); };
 function horaBonita(h) { if (!h) return ''; var p = h.split(':'), d = new Date(); d.setHours(+p[0], +p[1]); return d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); }
@@ -282,7 +331,8 @@ function enlazar() {
   document.querySelectorAll('[data-quitar]').forEach(function (b) { b.onclick = function () { st.carrito.splice(Number(b.dataset.quitar), 1); pintar(); }; });
   var otra = $('[data-otra]'); if (otra) otra.onclick = function () { st.paso = 0; pintar(); };
   document.querySelectorAll('[data-ent]').forEach(function (b) { b.onclick = function () { st.entrega = b.dataset.ent; pintar(); var d = $('#dir'); if (d) d.focus(); }; });
-  var dir = $('#dir'); if (dir) dir.oninput = function () { st.direccion = dir.value; $('#sig').disabled = !PASOS[st.paso].listo(); };
+  var dir = $('#dir'); if (dir) buscador(dir, $('#dir-sug'), function (v) { st.direccion = v; st.dirMapa = null; $('#sig').disabled = !PASOS[st.paso].listo(); },
+    function (y) { st.direccion = dir.value; st.dirMapa = mapa(y.lat, y.lng); pintar(); });
   document.querySelectorAll('[data-suc]').forEach(function (b) { b.onclick = function (ev) { if (ev.target.closest('[data-mapa]') || b.classList.contains('cerrada')) return; st.sucursal = b.dataset.suc; pintar(); }; });
   document.querySelectorAll('[data-pago]').forEach(function (b) { b.onclick = function () { st.pago = b.dataset.pago; pintar(); }; });
   document.querySelectorAll('[data-cambio]').forEach(function (b) { b.onclick = function () { st.cambio = b.dataset.cambio; pintar(); }; });
@@ -295,14 +345,19 @@ function enlazar() {
   document.querySelectorAll('[data-ev-fac]').forEach(function (b) { b.onclick = function () { E.factura = b.dataset.evFac === 'si'; pintar(); setTimeout(avanzar, 260); }; });
   document.querySelectorAll('[data-ev-pers]').forEach(function (b) { b.onclick = function () { pers(E.personas + Number(b.dataset.evPers)); }; });
   document.querySelectorAll('[data-ev-zona]').forEach(function (b) { b.onclick = function () { E.zona = b.dataset.evZona; pintar(); }; });
+  var fijar = function (lat, lng) { E.ubicacion = mapa(lat, lng); E.km = km(MTY, { lat: lat, lng: lng }); E.zona = zonaPorKm(E.km) || E.zona; };
   var ub = $('#ev-ubi'); if (ub) ub.onclick = function () {
-    if (!navigator.geolocation) return; ub.textContent = 'Buscando tu ubicación…';
-    navigator.geolocation.getCurrentPosition(function (p) { E.ubicacion = 'https://maps.google.com/?q=' + p.coords.latitude.toFixed(6) + ',' + p.coords.longitude.toFixed(6); pintar(); },
-      function () { ub.textContent = CANAL ? 'No se pudo: mándala por el chat 📍' : 'No se pudo: escribe la dirección'; }, { timeout: 8000 }); };
+    var listo_ = false, falla = function (m) { if (listo_) return; listo_ = true; ub.textContent = m; ub.classList.add('mal'); };
+    if (!navigator.geolocation) return falla('Tu navegador no deja: escribe la dirección arriba');
+    ub.textContent = 'Buscando tu ubicación…'; setTimeout(function () { falla('No se pudo: escribe la dirección arriba ☝️'); }, 9000);
+    navigator.geolocation.getCurrentPosition(function (p) { if (listo_) return; listo_ = true; fijar(p.coords.latitude, p.coords.longitude);
+      inverso(p.coords.latitude, p.coords.longitude).then(function (t) { if (t && !E.lugar.trim()) E.lugar = t; pintar(); }); pintar(); },
+      function () { falla('No se pudo: escribe la dirección arriba ☝️'); }, { timeout: 8000, maximumAge: 60000 }); };
   var f = $('#ev-fecha'); if (f) f.oninput = function () { E.fecha = f.value; revisa(); };
   var h = $('#ev-hora'); if (h) h.onchange = function () { E.hora = h.value; var x = horarioDe(h.value); if (x && x.id !== E.horario) { E.horario = x.id; pintar(); } };
   var pr = $('#ev-pers'); if (pr) pr.oninput = function () { pers(Number(pr.value)); };
-  var lu = $('#ev-lugar'); if (lu) lu.oninput = function () { E.lugar = lu.value; revisa(); };
+  var lu = $('#ev-lugar'); if (lu) buscador(lu, $('#ev-sug'), function (v) { E.lugar = v; if (E.ubicacion) { E.ubicacion = null; E.km = null; pintar(); var n = $('#ev-lugar'); n.focus(); n.setSelectionRange(v.length, v.length); return; } revisa(); },
+    function (y) { E.lugar = lu.value; fijar(y.lat, y.lng); pintar(); });
 }
 function avanzar() {
   var p = PASOS[st.paso]; if (!p.listo()) return;
@@ -331,10 +386,10 @@ function terminar() {
       var el = {}; M.pasos.forEach(function (p) { var n = nombres(p.id, [].concat(c.e[p.id] || [])); if (n.length) el[p.id] = n; });
       return { cantidad: c.cant, producto: M.producto.nombre, precio_unit: precioUnit(c), total: precioCajita(c), elecciones: el, resumen: resumen(c) }; });
     pedido = { tipo: 'pedido', canal: CANAL || 'Página', conversacion: CONV, creado_en: ahora, items: items,
-      entrega: st.entrega, direccion: st.entrega === 'domicilio' ? st.direccion : null, sucursal: st.entrega === 'recoger' ? st.sucursal : null,
+      entrega: st.entrega, direccion: st.entrega === 'domicilio' ? st.direccion : null, mapa: st.entrega === 'domicilio' ? st.dirMapa || null : null, sucursal: st.entrega === 'recoger' ? st.sucursal : null,
       pago: st.pago, cambio: st.pago === 'Efectivo' ? st.cambio : null, subtotal: subtotal(), envio: envio(), total: total(),
       texto: '🛒 Mi pedido\n' + items.map(function (i) { return '• ' + i.cantidad + ' × ' + i.resumen; }).join('\n') +
-        '\n' + (st.entrega === 'domicilio' ? '🛵 A domicilio: ' + st.direccion : '🏪 Paso por él a ' + st.sucursal + (ubic(st.sucursal).mapa ? ' · ' + ubic(st.sucursal).mapa : '')) +
+        '\n' + (st.entrega === 'domicilio' ? '🛵 A domicilio: ' + st.direccion + (st.dirMapa ? ' · ' + st.dirMapa : '') : '🏪 Paso por él a ' + st.sucursal + (ubic(st.sucursal).mapa ? ' · ' + ubic(st.sucursal).mapa : '')) +
         '\n💳 ' + st.pago + (st.cambio && st.pago === 'Efectivo' ? ' (pago con ' + st.cambio + ')' : '') + '\nTotal: ' + dinero(total()) };
   }
   if (CONFIG.pedidoUrl) fetch(CONFIG.pedidoUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pedido) }).catch(function () {});
