@@ -555,7 +555,8 @@ const CONFIG = {
   correo: 'angelgalvan@unaria.mx',
   razonSocial: '',       // ej. 'Unaria, S.A.S. de C.V.' (sale en el pie de página)
   precioDiagnostico: '', // si lo quieren publicar, ej. '$8,000'; vacío = "precio fijo, por escrito"
-  googleAnalytics: '',   // ej. 'G-XXXXXXX'
+  googleAnalytics: 'G-PFWR87QDZJ', // Analytics de Unaria (cuenta angelgalvan@unaria.mx)
+  googleAds: 'AW-18558560286',     // Google Ads de Unaria, cliente 845-579-3248
   pixelMeta: '',         // ej. '1234567890'
   chatApi: 'https://gimvgsjpeyvdretubrgc.supabase.co/functions/v1/chat', // servidor del chat (función de Supabase). Vacío = preguntas guiadas sin IA
   supabaseUrl: 'https://gimvgsjpeyvdretubrgc.supabase.co', // base de Unaria (no la de Treme/MEDCO ni la de Moncan)
@@ -597,11 +598,13 @@ const CONFIG = {
   });
 
   // Medición
-  if (CONFIG.googleAnalytics) {
+  if (CONFIG.googleAnalytics || CONFIG.googleAds) {
     const s = document.createElement('script'); s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.googleAnalytics; document.head.appendChild(s);
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + (CONFIG.googleAnalytics || CONFIG.googleAds); document.head.appendChild(s);
     window.dataLayer = window.dataLayer || []; window.gtag = function () { dataLayer.push(arguments); };
-    gtag('js', new Date()); gtag('config', CONFIG.googleAnalytics);
+    gtag('js', new Date());
+    if (CONFIG.googleAnalytics) gtag('config', CONFIG.googleAnalytics);
+    if (CONFIG.googleAds) gtag('config', CONFIG.googleAds);
   }
   if (CONFIG.pixelMeta) {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
