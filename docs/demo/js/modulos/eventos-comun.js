@@ -74,7 +74,9 @@ export function fichaEvento({ evento = {}, ia = [], titulo, alGuardar }) {
         <label>Anticipo recibido<input type="number" name="anticipo" min="0" step="100" value="${esc(e.anticipo || '')}" placeholder="$"></label>
         <label>Estado<select name="estado">${ORDEN.map((k) => `<option value="${k}"${k === e.estado ? ' selected' : ''}>${ESTADOS[k].t}</option>`).join('')}</select></label>
       </div>
-      ${V.cotizacion?.precioPersona ? '<p class="chb-cotiza" id="chb-cotiza"></p>' : ''}
+      ${V.cotizacion?.precioPersona ? `<div class="chb-tras"><label>Traslado y montaje<input type="number" name="traslado" min="0" step="50" value="${esc(e.traslado ?? '')}" placeholder="$"></label>
+        <div class="chb-tras-op">${[...new Set((V.cotizacion.zonas || []).flatMap((z) => [z.min, z.max]))].map((n) => `<button type="button" data-tras="${n}">${dinero(n)}</button>`).join('')}</div>
+        ${e.ubicacion ? `<a href="${esc(e.ubicacion)}" target="_blank" rel="noopener">📍 Ver ubicación</a>` : ''}</div><p class="chb-cotiza" id="chb-cotiza"></p>` : ''}
       <label${marca('notas')}>Notas<textarea name="notas" rows="3">${esc(e.notas || '')}</textarea></label>
       ${e.canal ? `<p class="chb-origen">Llegó por <b>${esc(canalDe(e.canal).t)}</b>${e.anuncio ? ` · anuncio <b>${esc(e.anuncio)}</b>` : ''}${e.utm && Object.keys(e.utm).length ? ` · ${esc(Object.entries(e.utm).map(([k, v]) => `${k}=${v}`).join(' · '))}` : ''}</p>` : ''}
     </form>`,
@@ -89,18 +91,20 @@ export function fichaEvento({ evento = {}, ia = [], titulo, alGuardar }) {
     const calc = () => {
       const n = Number(F.personas.value) || 0, h = F.hora.value ? horarioDe(F.hora.value) : (Q.horarios || []).find((x) => x.nombre === F.paquete.value);
       if (h && F.paquete && [...F.paquete.options].some((o) => o.value === h.nombre) && (auto || !F.paquete.value)) F.paquete.value = h.nombre;
-      const tot = n * Q.precioPersona; if (auto && n) monto.value = tot;
+      const tr = Number(F.traslado.value) || 0, tot = n * Q.precioPersona + tr; if (auto && n) monto.value = tot;
       const bajo = h && n && n < h.minimo;
-      caja.innerHTML = n ? `<b>${n} × ${dinero(Q.precioPersona)} = ${dinero(tot)}</b>${Q.anticipo ? ` · anticipo ${Q.anticipo}%: <b>${dinero(tot * Q.anticipo / 100)}</b>` : ''} · + traslado según la ubicación${h ? `<br><span class="${bajo ? 'chb-bajo' : ''}">${esc(h.nombre)}: mínimo ${h.minimo} órdenes${bajo ? ` · faltan ${h.minimo - n}` : ' ✓'}</span>` : ''}`
+      caja.innerHTML = n ? `<b>${n} × ${dinero(Q.precioPersona)}${tr ? ` + ${dinero(tr)} de traslado` : ''} = ${dinero(tot)}</b>${Q.anticipo ? ` · anticipo ${Q.anticipo}%: <b>${dinero(tot * Q.anticipo / 100)}</b>` : ''}${tr ? '' : ' · falta el traslado'}${h ? `<br><span class="${bajo ? 'chb-bajo' : ''}">${esc(h.nombre)}: mínimo ${h.minimo} órdenes${bajo ? ` · faltan ${h.minimo - n}` : ' ✓'}</span>` : ''}`
         : `Pon las personas y la hora: se cotiza a ${dinero(Q.precioPersona)} por persona.`;
     };
     monto.addEventListener('input', () => { auto = !monto.value; });
-    ['personas', 'hora', 'paquete'].forEach((k) => F[k].addEventListener('input', calc)); calc();
+    ['personas', 'hora', 'paquete', 'traslado'].forEach((k) => F[k].addEventListener('input', calc));
+    m.querySelectorAll('[data-tras]').forEach((b) => b.addEventListener('click', () => { F.traslado.value = b.dataset.tras; calc(); }));
+    calc();
   }
   m.querySelector('#chb-guardar').addEventListener('click', async (ev) => {
     const f = new FormData(m.querySelector('#chb-f')), v = {};
     f.forEach((x, k) => { v[k] = String(x).trim() || null; });
-    ['personas', 'monto', 'anticipo'].forEach((k) => { v[k] = v[k] == null ? (k === 'anticipo' ? 0 : null) : Number(v[k]); });
+    ['personas', 'monto', 'anticipo', 'traslado'].forEach((k) => { if (k in v || k !== 'traslado') v[k] = v[k] == null ? (k === 'anticipo' ? 0 : null) : Number(v[k]); });
     v.telefono = v.telefono ? v.telefono.replace(/\D/g, '').slice(-10) : null;
     if (!v.fecha) return toast('Pon la fecha del evento', true);
     ev.currentTarget.disabled = true;
@@ -132,6 +136,9 @@ export function estilos() {
   s.id = 'chb-estilos';
   s.textContent = `
   .chb-est { display:inline-flex; align-items:center; border-radius:999px; padding:2px 9px; font-size:12px; font-weight:700; white-space:nowrap; }
+  .chb-tras { display:flex; flex-wrap:wrap; align-items:end; gap:10px; } .chb-tras label { width:170px; } .chb-tras a { font-size:13px; font-weight:600; padding-bottom:10px; }
+  .chb-tras-op { display:flex; gap:6px; padding-bottom:6px; } .chb-tras-op button { border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:5px 10px; font:inherit; font-size:12.5px; cursor:pointer; }
+  .chb-tras-op button:hover { border-color:var(--primary); color:var(--primary); }
   .chb-cotiza { margin:0; background:#FFF6EE; border:1px solid #F7C9A9; border-radius:10px; padding:10px 12px; font-size:13.5px; color:#7A3D12; line-height:1.5; } .chb-bajo { color:#B42318; font-weight:700; }
   .chb-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
   .chb-kpi { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:grid; gap:2px; }

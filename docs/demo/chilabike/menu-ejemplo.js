@@ -28,6 +28,17 @@ window.MENU_CHILABIKE = {
   envio: 35,
   pagos: ['Efectivo', 'Transferencia'],
   sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
+  // Dónde está cada sucursal (los links que manda Javier por el chat). dias: solo esos días de la semana (0 = domingo).
+  ubicaciones: {
+    'San Pedro': { mapa: 'https://maps.app.goo.gl/K9raaonPuX851hHSA' },
+    'San Jerónimo': { mapa: 'https://maps.app.goo.gl/eVBVrVha2xWyrFS67' },
+    'Mitras': { direccion: 'Celaya 3133, Col. Mitras Centro, Monterrey', referencia: 'Frente a la Facultad de Medicina', mapa: 'https://goo.gl/maps/dNdRETziyLy7Ge476' },
+    'Cumbres': { mapa: 'https://maps.app.goo.gl/Qtzb6orMnviqnAvw8' },
+    'Centro': { mapa: 'https://maps.app.goo.gl/eksbWVScQesS8kX4A' },
+    'Venustiano Carranza': { mapa: 'https://maps.google.com/?q=25.679914,-100.330696' },
+    'San Pedro de Pinta': { mapa: 'https://maps.google.com/?q=25.655132,-100.371178', nota: 'Solo domingos', dias: [0] },
+    'Tec': { mapa: 'https://maps.app.goo.gl/E7GQjaJzuw98ogmbA' },
+  },
   // Eventos: así cotiza Javier (precio por persona, mínimo de órdenes según el horario, lo que incluye y el anticipo).
   eventos: {
     tipos: ['Cumpleaños', 'Boda o XV', 'Desayuno de oficina', 'Reunión', 'Tornafiesta', 'Otro'],
@@ -45,7 +56,12 @@ window.MENU_CHILABIKE = {
       { emoji: '🍽️', t: 'Desechables', d: 'Platos, cubiertos y servilletas' },
       { emoji: '🛒', t: 'Montaje', d: 'Carrito o montaje tipo buffet' },
       { emoji: '🧑‍🍳', t: 'Personal', d: 'Personal para el servicio' }],
-    traslado: 'El traslado y montaje se cotiza según la ubicación.',
+    traslado: 'El traslado y montaje se confirma viendo tu ubicación.',
+    // Aproximado de traslado y montaje. Javier lo confirma viendo la ubicación que le mandan.
+    zonas: [
+      { id: 'metro', nombre: 'Área metropolitana de Monterrey', min: 500, max: 850 },
+      { id: 'afueras', nombre: 'Carretera o afueras', detalle: 'Ej. bodas en carretera de noche', min: 900, max: 900 },
+      { id: 'fuera', nombre: 'Fuera de Monterrey', detalle: 'Saltillo, Montemorelos…', min: 3000, max: 3000 }],
     anticipo: 50,
     pideFactura: true,
   },

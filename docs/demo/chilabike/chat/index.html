@@ -32,6 +32,7 @@ body { margin:0; background:var(--crema); color:var(--texto); font:400 16px/1.5 
 .b.ellos { align-self:flex-start; background:var(--b-ellos); color:var(--b-ellos-t); border-top-left-radius:4px; }
 .b.yo { align-self:flex-end; background:var(--b-yo); color:var(--b-yo-t); border-top-right-radius:4px; }
 .b small { display:block; font-size:10.5px; opacity:.6; text-align:right; margin-top:2px; }
+.b a { color:inherit; text-decoration:underline; word-break:break-all; }
 .b .form { font-size:11.5px; font-weight:700; opacity:.7; display:block; margin-bottom:3px; }
 .botones { align-self:flex-start; width:82%; display:grid; gap:4px; margin-top:-4px; animation:in .25s ease both; }
 .botones button { font:inherit; font-size:14.5px; font-weight:600; border:0; background:var(--b-ellos); color:var(--accion); padding:10px; border-radius:12px; cursor:pointer; }
@@ -94,14 +95,16 @@ body { margin:0; background:var(--crema); color:var(--texto); font:400 16px/1.5 
     </div></div>
   </div>
 </div>
+<script src="../menu-ejemplo.js?v=20261104-1947"></script>
 <script>
+var MENU = window.MENU_CHILABIKE || {}; try { var g_ = JSON.parse(localStorage.getItem('chilabike-demo-menu') || 'null'); if (g_) MENU = Object.assign({}, MENU, g_, { ubicaciones: g_.ubicaciones || MENU.ubicaciones }); } catch (e) {}
 var gen = 0, canal = 'wa', hilo = document.getElementById('hilo'), rap = document.getElementById('rapidas'), num = 128;
 var NOM = { wa: ['Chilabike', 'cuenta de empresa'], ig: ['chilabike.mty', 'Chila Bike'], fb: ['Chilabike', 'Suele responder en minutos'] };
 var hora = function () { return new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); };
 var espera = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
 function burbuja(quien, texto, extra) {
   var d = document.createElement('div'); d.className = 'b ' + quien;
-  d.innerHTML = (extra || '') + texto.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }) + '<small>' + hora() + '</small>';
+  d.innerHTML = (extra || '') + texto.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }).replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>'; }) + '<small>' + hora() + '</small>';
   hilo.appendChild(d); hilo.scrollTop = hilo.scrollHeight; return d;
 }
 async function bot(texto, botones) {
@@ -141,8 +144,14 @@ function hoja(evento) {
   document.getElementById('hoja').classList.add('on');
 }
 document.getElementById('cerrar').onclick = function () { document.getElementById('hoja').classList.remove('on'); };
+// Las ubicaciones con el formato que ya usa Javier en el chat (salen de Menú → Sucursales)
+function textoUbicaciones() {
+  var U = MENU.ubicaciones || {};
+  return '📍 Ubicaciones:\n\n' + (MENU.sucursales || []).map(function (n, i) { var u = U[n] || {};
+    return (i % 2 ? '🟠 ' : '⚫ ') + n + (u.nota ? ' (' + u.nota.toLowerCase() + ')' : '') + (u.direccion ? '\n📍 ' + u.direccion : '') + (u.referencia ? '\n(' + u.referencia + ')' : '') + (u.mapa ? '\n' + u.mapa : ''); }).join('\n\n');
+}
 async function sucursales() {
-  await bot('Estamos en San Pedro, San Jerónimo, Mitras, San Pedro de Pinta, Cumbres, Centro, Venustiano Carranza y Tec 📍\nAbrimos de lunes a sábado en la mañana.', [['🌶️ Pedir mi cajita', function () { abrirMenu(false); }]]);
+  await bot(textoUbicaciones(), [['🌶️ Pedir mi cajita', function () { abrirMenu(false); }], ['🎉 Cotizar un evento', function () { abrirMenu(true); }]]);
 }
 window.addEventListener('message', async function (e) {
   if (!e.data || !e.data.chilabike) return;
@@ -154,24 +163,39 @@ window.addEventListener('message', async function (e) {
     var ev = p.evento, $$ = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
     await bot('¡Gracias! 🎉 Para ' + ev.personas + ' personas ' + (ev.horario ? '(' + ev.horario.toLowerCase() + ') ' : '') + (ev.monto ? 'sale en ' + $$(ev.precio_persona) + ' por persona: ' + $$(ev.monto) + '.' : 'te paso tu cotización en un momento.') +
       '\nEl traslado y montaje te lo cotizo según la ubicación 🚚' + (ev.anticipo_sugerido ? '\nPara apartar la fecha es el 50% (' + $$(ev.anticipo_sugerido) + ') y el resto el día del evento.' : '') + '\n¿Te aparto la fecha?', [['✅ Sí, apartar', async function () {
-      await bot('¡Va! Te paso los datos para el anticipo por transferencia y me mandas el comprobante por aquí 🙌'); }], ['🤔 Tengo dudas', async function () {
+      if (!ev.ubicacion) return pedirUbicacion(ev);
+      await bot('¡Va! Te paso los datos para el anticipo por transferencia y me mandas el comprobante por aquí 🙌'); }], ['📍 Mandar ubicación', function () { pedirUbicacion(ev, true); }], ['🤔 Tengo dudas', async function () {
       await bot('Claro, dime y te contesto. Si prefieres, Javier te marca.'); }]]);
   } else {
     num++;
     if (p.pago === 'Transferencia') await bot('¡Recibido! 🙌 Tu pedido #' + num + ' suma ' + '$' + p.total + '.\nTransfiere a la CLABE [__] y manda tu comprobante por aquí. En cuanto llegue, entra a cocina.');
     else await bot('¡Listo! 🙌 Tu pedido #' + num + ' ya está en la cocina 🍳\nTotal: $' + p.total + ' en efectivo. Te aviso cuando salga.');
-    await espera(2200); await bot('🛵 Tu pedido #' + num + ' ya va en camino. Llega en unos 25 min.');
+    var u = p.sucursal ? ((MENU.ubicaciones || {})[p.sucursal] || {}) : null;
+    await espera(2200);
+    if (u) await bot('✅ Tu pedido #' + num + ' ya está listo en ' + p.sucursal + '.' + (u.direccion ? '\n📍 ' + u.direccion : '') + (u.mapa ? '\n' + u.mapa : ''));
+    else await bot('🛵 Tu pedido #' + num + ' ya va en camino. Llega en unos 25 min.');
   }
 });
+// Javier siempre pide la ubicación del evento para confirmar el traslado y montaje
+async function pedirUbicacion(ev, ya) {
+  if (!ya) await bot('Para apartarte la fecha, mándame la ubicación del evento 📍 y te confirmo el traslado y montaje.', [['📍 Enviar ubicación', function () { pedirUbicacion(ev, true); }]]);
+  else {
+    burbuja('yo', '📍 Ubicación: ' + ev.direccion + '\nhttps://maps.google.com/?q=25.6489,-100.2860', canal === 'wa' ? '<span class="form">Ubicación</span>' : '');
+    var tr = ev.traslado || 650, tot = (ev.precio_persona || 110) * ev.personas + tr, $$ = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
+    await bot('¡Gracias! Ya la vi 👀 El traslado y montaje queda en ' + $$(tr) + '.\nTotal: ' + $$(tot) + '. Para apartar la fecha es el 50% (' + $$(tot / 2) + ') y el resto el día del evento. ¿Te paso los datos para el anticipo?', [['✅ Sí, pásamelos', async function () {
+      await bot('Va 🙌 Transfiere a la CLABE [__] a nombre de [__] y mándame el comprobante por aquí. En cuanto llegue, tu fecha queda apartada ✅'); }]]);
+  }
+}
 // Texto libre: el asistente lo entiende (en el demo, unas frases de ejemplo)
 async function libre(t) {
   burbuja('yo', t);
   var s = t.toLowerCase(), n = (s.match(/\d+/) || ['1'])[0];
   var salsa = /mixt/.test(s) ? 'mixtos' : /roj/.test(s) ? 'rojos' : /verd/.test(s) ? 'verdes' : null;
   var prot = /arrach/.test(s) ? 'arrachera' : /huevo/.test(s) ? 'huevo' : /chorizo/.test(s) ? 'chorizo' : /pollo/.test(s) ? 'pollo' : null;
+  if (/d[oó]nde (est|qued)|ubicaci|sucursal|direcci[oó]n|mapa|c[oó]mo llego/.test(s)) return sucursales();
   if (/evento|boda|cumple|fiesta|xv|personas/.test(s)) return abrirMenu(true);
   if (salsa) return bot('Va, te anoto ' + n + ' cajita' + (n > 1 ? 's' : '') + ' de ' + salsa + (prot ? ' con ' + prot : '') + ' 🌶️\n¿Le pones algo más o así está bien?', [['➕ Agregar toppings', function () { abrirMenu(false); }], ['👌 Así está bien', async function () {
-    await bot('Perfecto. ¿A domicilio o pasas por él?', [['🛵 A domicilio', async function () { await bot('Pásame tu dirección y te digo el total con envío.'); }], ['🏪 Paso por él', async function () { await bot('¿A qué sucursal vas? Te lo tenemos listo en 15 min.'); }]]); }]]);
+    await bot('Perfecto. ¿A domicilio o pasas por él?', [['🛵 A domicilio', async function () { await bot('Pásame tu dirección y te digo el total con envío.'); }], ['🏪 Paso por él', async function () { await bot('¿A qué sucursal vas? Te lo tenemos listo en 15 min.\n\n' + textoUbicaciones()); }]]); }]]);
   if (/hola|buen|que tal|qué tal|hey/.test(s)) return bienvenida();
   return bot('Te ayudo con eso 🙌 ¿Quieres pedir o cotizar un evento?', INICIO);
 }

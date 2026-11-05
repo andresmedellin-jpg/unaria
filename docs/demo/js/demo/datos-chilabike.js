@@ -74,8 +74,8 @@
 
     const fBoda = finde(38), fCumple = finde(16), fPosada = (() => { const d = new Date(finde(36) + 'T12:00:00'); d.setDate(d.getDate() - 1); return iso(d); })(), fExa = finde(23), fBodaAna = finde(52);
 
-    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', sugerida: '¡Va Mariana! 🎉 Para 180 personas en la madrugada (mínimo 100 ✅) sale en $110 por persona: $19,800. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings (crema, cebolla, cilantro, queso y frijoles), platos y cubiertos, carrito y personal. Las salsas te las servimos aparte para tu tía 😅 El traslado a Santiago se cotiza aparte. Para apartar la fecha es el 50% ($9,900) y el resto el día del evento. ¿Requieres factura?', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
-      extraccion: { tipo: 'Boda o XV', fecha: fBoda, hora: '01:00', personas: 180, direccion: 'Quinta Los Encinos, Santiago', paquete: 'Madrugada', sucursal: 'San Pedro',
+    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', sugerida: '¡Va Mariana! 🎉 Para 180 personas en la madrugada (mínimo 100 ✅) sale en $110 por persona: $19,800, más $900 de traslado y montaje a Santiago = $20,700. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings (crema, cebolla, cilantro, queso y frijoles), platos y cubiertos, carrito y personal. Las salsas te las servimos aparte para tu tía 😅 Para apartar la fecha es el 50% ($10,350) y el resto el día del evento. ¿Requieres factura?', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
+      extraccion: { tipo: 'Boda o XV', fecha: fBoda, hora: '01:00', personas: 180, direccion: 'Quinta Los Encinos, Santiago', paquete: 'Madrugada', sucursal: 'San Pedro', traslado: 900, monto: 20700,
         notas: 'Tornafiesta de la boda de su hermana. Quiere mixtos y salsas aparte para los que no aguantan picante.' } }, [
       ['cliente', 'Hola!! vi su anuncio en insta 😍 quiero cotizar sus cajitas para el tornafiesta de la boda de mi hermana', 3],
       ['javi', 'Qué onda Mariana! Claro que sí, a grilear 🙌 ¿Para qué fecha y cuántos serían?', 4],
@@ -83,23 +83,23 @@
       ['cliente', 'Sería como a la 1 de la mañana. Los queremos mixtos, ¿cuánto sale por persona?', 2],
       ['cliente', 'Ah y si pueden llevar las salsas aparte, mi tía no aguanta nada de picante jaja', 0],
     ]);
-    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', sugerida: 'Holaa! Para 40 personas en la mañana sale en $110 por persona: $4,400 (+ traslado a Cumbres). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para los vegetarianos se sirven sin proteína 🌱 Apartas con el 50% ($2,200). ¿Te aparto el sábado? ¿Requieres factura?', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
+    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', sugerida: 'Holaa! Para 40 personas en la mañana sale en $110 por persona: $4,400, más el traslado y montaje (en Cumbres anda entre $500 y $850; mándame tu ubicación 📍 y te confirmo). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para los vegetarianos se sirven sin proteína 🌱 Apartas con el 50%. ¿Te aparto el sábado? ¿Requieres factura?', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
       extraccion: { tipo: 'Cumpleaños', fecha: fCumple, hora: '11:00', personas: 40, direccion: 'Casa en Cumbres 5° Sector', paquete: 'En la mañana', sucursal: 'Cumbres', notas: 'Brunch de cumpleaños 30. Pregunta por opción vegetariana (proteína a elección).' } }, [
       ['cliente', 'holaaa cuánto cuesta para un cumple de 40 personas?', 1],
       ['cliente', `es un brunch el sábado ${new Date(fCumple + 'T12:00:00').getDate()} en mi casa en cumbres, como a las 11`, 1],
       ['cliente', 'y tienen algo vegetariano? 🥲', 0],
     ]);
-    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', sugerida: 'Carlos, ya le mandé la cotización a su correo. Si le parece, con el 50% de anticipo ($7,200, ya con el traslado) le aparto el viernes a las 9 am y el resto se liquida el día del evento. Cualquier duda aquí estoy.', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
+    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', sugerida: 'Carlos, ya le mandé la cotización a su correo. Si le parece, con el 50% de anticipo ($6,925) le aparto el viernes a las 9 am y el resto se liquida el día del evento. Cualquier duda aquí estoy.', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
       ['cliente', 'Buenas tardes, soy de Recursos Humanos de Grupo Industrial Norte. Queremos cotizar chilaquiles en cajita para el desayuno de la posada.', 6],
       ['javi', '¡Buenas tardes Carlos! Con gusto. ¿Cuántas personas serían y dónde?', 10],
       ['cliente', `Somos 120, en nuestras oficinas de Valle Oriente, el viernes ${new Date(fPosada + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} a las 9 am. Necesitamos factura.`, 15],
-      ['javi', 'Perfecto. Son $110 por persona: $13,200 más el traslado a Valle Oriente. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, montaje tipo buffet y personal, con factura. Le mando la cotización formal por correo hoy mismo 📄', 30],
+      ['javi', 'Perfecto. Son $110 por persona: $13,200 más $650 de traslado y montaje a Valle Oriente, $13,850 en total. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, montaje tipo buffet y personal, con factura. Le mando la cotización formal por correo hoy mismo 📄', 30],
       ['cliente', 'Excelente, quedo atento.', 0],
     ]);
     const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', sugerida: 'Hola Sofía! Claro, las mandamos desde San Jerónimo. Son 3 cajitas de rojos con pollo y 1 de verdes, $[__] más envío. ¿A qué dirección te las llevamos?', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14 }, [
       ['cliente', 'Hola, ¿me pueden mandar 3 cajitas de rojos con pollo y una de verdes a San Jerónimo? 🙏', 0],
     ]);
-    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto 🤘 El sábado a las 11 para 60 sale en $110 por persona: $6,600, más el traslado (se cotiza cuando tengan la terraza). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Apartas con el 50% ($3,300). Pásame la dirección cuando la tengan y si requieren factura.', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
+    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto 🤘 El sábado a las 11 para 60 sale en $110 por persona: $6,600, más el traslado y montaje (en San Pedro anda entre $500 y $850; te lo confirmo cuando me mandes la ubicación de la terraza 📍). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Apartas con el 50%. ¿Requieren factura?', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
       extraccion: { tipo: 'Reunión', fecha: fExa, hora: '11:00', personas: 60, direccion: 'Terraza en San Pedro (por confirmar)', paquete: 'En la mañana', sucursal: 'Tec', notas: 'Reunión de exalumnos del Tec, generación 2006. Lugar por confirmar.' } }, [
       ['cliente', 'Qué tal, estoy organizando la reunión de exalumnos de mi generación del Tec. Seríamos unos 60.', 2],
       ['javi', 'Qué buen plan Roberto 🤘 ¿Ya tienen fecha y lugar?', 40],
@@ -109,7 +109,7 @@
       ['cliente', 'Hola! Me pasaron su contacto, quiero chilaquiles para mi boda 💍', 20],
       ['javi', '¡Felicidades Ana Lucía! 🎉 ¿Cuándo es y cuántos invitados?', 30],
       ['cliente', '250 invitados, en Hacienda San Miguel en Allende', 60],
-      ['javi', 'Va, son $110 por persona: $27,500 para 250, más el traslado a Allende. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para apartar la fecha es el 50% ($13,750) por transferencia, te paso los datos 👇', 120],
+      ['javi', 'Va, son $110 por persona: $27,500 para 250, más $900 de traslado y montaje a Allende = $28,400. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para apartar la fecha es el 50% ($14,200) por transferencia, te paso los datos 👇', 120],
       ['cliente', 'Listo, ya te mandé el comprobante del anticipo ✅', 0],
     ]);
     const cLalo = C({ canal: 'instagram', contacto: '@lalo.mtz', sugerida: 'Qué onda Lalo! Gracias por la buena vibra 🙌 Mándanos tu nombre y tu número y te contacta el encargado de la sucursal más cercana.', anuncio_id: null, etiqueta: 'otro', hace: 95 }, [
@@ -129,7 +129,9 @@
     const horario = (h) => { let r = null; HOR.forEach((x) => { if (h >= x.desde) r = x; }); return r || HOR[HOR.length - 1]; };
     const E = (o) => { const e = { id: id('evt'), org_id: ORG, estado: 'solicitud', anticipo: 0, monto: null, ...o, creado_en: o.creado_en || hace(60 * 24 * (o.hace_dias || 3)) }; delete e.hace_dias;
       if (e.hora && HOR.length) e.paquete = horario(e.hora).nombre;
-      if (e.monto != null && COT.precioPersona) { const pagado = e.anticipo && e.anticipo >= e.monto; e.monto = e.personas * COT.precioPersona + (e.personas > 150 ? 2500 : 1200); e.anticipo = pagado ? e.monto : e.anticipo ? e.monto * (COT.anticipo || 50) / 100 : 0; }
+      // Traslado como lo cobra Javier: $500–850 en la ciudad, ~$900 carretera/afueras de noche, ~$3,000 Saltillo o Montemorelos
+      if (e.traslado == null && e.monto != null) e.traslado = /saltillo|montemorelos/i.test(e.direccion) ? 3000 : /santiago|allende|carretera/i.test(e.direccion) ? 900 : /fundidora|centro/i.test(e.direccion) ? 500 : 650;
+      if (e.monto != null && COT.precioPersona) { const pagado = e.anticipo && e.anticipo >= e.monto; e.monto = e.personas * COT.precioPersona + (e.traslado || 0); e.anticipo = pagado ? e.monto : e.anticipo ? e.monto * (COT.anticipo || 50) / 100 : 0; }
       eventos.push(e); return e; };
     const evCarlos = E({ tipo: 'Desayuno de oficina', fecha: fPosada, hora: '09:00', personas: 120, direccion: 'Oficinas Grupo Industrial Norte, Valle Oriente', paquete: 'Desayuno de oficina', estado: 'cotizado',
       contacto: 'Carlos Medina · Grupo Industrial Norte', telefono: null, sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', conversacion_id: cCarlos.id, monto: 38400, notas: 'Requiere factura. Cotización enviada por correo.', hace_dias: 1 });
@@ -192,7 +194,7 @@
         const c = { id: 'conv-menu-' + k, org_id: ORG, canal, contacto: canal === 'instagram' ? '@cliente.demo' : 'Cliente del menú (demo)', telefono: canal === 'whatsapp' ? '8100000000' : null,
           anuncio_id: null, etiqueta: p.tipo === 'evento' ? 'evento' : 'pedido', estado: 'abierta', leida: false, por_contestar: true,
           ultimo: p.texto.split('\n')[0], ultimo_en: p.creado_en, extraccion: p.evento || null,
-          sugerida: p.tipo === 'evento' ? '¡Gracias! 🎉 Para ' + p.evento.personas + ' personas (' + (p.evento.horario || '').toLowerCase() + ') sale en $' + (p.evento.precio_persona || 110) + ' por persona: $' + Number(p.evento.monto || 0).toLocaleString('es-MX') + ' más el traslado, que te cotizo según la ubicación. Para apartar la fecha es el 50% ($' + Number(p.evento.anticipo_sugerido || 0).toLocaleString('es-MX') + ') y el resto el día del evento. ¿Te paso los datos?' : '¡Listo! Tu pedido ya está en la cocina 🍳 Te aviso cuando salga.' };
+          sugerida: p.tipo === 'evento' ? '¡Gracias! 🎉 Para ' + p.evento.personas + ' personas (' + (p.evento.horario || '').toLowerCase() + ') sale en $' + (p.evento.precio_persona || 110) + ' por persona: $' + Number(p.evento.monto || 0).toLocaleString('es-MX') + ' más el traslado y montaje' + (p.evento.zona ? ' (' + p.evento.zona.toLowerCase() + ': aprox. $' + p.evento.traslado + (p.evento.traslado_max && p.evento.traslado_max !== p.evento.traslado ? '–' + p.evento.traslado_max : '') + ')' : '') + '. ' + (p.evento.ubicacion ? 'Ya vi tu ubicación 📍' : 'Mándame tu ubicación 📍 y te lo confirmo.') + ' Para apartar la fecha es el 50% ($' + Number(p.evento.anticipo_sugerido || 0).toLocaleString('es-MX') + ') y el resto el día del evento. ¿Te paso los datos?' : '¡Listo! Tu pedido ya está en la cocina 🍳 Te aviso cuando salga.' };
         conversaciones.unshift(c);
         mensajes.push({ id: id('msg'), org_id: ORG, conversacion_id: c.id, de: 'cliente', texto: p.texto, creado_en: p.creado_en });
         if (p.tipo === 'pedido') pedidos.push({ id: 'ped-menu-' + k, org_id: ORG, empresa_id: 'emp-chb', numero: ++numP, canal, conversacion_id: c.id, contacto: c.contacto, telefono: c.telefono,
@@ -220,6 +222,7 @@
     let menuDatos = window.MENU_CHILABIKE || {};
     try { menuDatos = JSON.parse(localStorage.getItem('chilabike-demo-menu') || 'null') || menuDatos; } catch (e) { /* ejemplo */ }
     if (!menuDatos.eventos?.horarios && window.MENU_CHILABIKE) menuDatos = { ...menuDatos, eventos: { ...window.MENU_CHILABIKE.eventos, ...(menuDatos.eventos || {}), horarios: window.MENU_CHILABIKE.eventos.horarios, incluye: window.MENU_CHILABIKE.eventos.incluye } };
+    if (window.MENU_CHILABIKE) { menuDatos = { ...menuDatos, ubicaciones: menuDatos.ubicaciones || window.MENU_CHILABIKE.ubicaciones, eventos: { ...menuDatos.eventos, zonas: menuDatos.eventos?.zonas || window.MENU_CHILABIKE.eventos.zonas } }; }
     const menus = [{ id: 'menu-chb', org_id: ORG, empresa_id: 'emp-chb', datos: menuDatos, publicado_en: new Date(AHORA - 3 * 864e5).toISOString(), publicado_por: 'Javier Andonie Moreno' }];
     return { organizaciones: [{ id: ORG, nombre: 'Grupo A.M', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, pedidos, menus, ...lv };
   };

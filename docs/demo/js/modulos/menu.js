@@ -16,6 +16,7 @@ export async function render(view, m) {
   const r = await db().from('menus').select('*').eq('empresa_id', empresa).maybeSingle();
   fila = r.data; M = copia(fila?.datos || window.MENU_CHILABIKE || { negocio: mod?.negocio?.nombre || '', producto: { nombre: '', precio: 0 }, pasos: [], envio: 0, pagos: ['Efectivo', 'Transferencia'], sucursales: [], eventos: { tipos: [] } });
   if (!M.eventos?.horarios && window.MENU_CHILABIKE?.eventos) M.eventos = { ...copia(window.MENU_CHILABIKE.eventos), ...(M.eventos || {}), horarios: copia(window.MENU_CHILABIKE.eventos.horarios), incluye: copia(window.MENU_CHILABIKE.eventos.incluye) };
+  if (window.MENU_CHILABIKE) { M.ubicaciones ||= copia(window.MENU_CHILABIKE.ubicaciones || {}); if (M.eventos && !M.eventos.zonas) M.eventos.zonas = copia(window.MENU_CHILABIKE.eventos.zonas || []); }
   sucio = false; acciones(); pintar();
 }
 
@@ -42,7 +43,11 @@ function pintar() {
         <h3>Entrega y pago</h3>
         <div class="form-2"><label>Envío a domicilio<input type="number" min="0" data-f="envio" data-num value="${esc(M.envio)}"></label></div>
         <div class="mn-chips"><span>Formas de pago</span>${['Efectivo', 'Transferencia', 'Tarjeta'].map((x) => `<button class="mn-chip${M.pagos.includes(x) ? ' on' : ''}" data-pago="${x}">${x}</button>`).join('')}</div>
-        <div class="mn-chips"><span>Sucursales</span>${M.sucursales.map((x, i) => `<button class="mn-chip on" data-quitar-suc="${i}" title="Quitar">${esc(x)} ✕</button>`).join('')}<button class="mn-chip" data-nueva-suc>+ Sucursal</button></div>
+        <div class="mn-sub" style="margin-top:6px">Sucursales <small>el link de Maps se le manda al cliente cuando pasa por su pedido o pregunta dónde están</small></div>
+        <table class="tabla mn-ops mn-sucs"><thead><tr><th style="width:150px">Sucursal</th><th>Link de Maps</th><th style="width:120px">Nota</th><th style="width:36px"></th></tr></thead><tbody>
+        ${M.sucursales.map((x, i) => { const u = (M.ubicaciones ||= {})[x] || {}; return `<tr data-suc="${i}"><td><input data-sf="nombre" value="${esc(x)}"></td><td><input data-sf="mapa" value="${esc(u.mapa || '')}" placeholder="https://maps.app.goo.gl/…"></td>
+          <td><input data-sf="nota" value="${esc(u.nota || '')}" placeholder="Ej. solo domingos"></td><td><button class="mn-x" data-quitar-suc="${i}" aria-label="Quitar">✕</button></td></tr>`; }).join('')}
+        </tbody></table><button class="link-btn" data-nueva-suc>+ Sucursal</button>
       </div>
     </div>
     ${eventos()}
@@ -75,7 +80,13 @@ function eventos() {
           <td><input data-f="eventos.incluye.${k}.d" value="${esc(x.d || '')}"></td><td><button class="mn-x" data-quitar-ev="incluye|${k}" aria-label="Quitar">✕</button></td></tr>`).join('')}
         </tbody></table><button class="link-btn" data-nuevo-ev="incluye">+ Agregar</button></div>
     </div>
-    <div class="form-2"><label>Traslado y montaje<input data-f="eventos.traslado" value="${esc(E.traslado || '')}"></label><label>Condiciones del precio<input data-f="eventos.condiciones" value="${esc(E.condiciones || '')}"></label></div>
+    <div><div class="mn-sub">Traslado y montaje aproximado por zona <small>se confirma viendo la ubicación</small></div>
+      <table class="tabla mn-ops"><thead><tr><th>Zona</th><th>Ejemplo</th><th style="width:100px">Desde</th><th style="width:100px">Hasta</th><th style="width:36px"></th></tr></thead><tbody>
+      ${(E.zonas ||= []).map((z, k) => `<tr><td><input data-f="eventos.zonas.${k}.nombre" value="${esc(z.nombre)}"></td><td><input data-f="eventos.zonas.${k}.detalle" value="${esc(z.detalle || '')}"></td>
+        <td><input type="number" min="0" data-f="eventos.zonas.${k}.min" data-num value="${esc(z.min ?? '')}"></td><td><input type="number" min="0" data-f="eventos.zonas.${k}.max" data-num value="${esc(z.max ?? '')}"></td>
+        <td><button class="mn-x" data-quitar-ev="zonas|${k}" aria-label="Quitar">✕</button></td></tr>`).join('')}
+      </tbody></table><button class="link-btn" data-nuevo-ev="zonas">+ Agregar zona</button></div>
+    <div class="form-2"><label>Traslado y montaje (nota)<input data-f="eventos.traslado" value="${esc(E.traslado || '')}"></label><label>Condiciones del precio<input data-f="eventos.condiciones" value="${esc(E.condiciones || '')}"></label></div>
   </div>`;
 }
 
@@ -109,6 +120,15 @@ function enlazar() {
   raiz.querySelectorAll('[data-pago]').forEach((b) => b.addEventListener('click', () => { const x = b.dataset.pago, i = M.pagos.indexOf(x); if (i >= 0) M.pagos.splice(i, 1); else M.pagos.push(x); cambio(); pintar(); }));
   raiz.querySelectorAll('[data-quitar-suc]').forEach((b) => b.addEventListener('click', () => { M.sucursales.splice(Number(b.dataset.quitarSuc), 1); cambio(); pintar(); }));
   raiz.querySelector('[data-nueva-suc]')?.addEventListener('click', () => { const n = prompt('Nombre de la sucursal'); if (n) { M.sucursales.push(n.trim()); cambio(); pintar(); } });
+  raiz.querySelectorAll('tr[data-suc]').forEach((tr) => {
+    const i = Number(tr.dataset.suc);
+    tr.querySelectorAll('[data-sf]').forEach((el) => el.addEventListener(el.dataset.sf === 'nombre' ? 'change' : 'input', () => {
+      const nom = M.sucursales[i], u = (M.ubicaciones[nom] ||= {});
+      if (el.dataset.sf === 'nombre') { const nuevo = el.value.trim(); if (!nuevo || nuevo === nom) return; M.sucursales[i] = nuevo; M.ubicaciones[nuevo] = u; delete M.ubicaciones[nom]; }
+      else if (el.dataset.sf === 'nota') { u.nota = el.value; if (/doming/i.test(el.value)) u.dias = [0]; else if (/s[aá]bado/i.test(el.value)) u.dias = [6]; else delete u.dias; }
+      else u[el.dataset.sf] = el.value.trim();
+      cambio(); }));
+  });
   raiz.querySelectorAll('[data-reponer]').forEach((b) => b.addEventListener('click', () => { const [pid, oid] = b.dataset.reponer.split('|'); const o = M.pasos.find((p) => p.id === pid)?.opciones.find((x) => x.id === oid); if (o) { o.disponible = true; cambio(); pintar(); } }));
   raiz.querySelectorAll('[data-paso]').forEach((caja) => {
     const p = M.pasos[Number(caja.dataset.paso)], i = Number(caja.dataset.paso);
@@ -125,7 +145,7 @@ function enlazar() {
   });
   raiz.querySelectorAll('[data-quitar-ev]').forEach((b) => b.addEventListener('click', () => { const [l, k] = b.dataset.quitarEv.split('|'); M.eventos[l].splice(Number(k), 1); cambio(); pintar(); }));
   raiz.querySelectorAll('[data-nuevo-ev]').forEach((b) => b.addEventListener('click', () => { const l = b.dataset.nuevoEv;
-    M.eventos[l].push(l === 'horarios' ? { id: 'h' + Date.now().toString(36), nombre: 'Nuevo horario', desde: '12:00', minimo: 30 } : { emoji: '✓', t: '', d: '' }); cambio(); pintar(); }));
+    M.eventos[l].push(l === 'horarios' ? { id: 'h' + Date.now().toString(36), nombre: 'Nuevo horario', desde: '12:00', minimo: 30 } : l === 'zonas' ? { id: 'z' + Date.now().toString(36), nombre: 'Nueva zona', min: 0, max: 0 } : { emoji: '✓', t: '', d: '' }); cambio(); pintar(); }));
   raiz.querySelector('#mn-nuevo-paso').addEventListener('click', () => { M.pasos.push({ id: nid('paso-' + Date.now().toString(36)), titulo: 'Nueva pregunta', tipo: 'varias', obligatorio: false, estilo: 'chips', opciones: [] }); cambio(); pintar(); });
 }
 
@@ -148,6 +168,7 @@ function estilos() {
   const s = document.createElement('style'); s.id = 'mn-estilos';
   s.textContent = `
   .mn-ev { margin-bottom:14px; display:grid; gap:12px; } .mn-ev .mn-check { display:flex; flex-direction:row; align-items:center; gap:8px; } .mn-ev .mn-check input { width:18px; height:18px; flex:none; } .mn-ev h3 small { font-weight:400; color:var(--text-3); font-size:12.5px; margin-left:6px; }
+  .mn-sub small { font-weight:400; color:var(--text-3); margin-left:4px; } .mn-sucs { margin-bottom:4px; }
   .mn-ev-grid { display:grid; grid-template-columns:1fr 1.3fr; gap:16px; } .mn-sub { font-weight:700; font-size:13px; margin-bottom:6px; }
   @media (max-width:900px) { .mn-ev-grid { grid-template-columns:1fr; } }
   .mn-hoy { display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:#FFFAEB; border:1px solid #F5C77E; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; }

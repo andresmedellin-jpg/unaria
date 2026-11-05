@@ -151,6 +151,7 @@ function verEvento(e) {
         ${fila('Lugar', esc(e.direccion || '—'))}
         ${fila('Personas', esc(e.personas ?? '—'))}
         ${fila(V.etiquetaPaquete || 'Paquete', esc(e.paquete || 'Por definir'))}
+        ${e.traslado != null ? fila('Traslado y montaje', dinero(e.traslado)) : ''}${e.ubicacion ? fila('Ubicación', `<a href="${esc(e.ubicacion)}" target="_blank" rel="noopener">Ver en el mapa ↗</a>`) : ''}
         ${fila('Sucursal', esc(e.sucursal || 'Por definir'))}
         ${fila('Contacto', esc(e.contacto || '—') + (e.telefono ? ` · ${esc(telBonito(e.telefono))}` : ''))}
         ${fila('Monto', dinero(e.monto))}

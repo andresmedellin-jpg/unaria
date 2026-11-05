@@ -77,6 +77,14 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
 .listo .ok { width:84px; height:84px; border-radius:50%; background:var(--naranja); display:grid; place-items:center; margin:0 auto 16px; animation:pop .45s cubic-bezier(.2,1.6,.4,1) both; }
 @keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:none; opacity:1; } }
 .nota { font-size:12.5px; color:var(--gris); text-align:center; margin-top:14px; }
+.sucs { display:grid; gap:8px; }
+.suc { display:flex; align-items:center; gap:10px; background:var(--papel); border:2px solid var(--linea); border-radius:14px; padding:11px 14px; cursor:pointer; }
+.suc > div { flex:1; } .suc b { display:block; font-size:15.5px; } .suc small { color:var(--gris); font-size:13px; }
+.suc a { font-size:13.5px; font-weight:700; color:var(--naranja-osc); text-decoration:none; white-space:nowrap; padding:6px 0 6px 8px; }
+.suc.on { border-color:var(--negro); box-shadow:0 0 0 2px var(--negro) inset; } .suc.cerrada { opacity:.5; cursor:not-allowed; }
+.ubi { width:100%; font:inherit; font-weight:700; font-size:15px; background:var(--papel); border:2px dashed var(--linea); border-radius:14px; padding:12px; cursor:pointer; color:var(--negro); }
+.ubi.on { border-style:solid; border-color:#7BC47F; background:#EEF8EE; }
+.op.fila { flex-direction:row; align-items:center; justify-content:space-between; gap:10px; min-height:0; padding-right:40px; } .op.fila small { display:block; }
 .incl { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
 .incl li { display:flex; gap:12px; align-items:flex-start; background:var(--papel); border:1px solid var(--linea); border-radius:14px; padding:10px 12px; font-size:14px; color:var(--gris); }
 .incl li span { font-size:22px; line-height:1.1; } .incl li b { display:block; color:var(--negro); font-size:15px; }
@@ -94,7 +102,7 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
   <main id="main"><p class="ayuda">Cargando el menú…</p></main>
   <div class="pie"><div class="in"><button class="btn btn-l" id="atras" aria-label="Atrás">‹</button><button class="btn btn-n" id="sig"><span id="sig-t">Siguiente</span><span class="t" id="sig-total"></span></button></div></div>
 </div>
-<script src="../menu-ejemplo.js?v=20261104-1930"></script>
+<script src="../menu-ejemplo.js?v=20261104-1947"></script>
 <script>
 // ---------- configuración (producción: la función de Supabase de Chilabike) ----------
 var CONFIG = {
@@ -117,7 +125,7 @@ function cargarMenu() {
   var guardado = null; try { guardado = JSON.parse(localStorage.getItem('chilabike-demo-menu') || 'null'); } catch (e) {}
   return Promise.resolve(guardado || window.MENU_CHILABIKE);
 }
-cargarMenu().then(function (m) { M = m; if (!(M.eventos || {}).horarios && window.MENU_CHILABIKE) M.eventos = Object.assign({}, window.MENU_CHILABIKE.eventos, M.eventos || {}, { horarios: window.MENU_CHILABIKE.eventos.horarios, incluye: window.MENU_CHILABIKE.eventos.incluye }); iniciar(); }).catch(function () { $('#main').innerHTML = '<p class="ayuda">No se pudo cargar el menú. Intenta de nuevo en un momento.</p>'; });
+cargarMenu().then(function (m) { M = m; var X = window.MENU_CHILABIKE; if (X) { M.ubicaciones = M.ubicaciones || X.ubicaciones; if (M.eventos && !M.eventos.zonas) M.eventos.zonas = X.eventos.zonas; } if (!(M.eventos || {}).horarios && window.MENU_CHILABIKE) M.eventos = Object.assign({}, window.MENU_CHILABIKE.eventos, M.eventos || {}, { horarios: window.MENU_CHILABIKE.eventos.horarios, incluye: window.MENU_CHILABIKE.eventos.incluye }); iniciar(); }).catch(function () { $('#main').innerHTML = '<p class="ayuda">No se pudo cargar el menú. Intenta de nuevo en un momento.</p>'; });
 
 // ---------- ayudantes del menú ----------
 var paso = function (id) { return M.pasos.find(function (p) { return p.id === id; }); };
@@ -151,8 +159,8 @@ function resumen(c) {
 function iniciar() {
   document.title = (EVENTO ? 'Cotiza tu evento' : 'Arma tu ' + M.producto.nombre.split(' ')[0].toLowerCase()) + ' · ' + M.negocio;
   $('#h-tit').textContent = EVENTO ? 'Cotiza tu evento' : 'Arma tu ' + M.producto.nombre.split(' ')[0].toLowerCase();
-  st = { paso: 0, actual: nueva(), carrito: [], entrega: null, sucursal: M.sucursales[0], direccion: '', pago: null, cambio: null,
-    ev: { tipo: null, fecha: '', horario: null, hora: '', personas: 0, lugar: '', factura: null } };
+  st = { paso: 0, actual: nueva(), carrito: [], entrega: null, sucursal: null, direccion: '', pago: null, cambio: null,
+    ev: { tipo: null, fecha: '', horario: null, hora: '', personas: 0, lugar: '', zona: null, ubicacion: null, factura: null } };
   if (EVENTO) { PASOS = EVENTOS.filter(function (p) { return !p.siFactura || EV().pideFactura; }); } else {
     PASOS = [];
     M.pasos.forEach(function (p) { if (p.junto && PASOS.length) PASOS[PASOS.length - 1].ids.push(p.id); else PASOS.push({ ids: [p.id] }); });
@@ -184,12 +192,18 @@ var CARRITO = { carrito: true, listo: function () { return st.carrito.length > 0
     st.carrito.map(function (c, i) { return '<div class="caja"><div class="tit"><span>' + c.cant + ' × ' + esc(M.producto.nombre) + '</span><span>' + dinero(precioCajita(c)) + '</span></div><div class="det">' + esc(resumen(c)) + '</div><div class="acc"><button data-quitar="' + i + '">Quitar</button></div></div>'; }).join('') +
     '<button class="op" data-otra style="align-items:center;flex-direction:row;justify-content:center;border-style:dashed"><b>+ Agregar otra</b></button>' +
     '<div class="total"><span>Subtotal</span><span>' + dinero(subtotal()) + '</span></div>'; } };
-var ENTREGA = { listo: function () { return st.entrega === 'recoger' || (st.entrega === 'domicilio' && st.direccion.trim().length > 5); }, html: function () {
+var ENTREGA = { listo: function () { return (st.entrega === 'recoger' && !!st.sucursal) || (st.entrega === 'domicilio' && st.direccion.trim().length > 5); }, html: function () {
   return '<h1>¿Cómo te lo damos?</h1><p class="ayuda">A domicilio te llega con uno de nuestros choferes.</p><div class="grid g2">' +
     '<button class="op' + (st.entrega === 'domicilio' ? ' on' : '') + '" data-ent="domicilio"><span class="ico">🛵</span><b>A domicilio</b><span class="p">' + (M.envio ? '+' + dinero(M.envio) : 'Sin costo') + '</span></button>' +
     '<button class="op' + (st.entrega === 'recoger' ? ' on' : '') + '" data-ent="recoger"><span class="ico">🏪</span><b>Paso por él</b><span class="p">Sin costo</span></button></div>' +
     (st.entrega === 'domicilio' ? '<div style="margin-top:14px"><label class="campo">Dirección<input id="dir" value="' + esc(st.direccion) + '" placeholder="Calle, número y colonia" autocomplete="street-address"></label></div>' : '') +
-    (st.entrega === 'recoger' ? '<div style="margin-top:14px"><label class="campo">¿En qué sucursal?<select id="suc">' + M.sucursales.map(function (s) { return '<option' + (s === st.sucursal ? ' selected' : '') + '>' + esc(s) + '</option>'; }).join('') + '</select></label></div>' : ''); } };
+    (st.entrega === 'recoger' ? '<div class="seccion" style="margin-top:18px">¿En qué sucursal?</div><div class="sucs">' + M.sucursales.map(function (s) {
+      var u = ubic(s), cerrada = !abreHoy(s);
+      return '<div class="suc' + (s === st.sucursal ? ' on' : '') + (cerrada ? ' cerrada' : '') + '" data-suc="' + esc(s) + '"><div><b>' + esc(s) + '</b>' +
+        (u.direccion || u.referencia || u.nota ? '<small>' + esc([u.direccion, u.referencia, u.nota].filter(Boolean).join(' · ')) + (cerrada ? ' · hoy no abre' : '') + '</small>' : '') + '</div>' +
+        (u.mapa ? '<a href="' + esc(u.mapa) + '" target="_blank" rel="noopener" data-mapa>Mapa ↗</a>' : '') + '</div>'; }).join('') + '</div>' : ''); } };
+var ubic = function (s) { return (M.ubicaciones || {})[s] || {}; };
+var abreHoy = function (s) { var d = ubic(s).dias; return !d || d.indexOf(new Date().getDay()) >= 0; };
 var PAGO = { listo: function () { return !!st.pago; }, html: function () {
   return '<h1>¿Cómo pagas?</h1><p class="ayuda">Total: <b>' + dinero(total()) + '</b>' + (envio() ? ' (con envío)' : '') + '</p><div class="grid g2">' +
     M.pagos.map(function (x) { return '<button class="op' + (st.pago === x ? ' on' : '') + '" data-pago="' + esc(x) + '"><span class="ico">' + ({ Efectivo: '💵', Transferencia: '🏦', Tarjeta: '💳' }[x] || '💰') + '</span><b>' + esc(x) + '</b><small>' + ({ Efectivo: 'Al recibir', Transferencia: 'Te pasamos los datos', Tarjeta: 'Terminal al recibir' }[x] || '') + '</small></button>'; }).join('') + '</div>' +
@@ -212,26 +226,34 @@ var EVENTOS = [
       '<div class="seccion">Horario</div><div class="grid g2">' + (EV().horarios || []).map(function (h) {
         return '<button class="op' + (st.ev.horario === h.id ? ' on' : '') + '" data-ev-hor="' + h.id + '"><span class="ico">' + (ico[h.id] || '🕒') + '</span><b>' + esc(h.nombre) + '</b><span class="p">Mínimo ' + h.minimo + ' órdenes</span></button>'; }).join('') + '</div>' +
       (st.ev.horario ? '<label class="campo" style="margin-top:14px">Hora aproximada<input type="time" id="ev-hora" value="' + esc(st.ev.hora) + '"></label>' : ''); } },
-  { listo: function () { return st.ev.personas >= minimo() && st.ev.lugar.trim().length > 3; }, al: function () { if (st.ev.personas < minimo()) st.ev.personas = minimo(); }, html: function () {
+  { listo: function () { return st.ev.personas >= minimo() && st.ev.lugar.trim().length > 3 && (!(EV().zonas || []).length || !!st.ev.zona); }, al: function () { if (st.ev.personas < minimo()) st.ev.personas = minimo(); }, html: function () {
     var E = st.ev, m = minimo(), pp = EV().precioPersona;
     return '<h1>¿Cuántos y dónde?</h1><p class="ayuda">Una orden por persona.</p>' +
       '<div class="cant"><button data-ev-pers="-5" aria-label="Menos">−</button><b id="ev-pers-n">' + E.personas + '</b><span>personas<br><small>mínimo ' + m + ' en este horario</small></span><button data-ev-pers="5" aria-label="Más">+</button></div>' +
       '<div class="rango" style="margin:10px 0 4px"><input type="range" id="ev-pers" min="' + m + '" max="' + Math.max(500, m * 4) + '" step="1" value="' + E.personas + '"></div>' +
       (pp ? '<p class="ayuda" id="ev-estim">' + E.personas + ' × ' + dinero(pp) + ' = <b>' + dinero(pp * E.personas) + '</b></p>' : '') +
-      '<label class="campo">¿Dónde es? <small style="font-weight:400;color:var(--gris)">colonia, salón o dirección</small><input id="ev-lugar" value="' + esc(E.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago"></label>'; } },
+      '<label class="campo">¿Dónde es? <small style="font-weight:400;color:var(--gris)">colonia, salón o dirección</small><input id="ev-lugar" value="' + esc(E.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago"></label>' +
+      '<button class="ubi' + (E.ubicacion ? ' on' : '') + '" id="ev-ubi">' + (E.ubicacion ? '✅ Ubicación compartida' : '📍 Compartir la ubicación exacta') + '</button>' +
+      ((EV().zonas || []).length ? '<div class="seccion">¿Por qué zona? <small>para el traslado</small></div><div class="grid">' + EV().zonas.map(function (z) {
+        return '<button class="op fila' + (E.zona === z.id ? ' on' : '') + '" data-ev-zona="' + z.id + '"><div><b>' + esc(z.nombre) + '</b>' + (z.detalle ? '<small>' + esc(z.detalle) + '</small>' : '') + '</div><span class="p">' + rango(z) + '</span></button>'; }).join('') + '</div>' : ''); } },
   { siFactura: true, listo: function () { return st.ev.factura !== null; }, auto: true, html: function () {
     return '<h1>¿Requieres factura?</h1><p class="ayuda">Para tenerla lista el día del evento.</p><div class="grid g2">' +
       [['si', '🧾', 'Sí, con factura'], ['no', '🙅', 'No, sin factura']].map(function (x) { return '<button class="op' + (st.ev.factura === (x[0] === 'si') ? ' on' : '') + '" data-ev-fac="' + x[0] + '"><span class="ico">' + x[1] + '</span><b>' + x[2] + '</b></button>'; }).join('') + '</div>'; } },
   { listo: function () { return true; }, html: function () {
-    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : 0, ant = X.anticipo || 0, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {};
+    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : 0, ant = X.anticipo || 0, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {}, z = zona();
+    var tMin = tot + (z ? z.min : 0), tMax = tot + (z ? z.max : 0), dos = function (a, b) { return a === b ? dinero(a) : dinero(a) + '–' + dinero(b); };
     return '<h1>Tu cotización</h1><p class="ayuda">' + esc(E.tipo) + ' · ' + fechaBonita(E.fecha) + ' · ' + esc(h.nombre || '') + (E.hora ? ' (' + horaBonita(E.hora) + ')' : '') + '</p>' +
       '<div class="caja"><div class="total" style="padding:0"><span>' + E.personas + ' personas</span><span>' + (pp ? dinero(tot) : '$<span class="pend">__</span>') + '</span></div>' +
       '<div class="det">' + (pp ? dinero(pp) + ' por persona' : 'Precio por persona: se cotiza') + ' · ' + esc(E.lugar) + (E.factura === true ? ' · con factura' : E.factura === false ? ' · sin factura' : '') + '</div>' +
-      (X.traslado ? '<div class="det">🚚 ' + esc(X.traslado) + '</div>' : '') + '</div>' +
-      (ant && pp ? '<div class="caja ant"><div class="tit"><span>Para apartar tu fecha</span><span>' + dinero(tot * ant / 100) + '</span></div><div class="det">' + ant + '% de anticipo · el resto (' + dinero(tot - tot * ant / 100) + ') se liquida el día del evento.</div></div>' : '') +
+      (z ? '<div class="tit" style="font-weight:500"><span>🚚 Traslado y montaje aprox.</span><span>' + rango(z) + '</span></div>' : '') +
+      (X.traslado ? '<div class="det">' + esc(X.traslado) + (CANAL ? ' Mándala por el chat de ' + CANAL + ' 📍' : '') + '</div>' : '') +
+      (z && pp ? '<div class="total" style="padding:6px 0 0;border-top:1px solid var(--linea)"><span>Total aprox.</span><span>' + dos(tMin, tMax) + '</span></div>' : '') + '</div>' +
+      (ant && pp ? '<div class="caja ant"><div class="tit"><span>Para apartar tu fecha</span><span>' + dos(tMin * ant / 100, tMax * ant / 100) + '</span></div><div class="det">' + ant + '% de anticipo · el resto se liquida el día del evento.</div></div>' : '') +
       '<div class="seccion">El servicio incluye</div>' + listaIncluye() +
       (X.condiciones ? '<p class="nota" style="text-align:left">' + esc(X.condiciones) + '</p>' : ''); } },
 ];
+var zona = function () { return (EV().zonas || []).filter(function (z) { return z.id === st.ev.zona; })[0] || null; };
+var rango = function (z) { return z.min === z.max ? dinero(z.min) : dinero(z.min) + '–' + dinero(z.max); };
 function horaBonita(h) { if (!h) return ''; var p = h.split(':'), d = new Date(); d.setHours(+p[0], +p[1]); return d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); }
 var nombres = function (pid, ids) { return ids.map(function (i) { return (opcion(pid, i) || {}).nombre; }).filter(Boolean); };
 var pasoListo = function (c) { return M.pasos.every(function (p) { return !p.obligatorio || [].concat(c.e[p.id] || []).length > 0; }); };
@@ -261,7 +283,7 @@ function enlazar() {
   var otra = $('[data-otra]'); if (otra) otra.onclick = function () { st.paso = 0; pintar(); };
   document.querySelectorAll('[data-ent]').forEach(function (b) { b.onclick = function () { st.entrega = b.dataset.ent; pintar(); var d = $('#dir'); if (d) d.focus(); }; });
   var dir = $('#dir'); if (dir) dir.oninput = function () { st.direccion = dir.value; $('#sig').disabled = !PASOS[st.paso].listo(); };
-  var suc = $('#suc'); if (suc) suc.onchange = function () { st.sucursal = suc.value; };
+  document.querySelectorAll('[data-suc]').forEach(function (b) { b.onclick = function (ev) { if (ev.target.closest('[data-mapa]') || b.classList.contains('cerrada')) return; st.sucursal = b.dataset.suc; pintar(); }; });
   document.querySelectorAll('[data-pago]').forEach(function (b) { b.onclick = function () { st.pago = b.dataset.pago; pintar(); }; });
   document.querySelectorAll('[data-cambio]').forEach(function (b) { b.onclick = function () { st.cambio = b.dataset.cambio; pintar(); }; });
   var E = st.ev;
@@ -272,6 +294,11 @@ function enlazar() {
   document.querySelectorAll('[data-ev-hor]').forEach(function (b) { b.onclick = function () { var h = horarios().filter(function (x) { return x.id === b.dataset.evHor; })[0]; E.horario = h.id; if (!E.hora || horarioDe(E.hora) !== h) E.hora = h.hora || h.desde; pintar(); }; });
   document.querySelectorAll('[data-ev-fac]').forEach(function (b) { b.onclick = function () { E.factura = b.dataset.evFac === 'si'; pintar(); setTimeout(avanzar, 260); }; });
   document.querySelectorAll('[data-ev-pers]').forEach(function (b) { b.onclick = function () { pers(E.personas + Number(b.dataset.evPers)); }; });
+  document.querySelectorAll('[data-ev-zona]').forEach(function (b) { b.onclick = function () { E.zona = b.dataset.evZona; pintar(); }; });
+  var ub = $('#ev-ubi'); if (ub) ub.onclick = function () {
+    if (!navigator.geolocation) return; ub.textContent = 'Buscando tu ubicación…';
+    navigator.geolocation.getCurrentPosition(function (p) { E.ubicacion = 'https://maps.google.com/?q=' + p.coords.latitude.toFixed(6) + ',' + p.coords.longitude.toFixed(6); pintar(); },
+      function () { ub.textContent = CANAL ? 'No se pudo: mándala por el chat 📍' : 'No se pudo: escribe la dirección'; }, { timeout: 8000 }); };
   var f = $('#ev-fecha'); if (f) f.oninput = function () { E.fecha = f.value; revisa(); };
   var h = $('#ev-hora'); if (h) h.onchange = function () { E.hora = h.value; var x = horarioDe(h.value); if (x && x.id !== E.horario) { E.horario = x.id; pintar(); } };
   var pr = $('#ev-pers'); if (pr) pr.oninput = function () { pers(Number(pr.value)); };
@@ -292,13 +319,13 @@ $('#atras').onclick = function () {
 function terminar() {
   var pedido, ahora = new Date().toISOString();
   if (EVENTO) {
-    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : null, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {};
+    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : null, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {}, z = zona();
     pedido = { tipo: 'evento', canal: CANAL || 'Página', conversacion: CONV, creado_en: ahora,
-      texto: '🎉 Quiero cotizar un evento\n' + E.tipo + ' · ' + E.personas + ' personas\n📅 ' + fechaBonita(E.fecha) + ', ' + horaBonita(E.hora) + ' (' + h.nombre + ')\n📍 ' + E.lugar +
+      texto: '🎉 Quiero cotizar un evento\n' + E.tipo + ' · ' + E.personas + ' personas\n📅 ' + fechaBonita(E.fecha) + ', ' + horaBonita(E.hora) + ' (' + h.nombre + ')\n📍 ' + E.lugar + (E.ubicacion ? ' · ' + E.ubicacion : '') + (z ? '\n🚚 Zona: ' + z.nombre + ' (traslado aprox. ' + rango(z) + ')' : '') +
         (E.factura !== null ? '\n🧾 ' + (E.factura ? 'Con factura' : 'Sin factura') : '') + (tot ? '\n💰 ' + dinero(tot) + ' (' + dinero(pp) + ' por persona) + traslado' : ''),
-      evento: { tipo: E.tipo, fecha: E.fecha, hora: E.hora, personas: E.personas, direccion: E.lugar, horario: h.nombre, factura: E.factura,
-        precio_persona: pp || null, monto: tot, anticipo_sugerido: tot && X.anticipo ? tot * X.anticipo / 100 : null,
-        notas: (h.nombre ? 'Horario: ' + h.nombre + ' (mínimo ' + h.minimo + ')' : '') + (E.factura !== null ? ' · ' + (E.factura ? 'requiere factura' : 'sin factura') : '') + ' · traslado por cotizar' } };
+      evento: { tipo: E.tipo, fecha: E.fecha, hora: E.hora, personas: E.personas, direccion: E.lugar, horario: h.nombre, factura: E.factura, zona: z ? z.nombre : null, ubicacion: E.ubicacion, traslado: z ? z.min : null, traslado_max: z ? z.max : null,
+        precio_persona: pp || null, monto: tot, anticipo_sugerido: tot && X.anticipo ? (tot + (z ? z.min : 0)) * X.anticipo / 100 : null,
+        notas: (h.nombre ? 'Horario: ' + h.nombre + ' (mínimo ' + h.minimo + ')' : '') + (E.factura !== null ? ' · ' + (E.factura ? 'requiere factura' : 'sin factura') : '') + (z ? ' · zona: ' + z.nombre + ', traslado aprox. ' + rango(z) : ' · traslado por cotizar') + (E.ubicacion ? ' · ubicación: ' + E.ubicacion : '') } };
   } else {
     var items = st.carrito.map(function (c) {
       var el = {}; M.pasos.forEach(function (p) { var n = nombres(p.id, [].concat(c.e[p.id] || [])); if (n.length) el[p.id] = n; });
@@ -307,7 +334,7 @@ function terminar() {
       entrega: st.entrega, direccion: st.entrega === 'domicilio' ? st.direccion : null, sucursal: st.entrega === 'recoger' ? st.sucursal : null,
       pago: st.pago, cambio: st.pago === 'Efectivo' ? st.cambio : null, subtotal: subtotal(), envio: envio(), total: total(),
       texto: '🛒 Mi pedido\n' + items.map(function (i) { return '• ' + i.cantidad + ' × ' + i.resumen; }).join('\n') +
-        '\n' + (st.entrega === 'domicilio' ? '🛵 A domicilio: ' + st.direccion : '🏪 Paso por él a ' + st.sucursal) +
+        '\n' + (st.entrega === 'domicilio' ? '🛵 A domicilio: ' + st.direccion : '🏪 Paso por él a ' + st.sucursal + (ubic(st.sucursal).mapa ? ' · ' + ubic(st.sucursal).mapa : '')) +
         '\n💳 ' + st.pago + (st.cambio && st.pago === 'Efectivo' ? ' (pago con ' + st.cambio + ')' : '') + '\nTotal: ' + dinero(total()) };
   }
   if (CONFIG.pedidoUrl) fetch(CONFIG.pedidoUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pedido) }).catch(function () {});

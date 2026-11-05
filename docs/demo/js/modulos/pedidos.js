@@ -13,7 +13,7 @@ const ESTADOS = {
 };
 const COLS = ['nuevo', 'cocina', 'camino', 'entregado'];
 const dinero = (n) => fmt(n).replace(/\.00$/, '');
-let raiz, mod, pedidos = [], reloj;
+let raiz, mod, pedidos = [], reloj, ubic = {};
 
 export async function render(view, m) {
   raiz = view; mod = m || mod; estilos(); clearInterval(reloj);
@@ -28,7 +28,10 @@ async function cargar() {
   if (mod?.negocio?.empresa_id) q = q.eq('empresa_id', mod.negocio.empresa_id);
   const r = await q;
   if (r.error) { raiz.innerHTML = `<div class="vacio">No se pudieron cargar los pedidos: ${esc(r.error.message)}</div>`; return; }
-  pedidos = r.data || []; pintar();
+  pedidos = r.data || [];
+  // Ubicación de cada sucursal (Menú → Sucursales) para mandarla cuando el pedido es para recoger
+  if (mod?.negocio?.empresa_id) { const mn = await db().from('menus').select('datos').eq('empresa_id', mod.negocio.empresa_id).maybeSingle(); ubic = mn.data?.datos?.ubicaciones || {}; }
+  pintar();
 }
 const min = (p) => Math.max(0, Math.round((Date.now() - new Date(p.creado_en)) / 6e4));
 const reloj_ = (p) => { const m = min(p); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`; };
@@ -73,7 +76,7 @@ async function avanzar(p) {
   const cambios = [...(p.cambios || []), { estado: e.sig, en: new Date().toISOString() }];
   const r = await db().from('pedidos').update({ estado: e.sig, cambios }).eq('id', p.id).select().single();
   if (r.error) return toast(r.error.message, true);
-  const aviso = (p.estado === 'cocina' && p.entrega === 'recoger' ? e.avisoRecoger : e.aviso || '').replace('{n}', p.numero).replace('{s}', p.sucursal || 'la sucursal');
+  const aviso = (p.estado === 'cocina' && p.entrega === 'recoger' ? e.avisoRecoger : e.aviso || '').replace('{n}', p.numero).replace('{s}', p.sucursal || 'la sucursal') + (p.estado === 'cocina' && p.entrega === 'recoger' && ubic[p.sucursal]?.mapa ? ' 📍 ' + ubic[p.sucursal].mapa : '');
   toast(aviso ? `Se le avisó a ${p.contacto || 'el cliente'} por ${(CANALES[p.canal] || CANALES.pagina).t}: “${aviso}”` : 'Listo ✓');
   await cargar();
 }

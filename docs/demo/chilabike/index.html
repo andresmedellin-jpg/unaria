@@ -117,6 +117,7 @@ section.s { padding: 64px 0; }
 /* sucursales */
 .sucs { display: flex; flex-wrap: wrap; gap: 10px; }
 .suc { background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 10px 16px; font-weight: 500; font-size: 16px; display: inline-flex; gap: 8px; align-items: center; }
+.suc { color: inherit; text-decoration: none; } a.suc:hover { border-color: var(--naranja); }
 .suc small { color: var(--gris); font-size: 13.5px; font-weight: 400; }
 .salsas { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
 .salsa { border-radius: 18px; padding: 22px 16px; display: flex; flex-direction: column; gap: 4px; min-height: 150px; justify-content: flex-end; color: #fff; }
@@ -285,7 +286,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
       </div>
       <div class="paq">
         <h3>Cómo apartas</h3>
-        <ul><li>50% de anticipo para apartar tu fecha</li><li>El resto se liquida el día del evento</li><li>Traslado y montaje: se cotiza según la ubicación</li><li>Con factura si la necesitas</li></ul>
+        <ul><li>50% de anticipo para apartar tu fecha</li><li>El resto se liquida el día del evento</li><li>Traslado y montaje: aprox. $500 a $850 en la ciudad; fuera de Monterrey se cotiza (ej. Saltillo o Montemorelos)</li><li>Con factura si la necesitas</li></ul>
       </div>
     </div>
   </div>
@@ -312,8 +313,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
     <span class="eti">Llegamos a toda la ciudad</span>
     <h2>Te surte la sucursal más cercana.</h2>
     <div class="sucs" style="margin-top:22px">
-      <span class="suc">San Pedro <small>Benito Juárez 606</small></span><span class="suc">Tec <small>Fernando García Roel 2501</small></span><span class="suc">Mitras <small>Celaya 3133, frente a Medicina</small></span><span class="suc">Centro <small>Mariano Escobedo 636</small></span>
-      <span class="suc">San Jerónimo</span><span class="suc">San Pedro de Pinta</span><span class="suc">Cumbres</span><span class="suc">Venustiano Carranza</span>
+      <a class="suc" href="https://maps.app.goo.gl/K9raaonPuX851hHSA" target="_blank" rel="noopener">San Pedro <small>Mapa ↗</small></a><a class="suc" href="https://maps.app.goo.gl/eVBVrVha2xWyrFS67" target="_blank" rel="noopener">San Jerónimo <small>Mapa ↗</small></a><a class="suc" href="https://goo.gl/maps/dNdRETziyLy7Ge476" target="_blank" rel="noopener">Mitras <small>Celaya 3133, frente a Medicina</small> <small>Mapa ↗</small></a><a class="suc" href="https://maps.app.goo.gl/Qtzb6orMnviqnAvw8" target="_blank" rel="noopener">Cumbres <small>Mapa ↗</small></a><a class="suc" href="https://maps.app.goo.gl/eksbWVScQesS8kX4A" target="_blank" rel="noopener">Centro <small>Mapa ↗</small></a><a class="suc" href="https://maps.google.com/?q=25.679914,-100.330696" target="_blank" rel="noopener">Venustiano Carranza <small>Mapa ↗</small></a><a class="suc" href="https://maps.google.com/?q=25.655132,-100.371178" target="_blank" rel="noopener">San Pedro de Pinta <small>Solo domingos</small> <small>Mapa ↗</small></a><a class="suc" href="https://maps.app.goo.gl/E7GQjaJzuw98ogmbA" target="_blank" rel="noopener">Tec <small>Mapa ↗</small></a>
     </div>
   </div>
 </section>
@@ -328,7 +328,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
         <details><summary>¿Con cuánta anticipación aparto?</summary><p>Lo ideal es con [__] semanas. Si es para esta semana, escríbenos y vemos si hay lugar.</p></details>
         <details><summary>¿Cuál es el mínimo de órdenes?</summary><p>Depende del horario: 35 en la mañana, 45 después de las 2:00 pm, 65 después de las 8:00 pm y 100 en la madrugada. Para grupos más chicos te recomendamos pedir a domicilio.</p></details>
         <details><summary>¿Cómo aparto la fecha?</summary><p>Con el 50% de anticipo. El resto se liquida el día del evento.</p></details>
-        <details><summary>¿Cuánto cuesta el traslado?</summary><p>El traslado y montaje se cotiza según la ubicación. El precio de $110 por persona es para el área metropolitana de Monterrey y a pronto pago.</p></details>
+        <details><summary>¿Cuánto cuesta el traslado?</summary><p>En el área metropolitana de Monterrey anda entre $500 y $850 según la zona. En carretera o afueras, y fuera de la ciudad (Saltillo, Montemorelos…), se cotiza aparte. Mándanos tu ubicación y te lo confirmamos. El precio de $110 por persona es para el área metropolitana y a pronto pago.</p></details>
         <details><summary>¿Hay opción sin picante o vegetariana?</summary><p>Sí. Las salsas pueden ir aparte y se pueden servir sin proteína.</p></details>
         <details><summary>¿Dan factura?</summary><p>Sí. Márcalo en el formulario y la tenemos lista.</p></details>
       </div>
