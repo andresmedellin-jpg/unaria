@@ -1,13 +1,15 @@
 <!doctype html>
-<!-- DEMO de Unaria para Chilabike: "Arma tu cajita" — el menú interactivo que se abre desde WhatsApp, Instagram o Messenger.
-     Paso a paso, como en Subway: salsa → proteína → toppings → bebida → entrega → pago. También cotiza eventos (?modo=evento).
-     Dentro del simulador (iframe) avisa a la conversación con postMessage; suelto, guarda el pedido en este navegador
-     (localStorage "chilabike-demo-pedidos") y el portal del demo lo muestra en Mensajes. Precios de muestra. -->
+<!-- Menú interactivo de Chilabike ("Arma tu cajita"): se abre desde WhatsApp, Instagram o Messenger.
+     Se arma SOLO con el menú capturado en el portal (Chilabike → Menú): producto, pasos (salsa, picor, proteína,
+     toppings, bebida… los que haya) con sus opciones, precios y "agotado hoy"; luego carrito, entrega y pago.
+     ?modo=evento cotiza un evento con las mismas salsas, proteínas y toppings. ?canal=wa|ig|fb dice desde qué app se abrió.
+     Origen del menú: CONFIG.menuUrl (producción) → el que se editó en el portal del demo (localStorage) → menu-ejemplo.js.
+     Al terminar: dentro del simulador avisa con postMessage; además guarda el pedido (demo: localStorage; producción: CONFIG.pedidoUrl). -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Arma tu cajita · Chilabike (demo)</title>
+<title>Arma tu cajita · Chilabike</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#121110">
 <meta name="color-scheme" content="light only">
@@ -29,8 +31,7 @@ header small { margin-left:auto; color:#BDB4A9; font-size:12px; }
 .pasos i { flex:1; height:4px; border-radius:2px; background:#3A3633; transition:background .3s; }
 .pasos i.on { background:var(--naranja); }
 main { flex:1; padding:18px 16px 120px; }
-.paso { display:none; } .paso.anim { animation:entra .3s ease both; }
-.paso.on { display:block; }
+.paso.anim { animation:entra .3s ease both; }
 @keyframes entra { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
 h1 { font-family:var(--f-disp); font-size:28px; line-height:1.05; letter-spacing:-.02em; margin:0 0 4px; color:var(--negro); }
 .ayuda { color:var(--gris); font-size:14.5px; margin:0 0 16px; }
@@ -41,10 +42,9 @@ h1 { font-family:var(--f-disp); font-size:28px; line-height:1.05; letter-spacing
 .op.on { border-color:var(--negro); box-shadow:0 0 0 2px var(--negro) inset; }
 .op.on::after { content:"✓"; position:absolute; top:8px; right:10px; width:22px; height:22px; border-radius:50%; background:var(--negro); color:#fff; font-size:13px; font-weight:700; display:grid; place-items:center; }
 .op b { font-size:15.5px; } .op small { color:var(--gris); font-size:13px; } .op .p { font-weight:700; font-size:13.5px; color:var(--naranja-osc); }
+.op.agotado, .chip.agotado { opacity:.45; cursor:not-allowed; } .op.agotado .p::after { content:" · agotado"; }
 .salsa { min-height:150px; justify-content:flex-end; color:#fff; border:0; }
 .salsa small { color:rgba(255,255,255,.85); } .salsa b { font-family:var(--f-disp); font-size:22px; }
-.salsa.verde { background:linear-gradient(160deg,#6E9F3B,#3F6B1F); } .salsa.roja { background:linear-gradient(160deg,#D9452B,#8F1F12); }
-.salsa.mixta { background:linear-gradient(110deg,#4F8A2B 0 50%,#B8321D 50% 100%); }
 .salsa.on { box-shadow:0 0 0 3px var(--negro), 0 10px 24px -10px rgba(0,0,0,.5); }
 .ico { font-size:26px; line-height:1; }
 .chips { display:flex; flex-wrap:wrap; gap:8px; }
@@ -77,6 +77,11 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
 .listo .ok { width:84px; height:84px; border-radius:50%; background:var(--naranja); display:grid; place-items:center; margin:0 auto 16px; animation:pop .45s cubic-bezier(.2,1.6,.4,1) both; }
 @keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:none; opacity:1; } }
 .nota { font-size:12.5px; color:var(--gris); text-align:center; margin-top:14px; }
+.incl { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.incl li { display:flex; gap:12px; align-items:flex-start; background:var(--papel); border:1px solid var(--linea); border-radius:14px; padding:10px 12px; font-size:14px; color:var(--gris); }
+.incl li span { font-size:22px; line-height:1.1; } .incl li b { display:block; color:var(--negro); font-size:15px; }
+.caja.ant { background:var(--suave); border-color:#F7C9A9; } .caja.ant .det { color:#7A3D12; }
+.cant small { font-size:12.5px; }
 .pend { background:#FFF3C4; color:#6B4E00; border-radius:4px; padding:0 4px; font-weight:700; font-size:.85em; }
 </style>
 </head>
@@ -86,123 +91,171 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
     <div class="fila"><span class="logo">🌶</span><b id="h-tit">Arma tu cajita</b><small id="h-canal"></small></div>
     <div class="pasos" id="barra"></div>
   </header>
-  <main id="main"></main>
+  <main id="main"><p class="ayuda">Cargando el menú…</p></main>
   <div class="pie"><div class="in"><button class="btn btn-l" id="atras" aria-label="Atrás">‹</button><button class="btn btn-n" id="sig"><span id="sig-t">Siguiente</span><span class="t" id="sig-total"></span></button></div></div>
 </div>
+<script src="../menu-ejemplo.js"></script>
 <script>
-// ---------- menú (precio de la cajita: el de las apps de entrega; lo demás, de muestra) ----------
-var MENU = {
-  cajita: { nombre: 'Cajita de chilaquiles (450 g)', precio: 150, incluye: 'frijoles, queso fresco, crema, cebolla morada y cilantro' },
-  salsas: [['verde', 'Verdes', 'Los de siempre'], ['roja', 'Rojos', 'Para los que sí aguantan'], ['mixta', 'Mixtos', 'Mitad y mitad']],
-  picor: ['Sin picante', 'Normal', 'Que pique 🔥'],
-  proteinas: [['Pollo', 0, '🍗'], ['Huevo estrellado', 0, '🍳'], ['Arrachera', 35, '🥩'], ['Chorizo', 20, '🌭'], ['Sin proteína', 0, '🌱']],
-  toppings: [['Aguacate', 25], ['Queso extra', 15], ['Chiltepín', 20], ['Doble crema', 10], ['Frijoles extra', 10], ['Totopos extra', 15], ['Salsa aparte', 0], ['Sin cebolla', 0]],
-  bebidas: [['Refresco 600 ml', 39, '🥤'], ['Agua', 25, '💧'], ['Café de olla', 35, '☕'], ['Nada', 0, '—']],
-  envio: 35,
-  sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
+// ---------- configuración (producción: la función de Supabase de Chilabike) ----------
+var CONFIG = {
+  menuUrl: '',      // GET → el menú publicado (tabla app.menus)
+  pedidoUrl: '',    // POST → crea el pedido (tabla app.pedidos) y lo liga a la conversación
 };
 var q = new URLSearchParams(location.search);
 var CANAL = { wa: 'WhatsApp', ig: 'Instagram', fb: 'Messenger' }[q.get('canal')] || '';
 var EVENTO = q.get('modo') === 'evento';
+var CONV = q.get('c') || null;               // la conversación de la que salió (va firmada en producción)
 var DENTRO = window.parent !== window;
 var $ = function (s) { return document.querySelector(s); };
 var dinero = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
 var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 $('#h-canal').textContent = CANAL ? 'dentro de ' + CANAL : '';
+var M, PASOS, st;
 
-// ---------- estado ----------
-var nueva = function () { return { salsa: null, picor: 'Normal', proteina: null, toppings: [], bebida: null, cant: 1 }; };
-var st = { paso: 0, actual: nueva(), carrito: [], entrega: null, sucursal: 'San Pedro', direccion: '', pago: null, nombre: '',
-  ev: { tipo: null, fecha: '', hora: '10:00', personas: 60, salsas: ['verde', 'roja'], proteinas: ['Pollo'], toppings: [], lugar: '', nombre: '' } };
-var precioCajita = function (c) {
-  var p = MENU.cajita.precio + (MENU.proteinas.find(function (x) { return x[0] === c.proteina; }) || [0, 0])[1];
-  c.toppings.forEach(function (t) { p += (MENU.toppings.find(function (x) { return x[0] === t; }) || [0, 0])[1]; });
-  p += (MENU.bebidas.find(function (x) { return x[0] === c.bebida; }) || [0, 0])[1];
-  return p * c.cant;
-};
+function cargarMenu() {
+  if (CONFIG.menuUrl) return fetch(CONFIG.menuUrl).then(function (r) { return r.json(); });
+  var guardado = null; try { guardado = JSON.parse(localStorage.getItem('chilabike-demo-menu') || 'null'); } catch (e) {}
+  return Promise.resolve(guardado || window.MENU_CHILABIKE);
+}
+cargarMenu().then(function (m) { M = m; if (!(M.eventos || {}).horarios && window.MENU_CHILABIKE) M.eventos = Object.assign({}, window.MENU_CHILABIKE.eventos, M.eventos || {}, { horarios: window.MENU_CHILABIKE.eventos.horarios, incluye: window.MENU_CHILABIKE.eventos.incluye }); iniciar(); }).catch(function () { $('#main').innerHTML = '<p class="ayuda">No se pudo cargar el menú. Intenta de nuevo en un momento.</p>'; });
+
+// ---------- ayudantes del menú ----------
+var paso = function (id) { return M.pasos.find(function (p) { return p.id === id; }); };
+var opcion = function (pid, oid) { var p = paso(pid); return p && p.opciones.find(function (o) { return o.id === oid; }); };
+var visibles = function (p) { return p.opciones.filter(function (o) { return o.visible !== false; }); };
+function nueva() {
+  var e = {}; M.pasos.forEach(function (p) { e[p.id] = p.tipo === 'varias' ? [] : (p.predeterminado || null); });
+  return { e: e, cant: 1 };
+}
+function precioUnit(c) {
+  var t = Number(M.producto.precio || 0);
+  M.pasos.forEach(function (p) { [].concat(c.e[p.id] || []).forEach(function (oid) { var o = opcion(p.id, oid); if (o) t += Number(o.precio || 0); }); });
+  return t;
+}
+var precioCajita = function (c) { return precioUnit(c) * c.cant; };
 var subtotal = function () { return st.carrito.reduce(function (s, c) { return s + precioCajita(c); }, 0); };
-var total = function () { return subtotal() + (st.entrega === 'domicilio' ? MENU.envio : 0); };
-var nomSalsa = function (k) { return (MENU.salsas.find(function (s) { return s[0] === k; }) || [0, k])[1]; };
-var resumenCajita = function (c) {
-  return c.cant + ' × ' + nomSalsa(c.salsa) + (c.picor !== 'Normal' ? ' (' + c.picor.replace(' 🔥', '') + ')' : '') + ' con ' + (c.proteina || '').toLowerCase() +
-    (c.toppings.length ? ' + ' + c.toppings.join(', ').toLowerCase() : '') + (c.bebida && c.bebida !== 'Nada' ? ' · ' + c.bebida.toLowerCase() : '');
-};
+var envio = function () { return st.entrega === 'domicilio' ? Number(M.envio || 0) : 0; };
+var total = function () { return subtotal() + envio(); };
+function resumen(c) {
+  var partes = [];
+  M.pasos.forEach(function (p) {
+    var ids = [].concat(c.e[p.id] || []);
+    if (!ids.length || (p.predeterminado && ids.length === 1 && ids[0] === p.predeterminado)) return;
+    var n = ids.map(function (oid) { return (opcion(p.id, oid) || {}).nombre; }).filter(function (x) { return x && !/^nada$/i.test(x); });
+    if (n.length) partes.push(n.join(', '));
+  });
+  return partes.join(' · ');
+}
 
-// ---------- pasos ----------
-var PEDIDO = [
-  { t: '¿Qué salsa?', listo: function () { return !!st.actual.salsa; }, html: function () {
-    return '<h1>¿Qué salsa?</h1><p class="ayuda">Tu cajita de 450 g ya trae ' + MENU.cajita.incluye + '.</p><div class="grid g3">' +
-      MENU.salsas.map(function (s) { return '<button class="op salsa ' + s[0] + (st.actual.salsa === s[0] ? ' on' : '') + '" data-salsa="' + s[0] + '"><b>' + s[1] + '</b><small>' + s[2] + '</small></button>'; }).join('') +
-      '</div><div class="seccion">¿Qué tanto pica?</div><div class="chips">' +
-      MENU.picor.map(function (p) { return '<button class="chip' + (st.actual.picor === p ? ' on' : '') + '" data-picor="' + p + '">' + p + '</button>'; }).join('') + '</div>'; } },
-  { t: 'Proteína', listo: function () { return !!st.actual.proteina; }, html: function () {
-    return '<h1>¿Con qué la quieres?</h1><p class="ayuda">Escoge una proteína.</p><div class="grid g2">' +
-      MENU.proteinas.map(function (p) { return '<button class="op' + (st.actual.proteina === p[0] ? ' on' : '') + '" data-prot="' + p[0] + '"><span class="ico">' + p[2] + '</span><b>' + p[0] + '</b><span class="p">' + (p[1] ? '+' + dinero(p[1]) : 'Incluido') + '</span></button>'; }).join('') + '</div>'; } },
-  { t: 'Toppings', listo: function () { return true; }, html: function () {
-    return '<h1>Ponle lo que quieras</h1><p class="ayuda">Toca todos los que se te antojen. Lista de toppings <span class="pend">por confirmar</span>.</p><div class="chips">' +
-      MENU.toppings.map(function (t) { return '<button class="chip' + (st.actual.toppings.indexOf(t[0]) >= 0 ? ' on' : '') + '" data-top="' + t[0] + '">' + t[0] + (t[1] ? '<small>+' + dinero(t[1]) + '</small>' : '') + '</button>'; }).join('') + '</div>'; } },
-  { t: 'Bebida', listo: function () { return !!st.actual.bebida; }, html: function () {
-    return '<h1>¿Algo de tomar?</h1><p class="ayuda">Para acompañar.</p><div class="grid g2">' +
-      MENU.bebidas.map(function (b) { return '<button class="op' + (st.actual.bebida === b[0] ? ' on' : '') + '" data-beb="' + b[0] + '"><span class="ico">' + b[2] + '</span><b>' + b[0] + '</b><span class="p">' + (b[1] ? dinero(b[1]) : '') + '</span></button>'; }).join('') +
-      '</div><div class="seccion">¿Cuántas cajitas así?</div><div class="cant"><button data-cant="-1">−</button><b>' + st.actual.cant + '</b><button data-cant="1">+</button><span>' + dinero(precioCajita(st.actual)) + '</span></div>'; } },
-  { t: 'Tu pedido', listo: function () { return st.carrito.length > 0; }, al: function () { if (st.actual.salsa) { st.carrito.push(st.actual); st.actual = nueva(); } }, html: function () {
-    return '<h1>Tu pedido</h1><p class="ayuda">¿Alguien más va a querer? Agrégale otra cajita.</p>' +
-      st.carrito.map(function (c, i) { return '<div class="caja"><div class="tit"><span>' + c.cant + ' × Cajita ' + nomSalsa(c.salsa).toLowerCase() + '</span><span>' + dinero(precioCajita(c)) + '</span></div><div class="det">' + esc(resumenCajita(c).replace(/^\d+ × /, '')) + '</div><div class="acc"><button data-quitar="' + i + '">Quitar</button></div></div>'; }).join('') +
-      '<button class="op" data-otra style="align-items:center;flex-direction:row;justify-content:center;border-style:dashed"><b>+ Agregar otra cajita</b></button>' +
-      '<div class="total"><span>Subtotal</span><span>' + dinero(subtotal()) + '</span></div>'; } },
-  { t: 'Entrega', listo: function () { return st.entrega === 'recoger' || (st.entrega === 'domicilio' && st.direccion.trim().length > 5); }, html: function () {
-    return '<h1>¿Cómo te lo damos?</h1><p class="ayuda">A domicilio te llega con uno de nuestros choferes.</p><div class="grid g2">' +
-      '<button class="op' + (st.entrega === 'domicilio' ? ' on' : '') + '" data-ent="domicilio"><span class="ico">🛵</span><b>A domicilio</b><span class="p">+' + dinero(MENU.envio) + '</span></button>' +
-      '<button class="op' + (st.entrega === 'recoger' ? ' on' : '') + '" data-ent="recoger"><span class="ico">🏪</span><b>Paso por él</b><span class="p">Sin costo</span></button></div>' +
-      (st.entrega === 'domicilio' ? '<div style="margin-top:14px"><label class="campo">Dirección<input id="dir" value="' + esc(st.direccion) + '" placeholder="Calle, número y colonia" autocomplete="street-address"></label></div>' : '') +
-      (st.entrega === 'recoger' ? '<div style="margin-top:14px"><label class="campo">¿En qué sucursal?<select id="suc">' + MENU.sucursales.map(function (s) { return '<option' + (s === st.sucursal ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></label></div>' : ''); } },
-  { t: 'Pago', listo: function () { return !!st.pago; }, html: function () {
-    return '<h1>¿Cómo pagas?</h1><p class="ayuda">Total: <b>' + dinero(total()) + '</b>' + (st.entrega === 'domicilio' ? ' (con envío)' : '') + '</p><div class="grid g2">' +
-      '<button class="op' + (st.pago === 'Efectivo' ? ' on' : '') + '" data-pago="Efectivo"><span class="ico">💵</span><b>Efectivo</b><small>Al recibir</small></button>' +
-      '<button class="op' + (st.pago === 'Transferencia' ? ' on' : '') + '" data-pago="Transferencia"><span class="ico">🏦</span><b>Transferencia</b><small>Te pasamos los datos</small></button></div>' +
-      (st.pago === 'Efectivo' ? '<div class="seccion" style="margin-top:16px">¿Con cuánto pagas? <small>para llevarte cambio</small></div><div class="chips">' + ['Exacto', '$200', '$500', '$1,000'].map(function (x) { return '<button class="chip' + (st.cambio === x ? ' on' : '') + '" data-cambio="' + x + '">' + x + '</button>'; }).join('') + '</div>' : ''); } },
-];
+// ---------- pasos: los del menú (los "junto" van en la misma pantalla que el anterior) + carrito, entrega y pago ----------
+function iniciar() {
+  document.title = (EVENTO ? 'Cotiza tu evento' : 'Arma tu ' + M.producto.nombre.split(' ')[0].toLowerCase()) + ' · ' + M.negocio;
+  $('#h-tit').textContent = EVENTO ? 'Cotiza tu evento' : 'Arma tu ' + M.producto.nombre.split(' ')[0].toLowerCase();
+  st = { paso: 0, actual: nueva(), carrito: [], entrega: null, sucursal: M.sucursales[0], direccion: '', pago: null, cambio: null,
+    ev: { tipo: null, fecha: '', horario: null, hora: '', personas: 0, lugar: '', factura: null } };
+  if (EVENTO) { PASOS = EVENTOS.filter(function (p) { return !p.siFactura || EV().pideFactura; }); } else {
+    PASOS = [];
+    M.pasos.forEach(function (p) { if (p.junto && PASOS.length) PASOS[PASOS.length - 1].ids.push(p.id); else PASOS.push({ ids: [p.id] }); });
+    PASOS = PASOS.map(pasoMenu).concat([CARRITO, ENTREGA, PAGO]);
+  }
+  pintar();
+}
+function bloque(p, i) {
+  var A = st.actual, sel = function (o) { return [].concat(A.e[p.id] || []).indexOf(o.id) >= 0; };
+  var cab = i === 0 ? '<h1>' + esc(p.titulo) + '</h1>' + (p.ayuda ? '<p class="ayuda">' + esc(p.ayuda) + '</p>' : '<p class="ayuda"></p>') : '<div class="seccion">' + esc(p.titulo) + (p.tipo === 'varias' ? '<small>las que quieras</small>' : '') + '</div>';
+  var ops = visibles(p);
+  if (p.estilo === 'salsa') return cab + '<div class="grid g3">' + ops.map(function (o) {
+    return '<button class="op salsa' + (sel(o) ? ' on' : '') + (o.disponible === false ? ' agotado' : '') + '" style="background:' + (o.color || 'var(--negro)') + '" data-p="' + p.id + '" data-o="' + o.id + '"><b>' + esc(o.nombre) + '</b><small>' + esc(o.disponible === false ? 'Agotado hoy' : o.desc || '') + '</small></button>'; }).join('') + '</div>';
+  if (p.estilo === 'tarjeta') return cab + '<div class="grid g2">' + ops.map(function (o) {
+    return '<button class="op' + (sel(o) ? ' on' : '') + (o.disponible === false ? ' agotado' : '') + '" data-p="' + p.id + '" data-o="' + o.id + '">' + (o.emoji ? '<span class="ico">' + o.emoji + '</span>' : '') + '<b>' + esc(o.nombre) + '</b><span class="p">' + (o.disponible === false ? 'Agotado hoy' : o.precio ? (p.id === 'bebida' ? dinero(o.precio) : '+' + dinero(o.precio)) : i === 0 && p.id !== 'bebida' ? 'Incluido' : '') + '</span></button>'; }).join('') + '</div>';
+  return cab + '<div class="chips">' + ops.map(function (o) {
+    return '<button class="chip' + (sel(o) ? ' on' : '') + (o.disponible === false ? ' agotado' : '') + '" data-p="' + p.id + '" data-o="' + o.id + '">' + esc(o.nombre) + (o.disponible === false ? '<small>agotado</small>' : o.precio ? '<small>+' + dinero(o.precio) + '</small>' : '') + '</button>'; }).join('') + '</div>';
+}
+function pasoMenu(g) {
+  var ps = g.ids.map(paso), ultimoMenu = g.ids.indexOf(M.pasos[M.pasos.length - 1].id) >= 0;
+  return { menu: true, ultimoMenu: ultimoMenu, auto: ps.length === 1 && ps[0].tipo === 'una' && ps[0].estilo !== 'salsa' && !ultimoMenu,
+    listo: function () { return ps.every(function (p) { return !p.obligatorio || [].concat(st.actual.e[p.id] || []).length > 0; }); },
+    html: function () {
+      return ps.map(bloque).join('') + (ultimoMenu ? '<div class="seccion">¿Cuántas así?</div><div class="cant"><button data-cant="-1">−</button><b>' + st.actual.cant + '</b><button data-cant="1">+</button><span>' + dinero(precioCajita(st.actual)) + '</span></div>' : '');
+    } };
+}
+var CARRITO = { carrito: true, listo: function () { return st.carrito.length > 0; }, al: function () { if (pasoListo(st.actual)) { st.carrito.push(st.actual); st.actual = nueva(); } }, html: function () {
+  return '<h1>Tu pedido</h1><p class="ayuda">¿Alguien más va a querer? Agrégale otra.</p>' +
+    st.carrito.map(function (c, i) { return '<div class="caja"><div class="tit"><span>' + c.cant + ' × ' + esc(M.producto.nombre) + '</span><span>' + dinero(precioCajita(c)) + '</span></div><div class="det">' + esc(resumen(c)) + '</div><div class="acc"><button data-quitar="' + i + '">Quitar</button></div></div>'; }).join('') +
+    '<button class="op" data-otra style="align-items:center;flex-direction:row;justify-content:center;border-style:dashed"><b>+ Agregar otra</b></button>' +
+    '<div class="total"><span>Subtotal</span><span>' + dinero(subtotal()) + '</span></div>'; } };
+var ENTREGA = { listo: function () { return st.entrega === 'recoger' || (st.entrega === 'domicilio' && st.direccion.trim().length > 5); }, html: function () {
+  return '<h1>¿Cómo te lo damos?</h1><p class="ayuda">A domicilio te llega con uno de nuestros choferes.</p><div class="grid g2">' +
+    '<button class="op' + (st.entrega === 'domicilio' ? ' on' : '') + '" data-ent="domicilio"><span class="ico">🛵</span><b>A domicilio</b><span class="p">' + (M.envio ? '+' + dinero(M.envio) : 'Sin costo') + '</span></button>' +
+    '<button class="op' + (st.entrega === 'recoger' ? ' on' : '') + '" data-ent="recoger"><span class="ico">🏪</span><b>Paso por él</b><span class="p">Sin costo</span></button></div>' +
+    (st.entrega === 'domicilio' ? '<div style="margin-top:14px"><label class="campo">Dirección<input id="dir" value="' + esc(st.direccion) + '" placeholder="Calle, número y colonia" autocomplete="street-address"></label></div>' : '') +
+    (st.entrega === 'recoger' ? '<div style="margin-top:14px"><label class="campo">¿En qué sucursal?<select id="suc">' + M.sucursales.map(function (s) { return '<option' + (s === st.sucursal ? ' selected' : '') + '>' + esc(s) + '</option>'; }).join('') + '</select></label></div>' : ''); } };
+var PAGO = { listo: function () { return !!st.pago; }, html: function () {
+  return '<h1>¿Cómo pagas?</h1><p class="ayuda">Total: <b>' + dinero(total()) + '</b>' + (envio() ? ' (con envío)' : '') + '</p><div class="grid g2">' +
+    M.pagos.map(function (x) { return '<button class="op' + (st.pago === x ? ' on' : '') + '" data-pago="' + esc(x) + '"><span class="ico">' + ({ Efectivo: '💵', Transferencia: '🏦', Tarjeta: '💳' }[x] || '💰') + '</span><b>' + esc(x) + '</b><small>' + ({ Efectivo: 'Al recibir', Transferencia: 'Te pasamos los datos', Tarjeta: 'Terminal al recibir' }[x] || '') + '</small></button>'; }).join('') + '</div>' +
+    (st.pago === 'Efectivo' ? '<div class="seccion" style="margin-top:16px">¿Con cuánto pagas? <small>para llevarte cambio</small></div><div class="chips">' + ['Exacto', '$200', '$500', '$1,000'].map(function (x) { return '<button class="chip' + (st.cambio === x ? ' on' : '') + '" data-cambio="' + x + '">' + x + '</button>'; }).join('') + '</div>' : ''); } };
+// Eventos: el esquema de Javier (precio por persona, mínimo de órdenes según el horario, lo que incluye y el anticipo).
+var EV = function () { return M.eventos || {}; };
+var horarios = function () { return (EV().horarios || []).slice().sort(function (a, b) { return a.desde < b.desde ? -1 : 1; }); };
+var horarioDe = function (h) { var l = horarios(), r = null; l.forEach(function (x) { if (h >= x.desde) r = x; }); return r || l[l.length - 1] || null; };
+var minimo = function () { var h = horarios().filter(function (x) { return x.id === st.ev.horario; })[0]; return h ? h.minimo : 15; };
+var listaIncluye = function () { return '<ul class="incl">' + (EV().incluye || []).map(function (x) { return '<li><span>' + esc(x.emoji || '✓') + '</span><div><b>' + esc(x.t) + '</b>' + esc(x.d || '') + '</div></li>'; }).join('') + '</ul>'; };
 var EVENTOS = [
-  { t: 'Tu evento', listo: function () { return !!st.ev.tipo; }, html: function () {
-    return '<h1>¿Qué vas a celebrar?</h1><p class="ayuda">En 1 minuto te damos una cotización.</p><div class="grid g2">' +
-      [['Cumpleaños', '🎂'], ['Boda o XV', '💍'], ['Desayuno de oficina', '💼'], ['Reunión', '🙌'], ['Tornafiesta', '🌙'], ['Otro', '✨']].map(function (x) { return '<button class="op' + (st.ev.tipo === x[0] ? ' on' : '') + '" data-ev-tipo="' + x[0] + '"><span class="ico">' + x[1] + '</span><b>' + x[0] + '</b></button>'; }).join('') + '</div>'; } },
-  { t: 'Cuándo y cuántos', listo: function () { return !!st.ev.fecha; }, html: function () {
+  { listo: function () { return !!st.ev.tipo; }, auto: true, html: function () {
+    var ico = { 'Cumpleaños': '🎂', 'Boda o XV': '💍', 'Desayuno de oficina': '💼', 'Reunión': '🙌', 'Tornafiesta': '🌙' };
+    return '<h1>¿Qué vas a celebrar?</h1><p class="ayuda">En 1 minuto te damos tu cotización.</p><div class="grid g2">' +
+      EV().tipos.map(function (x) { return '<button class="op' + (st.ev.tipo === x ? ' on' : '') + '" data-ev-tipo="' + esc(x) + '"><span class="ico">' + (ico[x] || '✨') + '</span><b>' + esc(x) + '</b></button>'; }).join('') + '</div>'; } },
+  { listo: function () { return !!st.ev.fecha && !!st.ev.horario; }, html: function () {
     var min = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-    return '<h1>¿Cuándo y cuántos?</h1><p class="ayuda">Aproximado está bien.</p><label class="campo">Fecha<input type="date" id="ev-fecha" min="' + min + '" value="' + esc(st.ev.fecha) + '"></label><label class="campo">Hora<input type="time" id="ev-hora" value="' + esc(st.ev.hora) + '"></label>' +
-      '<div class="seccion">Personas</div><div class="rango"><input type="range" id="ev-pers" min="15" max="500" step="5" value="' + st.ev.personas + '"><b id="ev-pers-n">' + st.ev.personas + '</b></div>'; } },
-  { t: 'Tu barra', listo: function () { return st.ev.salsas.length > 0 && st.ev.proteinas.length > 0; }, html: function () {
-    return '<h1>Arma tu barra</h1><p class="ayuda">Escoge todas las que quieras: cada invitado se sirve su cajita.</p><div class="seccion">Salsas</div><div class="chips">' +
-      MENU.salsas.map(function (s) { return '<button class="chip' + (st.ev.salsas.indexOf(s[0]) >= 0 ? ' on' : '') + '" data-ev-salsa="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div><div class="seccion">Proteínas</div><div class="chips">' +
-      MENU.proteinas.slice(0, 4).map(function (p) { return '<button class="chip' + (st.ev.proteinas.indexOf(p[0]) >= 0 ? ' on' : '') + '" data-ev-prot="' + p[0] + '">' + p[2] + ' ' + p[0] + '</button>'; }).join('') + '</div><div class="seccion">Toppings</div><div class="chips">' +
-      MENU.toppings.slice(0, 6).map(function (t) { return '<button class="chip' + (st.ev.toppings.indexOf(t[0]) >= 0 ? ' on' : '') + '" data-ev-top="' + t[0] + '">' + t[0] + '</button>'; }).join('') + '</div>'; } },
-  { t: 'Dónde', listo: function () { return st.ev.lugar.trim().length > 3; }, html: function () {
-    return '<h1>¿Dónde es?</h1><p class="ayuda">Colonia, salón o dirección.</p><label class="campo">Lugar<input id="ev-lugar" value="' + esc(st.ev.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago"></label>' +
-      '<div class="caja"><div class="tit"><span>Tu cotización estimada</span></div><div class="det">' + esc(st.ev.tipo) + ' · ' + st.ev.personas + ' personas · ' + st.ev.salsas.map(nomSalsa).join(' y ').toLowerCase() + ' · ' + esc(st.ev.proteinas.join(', ').toLowerCase()) + '</div>' +
-      '<div class="total" style="padding:4px 0 0"><span>Por persona</span><span>$<span class="pend">__</span></span></div><div class="det">El precio final te lo confirma Chilabike por este chat. Para apartar la fecha se pide anticipo.</div></div>'; } },
+    var ico = { manana: '☀️', tarde: '🌤️', noche: '🌙', madrugada: '🌌' };
+    return '<h1>¿Cuándo es?</h1><p class="ayuda">El mínimo de órdenes cambia según el horario.</p><label class="campo">Fecha<input type="date" id="ev-fecha" min="' + min + '" value="' + esc(st.ev.fecha) + '"></label>' +
+      '<div class="seccion">Horario</div><div class="grid g2">' + (EV().horarios || []).map(function (h) {
+        return '<button class="op' + (st.ev.horario === h.id ? ' on' : '') + '" data-ev-hor="' + h.id + '"><span class="ico">' + (ico[h.id] || '🕒') + '</span><b>' + esc(h.nombre) + '</b><span class="p">Mínimo ' + h.minimo + ' órdenes</span></button>'; }).join('') + '</div>' +
+      (st.ev.horario ? '<label class="campo" style="margin-top:14px">Hora aproximada<input type="time" id="ev-hora" value="' + esc(st.ev.hora) + '"></label>' : ''); } },
+  { listo: function () { return st.ev.personas >= minimo() && st.ev.lugar.trim().length > 3; }, al: function () { if (st.ev.personas < minimo()) st.ev.personas = minimo(); }, html: function () {
+    var E = st.ev, m = minimo(), pp = EV().precioPersona;
+    return '<h1>¿Cuántos y dónde?</h1><p class="ayuda">Una orden por persona.</p>' +
+      '<div class="cant"><button data-ev-pers="-5" aria-label="Menos">−</button><b id="ev-pers-n">' + E.personas + '</b><span>personas<br><small>mínimo ' + m + ' en este horario</small></span><button data-ev-pers="5" aria-label="Más">+</button></div>' +
+      '<div class="rango" style="margin:10px 0 4px"><input type="range" id="ev-pers" min="' + m + '" max="' + Math.max(500, m * 4) + '" step="1" value="' + E.personas + '"></div>' +
+      (pp ? '<p class="ayuda" id="ev-estim">' + E.personas + ' × ' + dinero(pp) + ' = <b>' + dinero(pp * E.personas) + '</b></p>' : '') +
+      '<label class="campo">¿Dónde es? <small style="font-weight:400;color:var(--gris)">colonia, salón o dirección</small><input id="ev-lugar" value="' + esc(E.lugar) + '" placeholder="Ej. Quinta Los Encinos, Santiago"></label>'; } },
+  { siFactura: true, listo: function () { return st.ev.factura !== null; }, auto: true, html: function () {
+    return '<h1>¿Requieres factura?</h1><p class="ayuda">Para tenerla lista el día del evento.</p><div class="grid g2">' +
+      [['si', '🧾', 'Sí, con factura'], ['no', '🙅', 'No, sin factura']].map(function (x) { return '<button class="op' + (st.ev.factura === (x[0] === 'si') ? ' on' : '') + '" data-ev-fac="' + x[0] + '"><span class="ico">' + x[1] + '</span><b>' + x[2] + '</b></button>'; }).join('') + '</div>'; } },
+  { listo: function () { return true; }, html: function () {
+    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : 0, ant = X.anticipo || 0, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {};
+    return '<h1>Tu cotización</h1><p class="ayuda">' + esc(E.tipo) + ' · ' + fechaBonita(E.fecha) + ' · ' + esc(h.nombre || '') + (E.hora ? ' (' + horaBonita(E.hora) + ')' : '') + '</p>' +
+      '<div class="caja"><div class="total" style="padding:0"><span>' + E.personas + ' personas</span><span>' + (pp ? dinero(tot) : '$<span class="pend">__</span>') + '</span></div>' +
+      '<div class="det">' + (pp ? dinero(pp) + ' por persona' : 'Precio por persona: se cotiza') + ' · ' + esc(E.lugar) + (E.factura === true ? ' · con factura' : E.factura === false ? ' · sin factura' : '') + '</div>' +
+      (X.traslado ? '<div class="det">🚚 ' + esc(X.traslado) + '</div>' : '') + '</div>' +
+      (ant && pp ? '<div class="caja ant"><div class="tit"><span>Para apartar tu fecha</span><span>' + dinero(tot * ant / 100) + '</span></div><div class="det">' + ant + '% de anticipo · el resto (' + dinero(tot - tot * ant / 100) + ') se liquida el día del evento.</div></div>' : '') +
+      '<div class="seccion">El servicio incluye</div>' + listaIncluye() +
+      (X.condiciones ? '<p class="nota" style="text-align:left">' + esc(X.condiciones) + '</p>' : ''); } },
 ];
-var PASOS = EVENTO ? EVENTOS : PEDIDO;
-$('#h-tit').textContent = EVENTO ? 'Cotiza tu evento' : 'Arma tu cajita';
+function horaBonita(h) { if (!h) return ''; var p = h.split(':'), d = new Date(); d.setHours(+p[0], +p[1]); return d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); }
+var nombres = function (pid, ids) { return ids.map(function (i) { return (opcion(pid, i) || {}).nombre; }).filter(Boolean); };
+var pasoListo = function (c) { return M.pasos.every(function (p) { return !p.obligatorio || [].concat(c.e[p.id] || []).length > 0; }); };
 
 var ultimoPaso = -1;
 function pintar() {
   var p = PASOS[st.paso], anim = ultimoPaso !== st.paso; ultimoPaso = st.paso;
   $('#barra').innerHTML = PASOS.map(function (_, i) { return '<i class="' + (i <= st.paso ? 'on' : '') + '"></i>'; }).join('');
-  $('#main').innerHTML = '<section class="paso on' + (anim ? ' anim' : '') + '">' + p.html() + '</section>';
+  $('#main').innerHTML = '<section class="paso' + (anim ? ' anim' : '') + '">' + p.html() + '</section>';
   var ultimo = st.paso === PASOS.length - 1;
-  $('#sig-t').textContent = ultimo ? (EVENTO ? 'Enviar a Chilabike' : 'Hacer mi pedido') : st.paso === 3 && !EVENTO ? 'Agregar al pedido' : 'Siguiente';
-  $('#sig-total').textContent = EVENTO ? '' : (st.paso <= 3 ? dinero(subtotal() + (st.actual.salsa ? precioCajita(st.actual) : 0)) : dinero(total()));
+  $('#sig-t').textContent = ultimo ? (EVENTO ? 'Enviar a ' + M.negocio : 'Hacer mi pedido') : p.ultimoMenu ? 'Agregar al pedido' : 'Siguiente';
+  $('#sig-total').textContent = EVENTO ? '' : (p.menu ? dinero(subtotal() + (pasoListo(st.actual) || precioUnit(st.actual) > M.producto.precio ? precioCajita(st.actual) : 0)) : dinero(total()));
   $('#sig').disabled = !p.listo();
   $('#atras').style.visibility = st.paso === 0 ? 'hidden' : 'visible';
   enlazar();
 }
-function toggle(lista, v) { var i = lista.indexOf(v); if (i >= 0) lista.splice(i, 1); else lista.push(v); }
 function enlazar() {
   var A = st.actual;
-  document.querySelectorAll('[data-salsa]').forEach(function (b) { b.onclick = function () { A.salsa = b.dataset.salsa; pintar(); }; });
-  document.querySelectorAll('[data-picor]').forEach(function (b) { b.onclick = function () { A.picor = b.dataset.picor; pintar(); }; });
-  document.querySelectorAll('[data-prot]').forEach(function (b) { b.onclick = function () { A.proteina = b.dataset.prot; pintar(); setTimeout(avanzar, 260); }; });
-  document.querySelectorAll('[data-top]').forEach(function (b) { b.onclick = function () { toggle(A.toppings, b.dataset.top); pintar(); }; });
-  document.querySelectorAll('[data-beb]').forEach(function (b) { b.onclick = function () { A.bebida = b.dataset.beb; pintar(); }; });
+  document.querySelectorAll('[data-p]').forEach(function (b) { b.onclick = function () {
+    var p = paso(b.dataset.p), o = opcion(p.id, b.dataset.o); if (!o || o.disponible === false) return;
+    if (p.tipo === 'varias') { var l = A.e[p.id], i = l.indexOf(o.id); if (i >= 0) l.splice(i, 1); else l.push(o.id); }
+    else A.e[p.id] = o.id;
+    pintar(); if (PASOS[st.paso].auto && p.tipo === 'una') setTimeout(avanzar, 260);
+  }; });
   document.querySelectorAll('[data-cant]').forEach(function (b) { b.onclick = function () { A.cant = Math.max(1, A.cant + Number(b.dataset.cant)); pintar(); }; });
   document.querySelectorAll('[data-quitar]').forEach(function (b) { b.onclick = function () { st.carrito.splice(Number(b.dataset.quitar), 1); pintar(); }; });
   var otra = $('[data-otra]'); if (otra) otra.onclick = function () { st.paso = 0; pintar(); };
@@ -213,52 +266,61 @@ function enlazar() {
   document.querySelectorAll('[data-cambio]').forEach(function (b) { b.onclick = function () { st.cambio = b.dataset.cambio; pintar(); }; });
   var E = st.ev;
   document.querySelectorAll('[data-ev-tipo]').forEach(function (b) { b.onclick = function () { E.tipo = b.dataset.evTipo; pintar(); setTimeout(avanzar, 260); }; });
-  var f = $('#ev-fecha'); if (f) f.oninput = function () { E.fecha = f.value; $('#sig').disabled = !PASOS[st.paso].listo(); };
-  var h = $('#ev-hora'); if (h) h.oninput = function () { E.hora = h.value; };
-  var pr = $('#ev-pers'); if (pr) pr.oninput = function () { E.personas = Number(pr.value); $('#ev-pers-n').textContent = pr.value; };
-  document.querySelectorAll('[data-ev-salsa]').forEach(function (b) { b.onclick = function () { toggle(E.salsas, b.dataset.evSalsa); pintar(); }; });
-  document.querySelectorAll('[data-ev-prot]').forEach(function (b) { b.onclick = function () { toggle(E.proteinas, b.dataset.evProt); pintar(); }; });
-  document.querySelectorAll('[data-ev-top]').forEach(function (b) { b.onclick = function () { toggle(E.toppings, b.dataset.evTop); pintar(); }; });
-  var l = $('#ev-lugar'); if (l) l.oninput = function () { E.lugar = l.value; $('#sig').disabled = !PASOS[st.paso].listo(); };
+  var revisa = function () { $('#sig').disabled = !PASOS[st.paso].listo(); };
+  var pers = function (n) { E.personas = Math.max(minimo(), n); $('#ev-pers-n').textContent = E.personas; var r = $('#ev-pers'); if (r) r.value = E.personas;
+    var es = $('#ev-estim'), pp = EV().precioPersona; if (es && pp) es.innerHTML = E.personas + ' × ' + dinero(pp) + ' = <b>' + dinero(pp * E.personas) + '</b>'; revisa(); };
+  document.querySelectorAll('[data-ev-hor]').forEach(function (b) { b.onclick = function () { var h = horarios().filter(function (x) { return x.id === b.dataset.evHor; })[0]; E.horario = h.id; if (!E.hora || horarioDe(E.hora) !== h) E.hora = h.hora || h.desde; pintar(); }; });
+  document.querySelectorAll('[data-ev-fac]').forEach(function (b) { b.onclick = function () { E.factura = b.dataset.evFac === 'si'; pintar(); setTimeout(avanzar, 260); }; });
+  document.querySelectorAll('[data-ev-pers]').forEach(function (b) { b.onclick = function () { pers(E.personas + Number(b.dataset.evPers)); }; });
+  var f = $('#ev-fecha'); if (f) f.oninput = function () { E.fecha = f.value; revisa(); };
+  var h = $('#ev-hora'); if (h) h.onchange = function () { E.hora = h.value; var x = horarioDe(h.value); if (x && x.id !== E.horario) { E.horario = x.id; pintar(); } };
+  var pr = $('#ev-pers'); if (pr) pr.oninput = function () { pers(Number(pr.value)); };
+  var lu = $('#ev-lugar'); if (lu) lu.oninput = function () { E.lugar = lu.value; revisa(); };
 }
 function avanzar() {
   var p = PASOS[st.paso]; if (!p.listo()) return;
   if (st.paso === PASOS.length - 1) return terminar();
   st.paso++; if (PASOS[st.paso].al) PASOS[st.paso].al(); pintar(); window.scrollTo(0, 0);
 }
-$('#sig').onclick = avanzar;
+$('#sig').onclick = function () { if (PASOS) avanzar(); };
 $('#atras').onclick = function () {
-  if (st.paso === 0) return;
-  if (!EVENTO && st.paso === 4 && st.carrito.length) { st.actual = st.carrito.pop(); }
+  if (!PASOS || st.paso === 0) return;
+  if (PASOS[st.paso].carrito && st.carrito.length) st.actual = st.carrito.pop();
   st.paso--; pintar();
 };
 
 function terminar() {
-  var pedido;
+  var pedido, ahora = new Date().toISOString();
   if (EVENTO) {
-    var E = st.ev;
-    pedido = { tipo: 'evento', canal: CANAL || 'Página', creado_en: new Date().toISOString(),
-      texto: '🎉 Quiero cotizar un evento\n' + E.tipo + ' · ' + E.personas + ' personas\n📅 ' + fechaBonita(E.fecha) + ', ' + E.hora + '\n📍 ' + E.lugar +
-        '\n🌶️ Barra: ' + E.salsas.map(nomSalsa).join(' y ') + ' con ' + E.proteinas.join(', ').toLowerCase() + (E.toppings.length ? '\n➕ ' + E.toppings.join(', ').toLowerCase() : ''),
-      evento: { tipo: E.tipo, fecha: E.fecha, hora: E.hora, personas: E.personas, direccion: E.lugar, paquete: E.tipo === 'Desayuno de oficina' ? 'Desayuno de oficina' : E.tipo === 'Tornafiesta' || E.tipo === 'Boda o XV' ? 'Tornafiesta' : 'Fiesta',
-        notas: 'Barra: ' + E.salsas.map(nomSalsa).join(' y ') + ' · ' + E.proteinas.join(', ') + (E.toppings.length ? ' · toppings: ' + E.toppings.join(', ') : '') } };
+    var E = st.ev, X = EV(), pp = X.precioPersona, tot = pp ? pp * E.personas : null, h = horarios().filter(function (x) { return x.id === E.horario; })[0] || {};
+    pedido = { tipo: 'evento', canal: CANAL || 'Página', conversacion: CONV, creado_en: ahora,
+      texto: '🎉 Quiero cotizar un evento\n' + E.tipo + ' · ' + E.personas + ' personas\n📅 ' + fechaBonita(E.fecha) + ', ' + horaBonita(E.hora) + ' (' + h.nombre + ')\n📍 ' + E.lugar +
+        (E.factura !== null ? '\n🧾 ' + (E.factura ? 'Con factura' : 'Sin factura') : '') + (tot ? '\n💰 ' + dinero(tot) + ' (' + dinero(pp) + ' por persona) + traslado' : ''),
+      evento: { tipo: E.tipo, fecha: E.fecha, hora: E.hora, personas: E.personas, direccion: E.lugar, horario: h.nombre, factura: E.factura,
+        precio_persona: pp || null, monto: tot, anticipo_sugerido: tot && X.anticipo ? tot * X.anticipo / 100 : null,
+        notas: (h.nombre ? 'Horario: ' + h.nombre + ' (mínimo ' + h.minimo + ')' : '') + (E.factura !== null ? ' · ' + (E.factura ? 'requiere factura' : 'sin factura') : '') + ' · traslado por cotizar' } };
   } else {
-    pedido = { tipo: 'pedido', canal: CANAL || 'Página', creado_en: new Date().toISOString(), total: total(), pago: st.pago,
-      texto: '🛒 Mi pedido\n' + st.carrito.map(function (c) { return '• ' + resumenCajita(c); }).join('\n') +
+    var items = st.carrito.map(function (c) {
+      var el = {}; M.pasos.forEach(function (p) { var n = nombres(p.id, [].concat(c.e[p.id] || [])); if (n.length) el[p.id] = n; });
+      return { cantidad: c.cant, producto: M.producto.nombre, precio_unit: precioUnit(c), total: precioCajita(c), elecciones: el, resumen: resumen(c) }; });
+    pedido = { tipo: 'pedido', canal: CANAL || 'Página', conversacion: CONV, creado_en: ahora, items: items,
+      entrega: st.entrega, direccion: st.entrega === 'domicilio' ? st.direccion : null, sucursal: st.entrega === 'recoger' ? st.sucursal : null,
+      pago: st.pago, cambio: st.pago === 'Efectivo' ? st.cambio : null, subtotal: subtotal(), envio: envio(), total: total(),
+      texto: '🛒 Mi pedido\n' + items.map(function (i) { return '• ' + i.cantidad + ' × ' + i.resumen; }).join('\n') +
         '\n' + (st.entrega === 'domicilio' ? '🛵 A domicilio: ' + st.direccion : '🏪 Paso por él a ' + st.sucursal) +
         '\n💳 ' + st.pago + (st.cambio && st.pago === 'Efectivo' ? ' (pago con ' + st.cambio + ')' : '') + '\nTotal: ' + dinero(total()) };
   }
-  if (DENTRO) { window.parent.postMessage({ chilabike: true, pedido: pedido }, '*'); }
+  if (CONFIG.pedidoUrl) fetch(CONFIG.pedidoUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pedido) }).catch(function () {});
+  if (DENTRO) window.parent.postMessage({ chilabike: true, pedido: pedido }, '*');
   try { var l = JSON.parse(localStorage.getItem('chilabike-demo-pedidos') || '[]'); l.push(pedido); localStorage.setItem('chilabike-demo-pedidos', JSON.stringify(l)); } catch (e) {}
   $('#barra').innerHTML = PASOS.map(function () { return '<i class="on"></i>'; }).join('');
   $('#main').innerHTML = '<div class="listo"><div class="ok"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#121110" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>' +
     '<h1>' + (EVENTO ? '¡Ya llegó tu solicitud!' : '¡Pedido enviado!') + '</h1><p class="ayuda">' + (CANAL ? 'Regresa al chat de ' + CANAL + ': ahí te confirmamos' : 'Te confirmamos por WhatsApp') + (EVENTO ? ' tu cotización.' : ' y te avisamos cuando salga tu pedido.') + '</p>' +
     '<div class="caja" style="text-align:left;white-space:pre-line">' + esc(pedido.texto) + '</div>' +
-    (DENTRO ? '' : '<p class="nota">Demo: el pedido aparece en Mensajes del portal (unaria.mx/demo/?demo=chilabike) si lo abres en este navegador.</p>') + '</div>';
+    (DENTRO ? '' : '<p class="nota">Demo: el pedido aparece en Chilabike → Pedidos del portal (unaria.mx/demo/?demo=chilabike) si lo abres en este navegador.</p>') + '</div>';
   document.querySelector('.pie').style.display = 'none';
 }
 function fechaBonita(iso) { if (!iso) return ''; var t = new Date(iso + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
-pintar();
 </script>
 </body>
 </html>

@@ -40,7 +40,7 @@ export const hace = (iso) => {
   const d = Math.round(h / 24); return d === 1 ? 'ayer' : `hace ${d} días`;
 };
 // Liga a otro módulo del mismo negocio (con MARCA.negocios los ids llevan el negocio: chilabike-eventos)
-const prefijo = () => (location.hash.match(/^#\/([a-z0-9]+-)(?:bandeja|eventos|anuncios)\b/) || [])[1] || '';
+const prefijo = () => (location.hash.match(/^#\/([a-z0-9]+-)(?:bandeja|eventos|anuncios|pedidos|menu)\b/) || [])[1] || '';
 export const ir = (id, q = '') => `${location.pathname}${location.search}#/${prefijo()}${id}${q ? '?' + q : ''}`;
 export const paramHash = (k) => new URLSearchParams(location.hash.split('?')[1] || '').get(k);
 
@@ -61,7 +61,7 @@ export function fichaEvento({ evento = {}, ia = [], titulo, alGuardar }) {
       </div>
       <div class="form-3">
         <label${marca('personas')}>Personas<input type="number" name="personas" min="1" value="${esc(e.personas ?? '')}"></label>
-        <label${marca('paquete')}>Paquete<select name="paquete"><option value="">Por definir</option>${op(V.paquetes, e.paquete)}</select></label>
+        <label${marca('paquete')}>${esc(V.etiquetaPaquete || 'Paquete')}<select name="paquete"><option value="">Por definir</option>${op(V.paquetes, e.paquete)}</select></label>
         <label${marca('sucursal')}>Sucursal que surte<select name="sucursal"><option value="">Por definir</option>${op(V.sucursales, e.sucursal)}</select></label>
       </div>
       <label${marca('direccion')}>Lugar o dirección<input type="text" name="direccion" value="${esc(e.direccion || '')}"></label>
@@ -74,12 +74,29 @@ export function fichaEvento({ evento = {}, ia = [], titulo, alGuardar }) {
         <label>Anticipo recibido<input type="number" name="anticipo" min="0" step="100" value="${esc(e.anticipo || '')}" placeholder="$"></label>
         <label>Estado<select name="estado">${ORDEN.map((k) => `<option value="${k}"${k === e.estado ? ' selected' : ''}>${ESTADOS[k].t}</option>`).join('')}</select></label>
       </div>
+      ${V.cotizacion?.precioPersona ? '<p class="chb-cotiza" id="chb-cotiza"></p>' : ''}
       <label${marca('notas')}>Notas<textarea name="notas" rows="3">${esc(e.notas || '')}</textarea></label>
       ${e.canal ? `<p class="chb-origen">Llegó por <b>${esc(canalDe(e.canal).t)}</b>${e.anuncio ? ` · anuncio <b>${esc(e.anuncio)}</b>` : ''}${e.utm && Object.keys(e.utm).length ? ` · ${esc(Object.entries(e.utm).map(([k, v]) => `${k}=${v}`).join(' · '))}` : ''}</p>` : ''}
     </form>`,
     pie: `<button class="btn btn-ghost" data-cerrar>Cancelar</button><button class="btn btn-primary" id="chb-guardar">${e.id ? 'Guardar cambios' : 'Crear evento'}</button>`,
   });
   m.querySelector('[data-cerrar]')?.addEventListener('click', cerrarModal);
+  const Q = V.cotizacion, caja = m.querySelector('#chb-cotiza');
+  if (Q?.precioPersona && caja) {
+    // Cotización con el esquema del negocio: precio por persona, mínimo según el horario y anticipo
+    const F = m.querySelector('#chb-f'), monto = F.monto; let auto = !e.monto;
+    const horarioDe = (h) => { const l = [...(Q.horarios || [])].sort((a, b) => (a.desde < b.desde ? -1 : 1)); let r = null; l.forEach((x) => { if (h >= x.desde) r = x; }); return r || l[l.length - 1]; };
+    const calc = () => {
+      const n = Number(F.personas.value) || 0, h = F.hora.value ? horarioDe(F.hora.value) : (Q.horarios || []).find((x) => x.nombre === F.paquete.value);
+      if (h && F.paquete && [...F.paquete.options].some((o) => o.value === h.nombre) && (auto || !F.paquete.value)) F.paquete.value = h.nombre;
+      const tot = n * Q.precioPersona; if (auto && n) monto.value = tot;
+      const bajo = h && n && n < h.minimo;
+      caja.innerHTML = n ? `<b>${n} × ${dinero(Q.precioPersona)} = ${dinero(tot)}</b>${Q.anticipo ? ` · anticipo ${Q.anticipo}%: <b>${dinero(tot * Q.anticipo / 100)}</b>` : ''} · + traslado según la ubicación${h ? `<br><span class="${bajo ? 'chb-bajo' : ''}">${esc(h.nombre)}: mínimo ${h.minimo} órdenes${bajo ? ` · faltan ${h.minimo - n}` : ' ✓'}</span>` : ''}`
+        : `Pon las personas y la hora: se cotiza a ${dinero(Q.precioPersona)} por persona.`;
+    };
+    monto.addEventListener('input', () => { auto = !monto.value; });
+    ['personas', 'hora', 'paquete'].forEach((k) => F[k].addEventListener('input', calc)); calc();
+  }
   m.querySelector('#chb-guardar').addEventListener('click', async (ev) => {
     const f = new FormData(m.querySelector('#chb-f')), v = {};
     f.forEach((x, k) => { v[k] = String(x).trim() || null; });
@@ -115,6 +132,7 @@ export function estilos() {
   s.id = 'chb-estilos';
   s.textContent = `
   .chb-est { display:inline-flex; align-items:center; border-radius:999px; padding:2px 9px; font-size:12px; font-weight:700; white-space:nowrap; }
+  .chb-cotiza { margin:0; background:#FFF6EE; border:1px solid #F7C9A9; border-radius:10px; padding:10px 12px; font-size:13.5px; color:#7A3D12; line-height:1.5; } .chb-bajo { color:#B42318; font-weight:700; }
   .chb-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
   .chb-kpi { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:grid; gap:2px; }
   .chb-kpi b { font-size:24px; line-height:1.15; letter-spacing:-.01em; }

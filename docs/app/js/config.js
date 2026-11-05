@@ -42,6 +42,8 @@ const ICONOS = {
   bandeja:    svg('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/>'),
   eventos:    svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3v3H8z"/>'),
   ventas:     svg('<path d="M4 4h2l2.4 10.2a1.5 1.5 0 0 0 1.5 1.1h7.6a1.5 1.5 0 0 0 1.5-1.2L20.5 8H7"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/>'),
+  pedidos:    svg('<path d="M6 3h12l1 4H5z"/><path d="M5 7h14v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 11h6M9 15h4"/>'),
+  menu:       svg('<path d="M4 5h16M4 12h16M4 19h10"/><circle cx="18.5" cy="19" r="1.5"/>'),
   resumen:    svg('<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>'),
   anuncios:   svg('<path d="M3 11v3a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'),
 };
@@ -101,6 +103,8 @@ export const MODULOS = [
   // Paquete de mensajes y eventos (restaurantes con eventos, p. ej. Chilabike): bandeja de WhatsApp, Instagram y Facebook, calendario y anuncios
   { id: 'bandeja',    grupo: 'Ventas',    titulo: 'Mensajes',         icono: ICONOS.bandeja,    roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'eventos',    grupo: 'Ventas',    titulo: 'Eventos',          icono: ICONOS.eventos,    roles: ['dueno','administracion'], listo: true, opcional: true },
+  { id: 'pedidos',    grupo: 'Ventas',    titulo: 'Pedidos',          icono: ICONOS.pedidos,    roles: ['dueno','administracion','encargado','operacion'], listo: true, opcional: true },
+  { id: 'menu',       grupo: 'Ventas',    titulo: 'Menú',             icono: ICONOS.menu,       roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'anuncios',   grupo: 'Ventas',    titulo: 'Anuncios',         icono: ICONOS.anuncios,   roles: ['dueno','administracion'], listo: true, opcional: true },
   // Ventas del punto de venta (Loyverse), por negocio
   { id: 'ventas',     grupo: 'Ventas',    titulo: 'Ventas',           icono: ICONOS.ventas,     roles: ['dueno','administracion'], listo: true, opcional: true },

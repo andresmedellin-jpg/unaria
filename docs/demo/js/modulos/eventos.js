@@ -150,7 +150,7 @@ function verEvento(e) {
         ${fila('Fecha', esc(fechaLarga(e.fecha)) + (e.hora ? ' · ' + esc(horaBonita(e.hora)) : ''))}
         ${fila('Lugar', esc(e.direccion || '—'))}
         ${fila('Personas', esc(e.personas ?? '—'))}
-        ${fila('Paquete', esc(e.paquete || 'Por definir'))}
+        ${fila(V.etiquetaPaquete || 'Paquete', esc(e.paquete || 'Por definir'))}
         ${fila('Sucursal', esc(e.sucursal || 'Por definir'))}
         ${fila('Contacto', esc(e.contacto || '—') + (e.telefono ? ` · ${esc(telBonito(e.telefono))}` : ''))}
         ${fila('Monto', dinero(e.monto))}

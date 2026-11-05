@@ -16,7 +16,7 @@
     menuGeneral: [{ id: 'resumen' }],
     negocios: [
       { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', color: '#C9500C', empresa_id: 'emp-chb',
-        modulos: ['bandeja', 'eventos', 'anuncios'], titulos: { bandeja: 'Mensajes' } },
+        modulos: ['bandeja', 'pedidos', 'eventos', 'menu', 'anuncios'], titulos: { bandeja: 'Mensajes' } },
       { id: 'curandero', nombre: 'Curandero', giro: 'Café y pan · Mitras', inicial: 'Cu', empresa_id: 'emp-cur', modulos: ['ventas'],
         // Manual de identidad (Uncommon Studio): #2e3526 · #697148 · #D1C9B3; letras King Graphics y Bicyclette
         color: '#697148', color2: '#2e3526', colorSuave: '#ECE8DC', colorFondo: '#697148', colorTinta: '#D1C9B3', isotipo: 'img/clientes/curandero-isotipo.svg' },
@@ -33,7 +33,10 @@
       negocio: 'Chilabike', dueno: 'Javier', pagina: './chilabike/', chat: './chilabike/chat/',
       sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
       tipos: ['Cumpleaños', 'Boda o XV', 'Desayuno de oficina', 'Reunión', 'Festival', 'Otro'],
-      paquetes: ['Desayuno de oficina', 'Fiesta', 'Tornafiesta'],
+      // Así cotiza Javier: $110 por persona, mínimo de órdenes según el horario, 50% de anticipo (vive en el Menú → eventos)
+      etiquetaPaquete: 'Horario',
+      paquetes: ((window.MENU_CHILABIKE || {}).eventos?.horarios || []).map((h) => h.nombre),
+      cotizacion: (window.MENU_CHILABIKE || {}).eventos || null,
     },
   };
 
@@ -71,8 +74,8 @@
 
     const fBoda = finde(38), fCumple = finde(16), fPosada = (() => { const d = new Date(finde(36) + 'T12:00:00'); d.setDate(d.getDate() - 1); return iso(d); })(), fExa = finde(23), fBodaAna = finde(52);
 
-    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', sugerida: 'Va, un tornafiesta de 180 queda perfecto con el paquete Tornafiesta: llegamos a la 1 con cajitas calientitas de mixtos y las salsas aparte para tu tía 😅 Sale en $[__] por persona. Para apartar la fecha es un anticipo del [__]%. ¿Te paso los datos?', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
-      extraccion: { tipo: 'Boda o XV', fecha: fBoda, hora: '01:00', personas: 180, direccion: 'Quinta Los Encinos, Santiago', paquete: 'Tornafiesta', sucursal: 'San Pedro',
+    const cMariana = C({ canal: 'whatsapp', contacto: 'Mariana Treviño', sugerida: '¡Va Mariana! 🎉 Para 180 personas en la madrugada (mínimo 100 ✅) sale en $110 por persona: $19,800. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings (crema, cebolla, cilantro, queso y frijoles), platos y cubiertos, carrito y personal. Las salsas te las servimos aparte para tu tía 😅 El traslado a Santiago se cotiza aparte. Para apartar la fecha es el 50% ($9,900) y el resto el día del evento. ¿Requieres factura?', telefono: '8117246630', anuncio_id: 'ad-bodas', etiqueta: 'evento', hace: 26,
+      extraccion: { tipo: 'Boda o XV', fecha: fBoda, hora: '01:00', personas: 180, direccion: 'Quinta Los Encinos, Santiago', paquete: 'Madrugada', sucursal: 'San Pedro',
         notas: 'Tornafiesta de la boda de su hermana. Quiere mixtos y salsas aparte para los que no aguantan picante.' } }, [
       ['cliente', 'Hola!! vi su anuncio en insta 😍 quiero cotizar sus cajitas para el tornafiesta de la boda de mi hermana', 3],
       ['javi', 'Qué onda Mariana! Claro que sí, a grilear 🙌 ¿Para qué fecha y cuántos serían?', 4],
@@ -80,24 +83,24 @@
       ['cliente', 'Sería como a la 1 de la mañana. Los queremos mixtos, ¿cuánto sale por persona?', 2],
       ['cliente', 'Ah y si pueden llevar las salsas aparte, mi tía no aguanta nada de picante jaja', 0],
     ]);
-    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', sugerida: 'Holaa! Para 40 personas te queda el paquete Fiesta: estación con las 3 salsas y barra de toppings, en $[__] por persona. Sí hay vegetariano, la proteína es a elección 🌱 ¿Te aparto el sábado?', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
-      extraccion: { tipo: 'Cumpleaños', fecha: fCumple, hora: '11:00', personas: 40, direccion: 'Casa en Cumbres 5° Sector', paquete: 'Fiesta', sucursal: 'Cumbres', notas: 'Brunch de cumpleaños 30. Pregunta por opción vegetariana (proteína a elección).' } }, [
+    const cDani = C({ canal: 'instagram', contacto: '@dani.glzz', sugerida: 'Holaa! Para 40 personas en la mañana sale en $110 por persona: $4,400 (+ traslado a Cumbres). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para los vegetarianos se sirven sin proteína 🌱 Apartas con el 50% ($2,200). ¿Te aparto el sábado? ¿Requieres factura?', anuncio_id: 'ad-cumple', etiqueta: 'evento', hace: 48,
+      extraccion: { tipo: 'Cumpleaños', fecha: fCumple, hora: '11:00', personas: 40, direccion: 'Casa en Cumbres 5° Sector', paquete: 'En la mañana', sucursal: 'Cumbres', notas: 'Brunch de cumpleaños 30. Pregunta por opción vegetariana (proteína a elección).' } }, [
       ['cliente', 'holaaa cuánto cuesta para un cumple de 40 personas?', 1],
       ['cliente', `es un brunch el sábado ${new Date(fCumple + 'T12:00:00').getDate()} en mi casa en cumbres, como a las 11`, 1],
       ['cliente', 'y tienen algo vegetariano? 🥲', 0],
     ]);
-    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', sugerida: 'Carlos, ya le mandé la cotización a su correo. Si le parece, con el anticipo le aparto el viernes a las 9 am. Cualquier duda aquí estoy.', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
+    const cCarlos = C({ canal: 'facebook', contacto: 'Carlos Medina', sugerida: 'Carlos, ya le mandé la cotización a su correo. Si le parece, con el 50% de anticipo ($7,200, ya con el traslado) le aparto el viernes a las 9 am y el resto se liquida el día del evento. Cualquier duda aquí estoy.', anuncio_id: 'ad-posadas', etiqueta: 'evento', hace: 60 * 26, leida: true }, [
       ['cliente', 'Buenas tardes, soy de Recursos Humanos de Grupo Industrial Norte. Queremos cotizar chilaquiles en cajita para el desayuno de la posada.', 6],
       ['javi', '¡Buenas tardes Carlos! Con gusto. ¿Cuántas personas serían y dónde?', 10],
       ['cliente', `Somos 120, en nuestras oficinas de Valle Oriente, el viernes ${new Date(fPosada + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })} a las 9 am. Necesitamos factura.`, 15],
-      ['javi', 'Perfecto. Para empresas está el Desayuno de oficina: cajita de verdes, rojos o mixtos con proteína y bebida, entregado a la hora que nos diga, con factura. Le mando la cotización por correo hoy mismo 📄', 30],
+      ['javi', 'Perfecto. Son $110 por persona: $13,200 más el traslado a Valle Oriente. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, montaje tipo buffet y personal, con factura. Le mando la cotización formal por correo hoy mismo 📄', 30],
       ['cliente', 'Excelente, quedo atento.', 0],
     ]);
     const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', sugerida: 'Hola Sofía! Claro, las mandamos desde San Jerónimo. Son 3 cajitas de rojos con pollo y 1 de verdes, $[__] más envío. ¿A qué dirección te las llevamos?', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14 }, [
       ['cliente', 'Hola, ¿me pueden mandar 3 cajitas de rojos con pollo y una de verdes a San Jerónimo? 🙏', 0],
     ]);
-    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto, el sábado a las 11 para 60 queda bien. Les propongo el paquete Fiesta en $[__] por persona. Cuando tengan la terraza me pasas la dirección y te aparto la fecha 🤘', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
-      extraccion: { tipo: 'Reunión', fecha: fExa, hora: '11:00', personas: 60, direccion: 'Terraza en San Pedro (por confirmar)', paquete: 'Fiesta', sucursal: 'Tec', notas: 'Reunión de exalumnos del Tec, generación 2006. Lugar por confirmar.' } }, [
+    const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto 🤘 El sábado a las 11 para 60 sale en $110 por persona: $6,600, más el traslado (se cotiza cuando tengan la terraza). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Apartas con el 50% ($3,300). Pásame la dirección cuando la tengan y si requieren factura.', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
+      extraccion: { tipo: 'Reunión', fecha: fExa, hora: '11:00', personas: 60, direccion: 'Terraza en San Pedro (por confirmar)', paquete: 'En la mañana', sucursal: 'Tec', notas: 'Reunión de exalumnos del Tec, generación 2006. Lugar por confirmar.' } }, [
       ['cliente', 'Qué tal, estoy organizando la reunión de exalumnos de mi generación del Tec. Seríamos unos 60.', 2],
       ['javi', 'Qué buen plan Roberto 🤘 ¿Ya tienen fecha y lugar?', 40],
       ['cliente', `Sería el sábado ${new Date(fExa + 'T12:00:00').getDate()} como a las 11. El lugar todavía lo estamos viendo, probablemente una terraza en San Pedro.`, 0],
@@ -106,7 +109,7 @@
       ['cliente', 'Hola! Me pasaron su contacto, quiero chilaquiles para mi boda 💍', 20],
       ['javi', '¡Felicidades Ana Lucía! 🎉 ¿Cuándo es y cuántos invitados?', 30],
       ['cliente', '250 invitados, en Hacienda San Miguel en Allende', 60],
-      ['javi', 'Va, te quedaría el paquete Fiesta: estación de chilaquiles con las 3 salsas y barra de toppings. Para apartar la fecha es el anticipo por transferencia, te paso los datos 👇', 120],
+      ['javi', 'Va, son $110 por persona: $27,500 para 250, más el traslado a Allende. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Para apartar la fecha es el 50% ($13,750) por transferencia, te paso los datos 👇', 120],
       ['cliente', 'Listo, ya te mandé el comprobante del anticipo ✅', 0],
     ]);
     const cLalo = C({ canal: 'instagram', contacto: '@lalo.mtz', sugerida: 'Qué onda Lalo! Gracias por la buena vibra 🙌 Mándanos tu nombre y tu número y te contacta el encargado de la sucursal más cercana.', anuncio_id: null, etiqueta: 'otro', hace: 95 }, [
@@ -121,7 +124,13 @@
     ]);
 
     // ---------- eventos ----------
-    const E = (o) => { const e = { id: id('evt'), org_id: ORG, estado: 'solicitud', anticipo: 0, monto: null, ...o, creado_en: o.creado_en || hace(60 * 24 * (o.hace_dias || 3)) }; delete e.hace_dias; eventos.push(e); return e; };
+    // Montos con el esquema real: $110 por persona + traslado; anticipo del 50% (o pagado completo)
+    const COT = window.__MARCA.chilabike.cotizacion || {}, HOR = [...(COT.horarios || [])].sort((a, b) => (a.desde < b.desde ? -1 : 1));
+    const horario = (h) => { let r = null; HOR.forEach((x) => { if (h >= x.desde) r = x; }); return r || HOR[HOR.length - 1]; };
+    const E = (o) => { const e = { id: id('evt'), org_id: ORG, estado: 'solicitud', anticipo: 0, monto: null, ...o, creado_en: o.creado_en || hace(60 * 24 * (o.hace_dias || 3)) }; delete e.hace_dias;
+      if (e.hora && HOR.length) e.paquete = horario(e.hora).nombre;
+      if (e.monto != null && COT.precioPersona) { const pagado = e.anticipo && e.anticipo >= e.monto; e.monto = e.personas * COT.precioPersona + (e.personas > 150 ? 2500 : 1200); e.anticipo = pagado ? e.monto : e.anticipo ? e.monto * (COT.anticipo || 50) / 100 : 0; }
+      eventos.push(e); return e; };
     const evCarlos = E({ tipo: 'Desayuno de oficina', fecha: fPosada, hora: '09:00', personas: 120, direccion: 'Oficinas Grupo Industrial Norte, Valle Oriente', paquete: 'Desayuno de oficina', estado: 'cotizado',
       contacto: 'Carlos Medina · Grupo Industrial Norte', telefono: null, sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', conversacion_id: cCarlos.id, monto: 38400, notas: 'Requiere factura. Cotización enviada por correo.', hace_dias: 1 });
     cCarlos.evento_id = evCarlos.id;
@@ -159,6 +168,23 @@
           anuncio_id: s.canal === 'Google' ? 'ad-google' : null, notas: s.notas, creado_en: s.creado_en, nuevo: true });
       });
     } catch (e) { /* sin almacenamiento: solo los de ejemplo */ }
+    // ---------- pedidos de hoy (del menú interactivo) ----------
+    const pedidos = [];
+    const P = (o) => { const p = { id: id('ped'), org_id: ORG, empresa_id: 'emp-chb', estado: 'nuevo', pagado: false, cambios: [], envio: o.entrega === 'domicilio' ? 35 : 0, ...o, creado_en: hace(o.hace) };
+      p.subtotal = p.items.reduce((s, i) => s + i.total, 0); p.total = p.subtotal + p.envio; delete p.hace; pedidos.push(p); return p; };
+    const it = (cantidad, resumen, precio) => ({ cantidad, producto: 'Cajita de chilaquiles', precio_unit: precio, total: precio * cantidad, resumen });
+    let numP = 140;
+    [
+      { numero: 132, canal: 'whatsapp', contacto: 'Daniela Robles', telefono: '8112003344', entrega: 'domicilio', direccion: 'Río Nazas 230, Del Valle', pago: 'Efectivo', cambio: '$500', estado: 'entregado', hace: 170, items: [it(2, 'Rojos · Pollo · Aguacate · Refresco 600 ml', 214)] },
+      { numero: 133, canal: 'instagram', contacto: '@marce.tg', entrega: 'recoger', sucursal: 'Tec', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 150, items: [it(1, 'Verdes · Huevo estrellado · Café de olla', 185)] },
+      { numero: 134, canal: 'whatsapp', contacto: 'Oficina Grupo Lamosa', telefono: '8183551200', entrega: 'domicilio', direccion: 'Av. Pedro Ramírez Vázquez 200, Valle Oriente', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 120, items: [it(6, 'Mixtos · Pollo · Refresco 600 ml', 189), it(2, 'Verdes · Sin proteína · Agua', 175)] },
+      { numero: 135, canal: 'facebook', contacto: 'Roberto Salinas', entrega: 'domicilio', direccion: 'Calzada del Valle 400, Del Valle', pago: 'Efectivo', cambio: 'Exacto', estado: 'camino', hace: 34, items: [it(2, 'Rojos · Que pique 🔥 · Arrachera · Chiltepín · Agua', 230)] },
+      { numero: 136, canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', entrega: 'domicilio', direccion: 'San Jerónimo 1200', pago: 'Efectivo', cambio: '$1,000', estado: 'cocina', hace: 27, items: [it(3, 'Rojos · Pollo · Refresco 600 ml', 189), it(1, 'Verdes · Pollo · Refresco 600 ml', 189)], conversacion: 'Sofía Garza' },
+      { numero: 137, canal: 'instagram', contacto: '@dani.glzz', entrega: 'recoger', sucursal: 'Cumbres', pago: 'Transferencia', estado: 'cocina', hace: 18, items: [it(1, 'Mixtos · Sin picante · Sin proteína · Aguacate, Queso extra · Agua', 215)] },
+      { numero: 138, canal: 'whatsapp', contacto: 'Paty Leal', telefono: '8126601173', entrega: 'domicilio', direccion: 'Celaya 3010, Mitras Centro', pago: 'Efectivo', cambio: '$200', estado: 'nuevo', hace: 6, items: [it(1, 'Verdes · Chorizo · Doble crema · Refresco 600 ml', 219)], conversacion: 'Paty Leal' },
+      { numero: 139, canal: 'facebook', contacto: 'Luis Herrera', entrega: 'domicilio', direccion: 'Hidalgo 450, Centro', pago: 'Transferencia', estado: 'nuevo', hace: 2, items: [it(2, 'Rojos · Huevo estrellado · Frijoles extra · Café de olla', 195)] },
+    ].forEach((o) => { const conv = o.conversacion ? conversaciones.find((c) => c.contacto === o.conversacion) : null; delete o.conversacion; P({ ...o, conversacion_id: conv?.id || null }); });
+
     // Pedidos y cotizaciones hechos con el menú interactivo (../chilabike/arma/) en este navegador
     try {
       JSON.parse(localStorage.getItem('chilabike-demo-pedidos') || '[]').forEach((p, k) => {
@@ -166,9 +192,12 @@
         const c = { id: 'conv-menu-' + k, org_id: ORG, canal, contacto: canal === 'instagram' ? '@cliente.demo' : 'Cliente del menú (demo)', telefono: canal === 'whatsapp' ? '8100000000' : null,
           anuncio_id: null, etiqueta: p.tipo === 'evento' ? 'evento' : 'pedido', estado: 'abierta', leida: false, por_contestar: true,
           ultimo: p.texto.split('\n')[0], ultimo_en: p.creado_en, extraccion: p.evento || null,
-          sugerida: p.tipo === 'evento' ? '¡Gracias! Para ' + p.evento.personas + ' personas te queda el paquete ' + p.evento.paquete + ' en $[__] por persona. ¿Te aparto la fecha?' : '¡Listo! Tu pedido ya está en la cocina 🍳 Te aviso cuando salga.' };
+          sugerida: p.tipo === 'evento' ? '¡Gracias! 🎉 Para ' + p.evento.personas + ' personas (' + (p.evento.horario || '').toLowerCase() + ') sale en $' + (p.evento.precio_persona || 110) + ' por persona: $' + Number(p.evento.monto || 0).toLocaleString('es-MX') + ' más el traslado, que te cotizo según la ubicación. Para apartar la fecha es el 50% ($' + Number(p.evento.anticipo_sugerido || 0).toLocaleString('es-MX') + ') y el resto el día del evento. ¿Te paso los datos?' : '¡Listo! Tu pedido ya está en la cocina 🍳 Te aviso cuando salga.' };
         conversaciones.unshift(c);
         mensajes.push({ id: id('msg'), org_id: ORG, conversacion_id: c.id, de: 'cliente', texto: p.texto, creado_en: p.creado_en });
+        if (p.tipo === 'pedido') pedidos.push({ id: 'ped-menu-' + k, org_id: ORG, empresa_id: 'emp-chb', numero: ++numP, canal, conversacion_id: c.id, contacto: c.contacto, telefono: c.telefono,
+          items: p.items || [], entrega: p.entrega, direccion: p.direccion, sucursal: p.sucursal, pago: p.pago, cambio: p.cambio, pagado: false,
+          subtotal: p.subtotal, envio: p.envio, total: p.total, estado: 'nuevo', cambios: [], creado_en: p.creado_en });
       });
     } catch (e) { /* sin almacenamiento */ }
 
@@ -187,6 +216,11 @@
       { id: 'paq-2', nombre: 'Fiesta', precio_persona: null, minimo: null, incluye: 'Estación con chilaqueros, las 3 salsas, proteínas y barra de toppings' },
       { id: 'paq-3', nombre: 'Tornafiesta', precio_persona: null, minimo: null, incluye: 'Cajitas a media noche, salsas aparte' },
     ];
-    return { organizaciones: [{ id: ORG, nombre: 'Grupo A.M', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, ...lv };
+        // El menú: el que se guardó en el portal de este navegador o el de ejemplo
+    let menuDatos = window.MENU_CHILABIKE || {};
+    try { menuDatos = JSON.parse(localStorage.getItem('chilabike-demo-menu') || 'null') || menuDatos; } catch (e) { /* ejemplo */ }
+    if (!menuDatos.eventos?.horarios && window.MENU_CHILABIKE) menuDatos = { ...menuDatos, eventos: { ...window.MENU_CHILABIKE.eventos, ...(menuDatos.eventos || {}), horarios: window.MENU_CHILABIKE.eventos.horarios, incluye: window.MENU_CHILABIKE.eventos.incluye } };
+    const menus = [{ id: 'menu-chb', org_id: ORG, empresa_id: 'emp-chb', datos: menuDatos, publicado_en: new Date(AHORA - 3 * 864e5).toISOString(), publicado_por: 'Javier Andonie Moreno' }];
+    return { organizaciones: [{ id: ORG, nombre: 'Grupo A.M', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, pedidos, menus, ...lv };
   };
 })();

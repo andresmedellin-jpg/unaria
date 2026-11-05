@@ -132,7 +132,7 @@ function tarjeta(titulo, texto, boton, accion) {
 var INICIO = [['🌶️ Pedir mi cajita', function () { abrirMenu(false); }], ['🎉 Cotizar un evento', function () { abrirMenu(true); }], ['📍 Sucursales y horario', sucursales]];
 async function abrirMenu(evento) {
   await bot(evento ? '¡Qué buen plan! 🙌 Cotízalo aquí en un minuto:' : '¡Va! Arma tu cajita como la quieras 👇');
-  tarjeta(evento ? 'Cotiza tu evento' : 'Arma tu cajita', evento ? ['Eventos Chilabike', 'Fecha, personas y tu barra de chilaquiles.'] : ['Menú Chilabike', 'Salsa, proteína, toppings y bebida.'],
+  tarjeta(evento ? 'Cotiza tu evento' : 'Arma tu cajita', evento ? ['Eventos Chilabike', 'Fecha, horario, personas y tu cotización al instante.'] : ['Menú Chilabike', 'Salsa, proteína, toppings y bebida.'],
     canal === 'wa' ? (evento ? '📋 Cotizar' : '📋 Ver menú y pedir') : (evento ? 'Cotizar evento' : 'Abrir menú'), function () { hoja(evento); });
 }
 function hoja(evento) {
@@ -151,9 +151,10 @@ window.addEventListener('message', async function (e) {
   await espera(350);
   burbuja('yo', p.texto, canal === 'wa' ? '<span class="form">📋 Respuesta del formulario</span>' : '');
   if (p.tipo === 'evento') {
-    var ev = p.evento;
-    await bot('¡Gracias! 🎉 Para ' + ev.personas + ' personas te queda el paquete ' + ev.paquete + ' en $[__] por persona.\n¿Te aparto la fecha?', [['✅ Sí, apartar', async function () {
-      await bot('Para apartar es un anticipo del [__]% por transferencia. Te paso los datos y me mandas el comprobante por aquí 🙌'); }], ['🤔 Tengo dudas', async function () {
+    var ev = p.evento, $$ = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
+    await bot('¡Gracias! 🎉 Para ' + ev.personas + ' personas ' + (ev.horario ? '(' + ev.horario.toLowerCase() + ') ' : '') + (ev.monto ? 'sale en ' + $$(ev.precio_persona) + ' por persona: ' + $$(ev.monto) + '.' : 'te paso tu cotización en un momento.') +
+      '\nEl traslado y montaje te lo cotizo según la ubicación 🚚' + (ev.anticipo_sugerido ? '\nPara apartar la fecha es el 50% (' + $$(ev.anticipo_sugerido) + ') y el resto el día del evento.' : '') + '\n¿Te aparto la fecha?', [['✅ Sí, apartar', async function () {
+      await bot('¡Va! Te paso los datos para el anticipo por transferencia y me mandas el comprobante por aquí 🙌'); }], ['🤔 Tengo dudas', async function () {
       await bot('Claro, dime y te contesto. Si prefieres, Javier te marca.'); }]]);
   } else {
     num++;

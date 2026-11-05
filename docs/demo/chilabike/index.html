@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- DEMO de Unaria para Chilabike: página de eventos con datos de ejemplo. No es la página oficial del negocio.
      Lo que se envía en el formulario se guarda solo en este navegador y aparece en el calendario del demo
-     (unaria.mx/demo/?demo=chilabike#/eventos). Precios y paquetes con [$__] = pendientes de Javier. -->
+     (unaria.mx/demo/?demo=chilabike#/eventos). Precio y mínimos: el esquema de eventos de Javier ($110 por persona, mínimos por horario, 50% de anticipo). [__] = pendiente. -->
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -97,6 +97,9 @@ section.s { padding: 64px 0; }
 .paq.dest li::before { background-color: var(--negro); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F26B1D' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E"); }
 .paq .pill { align-self: flex-start; font: 700 12px var(--f-txt); letter-spacing: .1em; text-transform: uppercase; background: var(--negro); color: var(--naranja); border-radius: 999px; padding: 5px 12px; }
 .paq .btn { margin-top: auto; }
+.paq ul.minimos li::before { display: none; }
+.paq ul.minimos li { justify-content: space-between; align-items: baseline; border-bottom: 1px solid #34302C; padding-bottom: 8px; }
+.paq ul.minimos b { font: 800 26px var(--f-disp); color: var(--naranja); }
 .paq.dest .btn-n { background: var(--negro); color: #fff; }
 .pend { background: #FFF3C4; color: #6B4E00; border-radius: 4px; padding: 0 .3em; font-family: var(--f-txt); font-weight: 700; font-size: .7em; vertical-align: .15em; letter-spacing: 0; }
 .nota-paq { font-size: 14px; color: #8F867B; margin-top: 18px; }
@@ -259,7 +262,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
     <h2>Tres pasos y listo.</h2>
     <div class="pasos" style="margin-top:26px">
       <div class="paso"><div><b>Cotiza</b><span>Llenas el formulario en un minuto: fecha, lugar y cuántos son.</span></div></div>
-      <div class="paso"><div><b>Te escribimos</b><span>Te mandamos por WhatsApp el paquete que te queda y el precio.</span></div></div>
+      <div class="paso"><div><b>Te escribimos</b><span>Te mandamos por WhatsApp tu cotización: $110 por persona más el traslado.</span></div></div>
       <div class="paso"><div><b>Apartas y llegamos</b><span>Con tu anticipo queda tu fecha. El día del evento llegamos con todo.</span></div></div>
     </div>
   </div>
@@ -267,31 +270,24 @@ footer .unaria { font-size: 13px; color: #7C746B; }
 
 <section class="s oscuro">
   <div class="c">
-    <span class="eti">Paquetes</span>
-    <h2>Escoge cómo los quieres.</h2>
-    <p class="lead">Cajitas por persona, servidas en tu evento. Te armamos uno a la medida si lo necesitas.</p>
+    <span class="eti">Precio</span>
+    <h2>$110 por persona.</h2>
+    <p class="lead">Chilaquiles servidos en tu evento, con todo incluido. Precio en el área metropolitana de Monterrey y a pronto pago.</p>
     <div class="paqs">
-      <div class="paq">
-        <h3>Desayuno de oficina</h3>
-        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Cajita de verdes, rojos o mixtos</li><li>Proteína a elección y bebida</li><li>Entrega a la hora de tu junta</li><li>Factura</li></ul>
-        <a class="btn btn-n" href="#cotiza" data-paquete="Desayuno de oficina">Cotizar este</a>
-      </div>
       <div class="paq dest">
-        <span class="pill">El más pedido</span>
-        <h3>Fiesta</h3>
-        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Estación de chilaquiles con chilaqueros</li><li>Las 3 salsas y proteínas a escoger</li><li>Barra de toppings</li><li>Servicio de <span class="pend">__</span> horas</li></ul>
-        <a class="btn btn-n" href="#cotiza" data-paquete="Fiesta">Cotizar este</a>
+        <span class="pill">El servicio incluye</span>
+        <ul><li>Salsas: roja y verde</li><li>Proteínas: pollo y chicharrón guisado</li><li>Toppings: crema, cebolla, cilantro, queso y frijoles</li><li>Platos, cubiertos y servilletas</li><li>Carrito o montaje tipo buffet</li><li>Personal para el servicio</li></ul>
+        <a class="btn btn-n" href="#cotiza">Cotizar mi evento</a>
       </div>
       <div class="paq">
-        <h3>Tornafiesta</h3>
-        <div class="precio">$<span class="pend">__</span> <small>por persona</small></div>
-        <ul><li>Llegamos a media noche</li><li>Cajitas calientitas para todos</li><li>Salsas aparte para los que no aguantan</li></ul>
-        <a class="btn btn-n" href="#cotiza" data-paquete="Tornafiesta">Cotizar este</a>
+        <h3>Mínimo de órdenes</h3>
+        <ul class="minimos"><li><span>En la mañana</span><b>35</b></li><li><span>Después de las 2:00 pm</span><b>45</b></li><li><span>Después de las 8:00 pm</span><b>65</b></li><li><span>Madrugada</span><b>100</b></li></ul>
+      </div>
+      <div class="paq">
+        <h3>Cómo apartas</h3>
+        <ul><li>50% de anticipo para apartar tu fecha</li><li>El resto se liquida el día del evento</li><li>Traslado y montaje: se cotiza según la ubicación</li><li>Con factura si la necesitas</li></ul>
       </div>
     </div>
-    <p class="nota-paq">Paquetes y precios de ejemplo: los reales los define Chilabike.</p>
   </div>
 </section>
 
@@ -327,14 +323,14 @@ footer .unaria { font-size: 13px; color: #7C746B; }
     <div>
       <span class="eti">Cotiza tu evento</span>
       <h2>Cuéntanos de tu evento.</h2>
-      <p class="lead">Te contestamos por WhatsApp con el paquete y el precio. Sin compromiso.</p>
+      <p class="lead">Mándanos fecha, hora, ubicación y cuántos son, y te pasamos la cotización por WhatsApp. Sin compromiso 🙂</p>
       <div class="faq">
         <details><summary>¿Con cuánta anticipación aparto?</summary><p>Lo ideal es con [__] semanas. Si es para esta semana, escríbenos y vemos si hay lugar.</p></details>
-        <details><summary>¿Cuál es el mínimo de personas?</summary><p>Desde [__] personas. Para grupos más chicos te recomendamos pedir a domicilio.</p></details>
-        <details><summary>¿Cómo aparto la fecha?</summary><p>Con un anticipo del [__]% por transferencia. El resto se liquida el día del evento.</p></details>
-        <details><summary>¿Llegan a mi zona?</summary><p>Cubrimos Monterrey y su área metropolitana desde nuestras 8 sucursales. Fuera de la zona puede haber un costo de traslado.</p></details>
-        <details><summary>¿Hay opción sin picante o vegetariana?</summary><p>Sí. Las salsas pueden ir aparte y la proteína es a elección.</p></details>
-        <details><summary>¿Dan factura?</summary><p>Sí, pídela al confirmar tu evento.</p></details>
+        <details><summary>¿Cuál es el mínimo de órdenes?</summary><p>Depende del horario: 35 en la mañana, 45 después de las 2:00 pm, 65 después de las 8:00 pm y 100 en la madrugada. Para grupos más chicos te recomendamos pedir a domicilio.</p></details>
+        <details><summary>¿Cómo aparto la fecha?</summary><p>Con el 50% de anticipo. El resto se liquida el día del evento.</p></details>
+        <details><summary>¿Cuánto cuesta el traslado?</summary><p>El traslado y montaje se cotiza según la ubicación. El precio de $110 por persona es para el área metropolitana de Monterrey y a pronto pago.</p></details>
+        <details><summary>¿Hay opción sin picante o vegetariana?</summary><p>Sí. Las salsas pueden ir aparte y se pueden servir sin proteína.</p></details>
+        <details><summary>¿Dan factura?</summary><p>Sí. Márcalo en el formulario y la tenemos lista.</p></details>
       </div>
     </div>
 
@@ -356,8 +352,8 @@ footer .unaria { font-size: 13px; color: #7C746B; }
         </div>
         <div class="dos">
           <label class="campo"><span>Personas</span><input type="number" name="personas" inputmode="numeric" min="1" placeholder="Ej. 80" required></label>
-          <label class="campo"><span>Paquete</span>
-            <select name="paquete"><option value="">Aún no sé</option><option>Desayuno de oficina</option><option>Fiesta</option><option>Tornafiesta</option></select></label>
+          <label class="campo"><span>¿Requiere factura?</span>
+            <select name="factura"><option value="">Aún no sé</option><option value="si">Sí</option><option value="no">No</option></select></label>
         </div>
         <label class="campo"><span>¿Dónde es? <small>Colonia, salón o dirección</small></span><input type="text" name="direccion" placeholder="Ej. Salón Los Arcos, Cumbres" required></label>
         <label class="campo"><span>Tu nombre</span><input type="text" name="nombre" autocomplete="name" required></label>
@@ -478,7 +474,7 @@ $('f').addEventListener('submit', function (e) {
 
   var sol = {
     id: 'web-' + Date.now(), creado_en: new Date().toISOString(), estado: 'solicitud',
-    tipo: v.tipo, fecha: v.fecha, hora: v.hora || null, personas: Number(v.personas) || null, paquete: v.paquete || null,
+    tipo: v.tipo, fecha: v.fecha, hora: v.hora || null, personas: Number(v.personas) || null, factura: v.factura === 'si' ? true : v.factura === 'no' ? false : null,
     direccion: v.direccion, nombre: v.nombre, telefono: v.telefono.replace(/\D/g, '').slice(-10), notas: v.comentarios || null,
     canal: canal(), utm: origen, pagina: location.href.split('#')[0].slice(0, 300)
   };
@@ -489,7 +485,7 @@ $('f').addEventListener('submit', function (e) {
 
   $('g-titulo').textContent = '¡Listo, ' + v.nombre.split(' ')[0] + '!';
   $('g-aviso').innerHTML = '';
-  $('g-aviso').textContent = '🎉 Nueva solicitud de evento\n' + sol.tipo + ' · ' + (sol.personas || '?') + ' personas\n' + fechaBonita(sol.fecha, sol.hora) + '\n📍 ' + sol.direccion + '\n👤 ' + sol.nombre + ' · ' + v.telefono + '\nVino de: ' + sol.canal;
+  $('g-aviso').textContent = '🎉 Nueva solicitud de evento\n' + sol.tipo + ' · ' + (sol.personas || '?') + ' personas\n' + fechaBonita(sol.fecha, sol.hora) + '\n📍 ' + sol.direccion + (sol.factura === true ? '\n🧾 Requiere factura' : '') + '\n👤 ' + sol.nombre + ' · ' + v.telefono + '\nVino de: ' + sol.canal;
   var hora = document.createElement('small'); hora.textContent = new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); $('g-aviso').appendChild(hora);
   f.style.display = 'none'; $('gracias').classList.add('on');
   $('gracias').scrollIntoView({ behavior: 'smooth', block: 'start' });

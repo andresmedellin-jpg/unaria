@@ -26,6 +26,8 @@ const vistas = {
   eventos: () => import('./modulos/eventos.js'),
   anuncios: () => import('./modulos/anuncios.js'),
   ventas: () => import('./modulos/ventas.js'),
+  pedidos: () => import('./modulos/pedidos.js'),
+  menu: () => import('./modulos/menu.js'),
   resumen: () => import('./modulos/resumen.js'),
   preparacion: () => import('./modulos/preparacion.js'),
 };
