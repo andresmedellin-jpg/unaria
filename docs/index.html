@@ -214,6 +214,26 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 @media (max-width: 960px) { .ruta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .ruta { grid-template-columns: minmax(0, 1fr); } }
 
+/* Precios */
+.planes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.plan { border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 24px 22px; display: grid; gap: 12px; align-content: start; position: relative; }
+.plan.destacado { border: 2px solid var(--acento); }
+.plan .p-marca { position: absolute; top: -11px; left: 20px; background: var(--acento); color: var(--sobre-acento); font: 600 .78rem/1 var(--f-texto); padding: 5px 10px; border-radius: 99px; }
+.plan .p-para { color: var(--gris); font-size: .97rem; }
+.plan .p-precio { font: 700 2rem/1 var(--f-display); color: var(--tinta); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.plan .p-precio small, .arranque .p-precio small { font: 500 .9rem var(--f-texto); color: var(--gris); letter-spacing: 0; }
+.p-desde { display: block; font: 500 .75rem/1.3 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--gris); margin-bottom: 6px; }
+.plan ul { list-style: none; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--linea); display: grid; gap: 9px; font-size: .97rem; }
+.plan li { padding-left: 20px; position: relative; }
+.plan li::before { content: ""; position: absolute; left: 0; top: .5em; width: 9px; height: 9px; border-radius: 2px; background: var(--acento); }
+.arranque { margin-top: 12px; border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 22px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 32px; align-items: center; }
+.arranque .p-precio { font: 700 1.6rem/1 var(--f-display); color: var(--tinta); letter-spacing: -.02em; }
+.arranque p { color: var(--gris); }
+.incluye { margin-top: 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; }
+.incluye h3 { font-size: 1rem; margin-bottom: 8px; }
+.incluye ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--gris); font-size: .97rem; }
+@media (max-width: 960px) { .planes, .incluye { grid-template-columns: minmax(0, 1fr); } .arranque { grid-template-columns: minmax(0, 1fr); } }
+
 /* Nosotros */
 .nosotros .envoltura { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); align-items: start; }
 .socios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -268,6 +288,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#situaciones">Situaciones</a>
       <a href="#como-empezamos">Cómo empezamos</a>
+      <a href="#precios">Precios</a>
       <a href="#preguntas">Preguntas</a>
     </nav>
     <button class="btn btn-primario" type="button" data-abrir-chat>¿Por dónde empiezo?</button>
@@ -421,11 +442,88 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     </div>
     <div class="ruta">
       <div class="etapa primera"><span class="e-num">1 · 30 minutos</span><h3>Llamada</h3><span class="e-precio">Sin costo</span><p>Entendemos tu operación y dónde te duele. Sales sabiendo si podemos ayudarte.</p></div>
-      <div class="etapa"><span class="e-num">2 · Diagnóstico</span><h3>Mapa de tu operación</h3><span class="e-precio" id="precio-diagnostico">Precio fijo, por escrito</span><p>Mapeamos tus sistemas, dónde capturas doble y cuánto te cuesta. Te llevas un mapa con números y prioridades.</p></div>
-      <div class="etapa"><span class="e-num">3 · Primera conexión</span><h3>Resultados rápido</h3><span class="e-precio">Precio fijo, por escrito</span><p>Construimos primero lo que más horas te ahorra, para que veas resultados pronto.</p></div>
-      <div class="etapa"><span class="e-num">4 · Cada mes</span><h3>Crece contigo</h3><span class="e-precio">Mensualidad según lo conectado</span><p>Soporte, mejoras y nuevas conexiones, área por área.</p></div>
+      <div class="etapa"><span class="e-num">2 · Diagnóstico</span><h3>Mapa de tu operación</h3><span class="e-precio" id="precio-diagnostico">Incluido en el arranque</span><p>Mapeamos tus sistemas, dónde capturas doble y cuánto te cuesta. Te llevas un mapa con números y prioridades.</p></div>
+      <div class="etapa"><span class="e-num">3 · Primera conexión</span><h3>Resultados rápido</h3><span class="e-precio">Arranque desde $35,000</span><p>Construimos primero lo que más horas te ahorra, para que veas resultados pronto.</p></div>
+      <div class="etapa"><span class="e-num">4 · Cada mes</span><h3>Crece contigo</h3><span class="e-precio">Desde $4,500 al mes</span><p>Soporte, mejoras y nuevas conexiones, área por área.</p></div>
     </div>
-    <p class="nota-precio"><b>Sin sorpresas:</b> siempre sabes cuánto vas a pagar, por escrito, antes de empezar cada etapa.</p>
+    <p class="nota-precio"><b>Sin sorpresas:</b> siempre sabes cuánto vas a pagar, por escrito, antes de empezar. <a href="#precios">Ver precios</a></p>
+  </div>
+</section>
+
+<section class="borde-arriba" id="precios">
+  <div class="envoltura">
+    <div class="cabeza">
+      <p class="etiqueta">Precios</p>
+      <h2>Precios claros desde la primera llamada.</h2>
+      <p class="lead">Dos números: un arranque a precio fijo y una mensualidad con todo incluido. Sin cobro por hora, sin cobro por uso de la inteligencia artificial y sin cargos sorpresa.</p>
+    </div>
+    <div class="planes">
+      <div class="plan">
+        <h3>Esencial</h3>
+        <p class="p-para">Para ordenar la operación interna y dejar de capturar doble.</p>
+        <div class="p-precio">$4,500 <small>al mes + IVA</small></div>
+        <ul>
+          <li>Portal de tu negocio con asistente de IA</li>
+          <li>Conectado a lo que ya usas: Excel, Aspel, Shopify</li>
+          <li>Hasta 10 usuarios, cada quien ve lo suyo</li>
+          <li>Soporte y ajustes menores</li>
+        </ul>
+      </div>
+      <div class="plan destacado">
+        <span class="p-marca">El más común</span>
+        <h3>Operación</h3>
+        <p class="p-para">Para negocios que atienden a sus clientes por WhatsApp.</p>
+        <div class="p-precio">$8,000 <small>al mes + IVA</small></div>
+        <ul>
+          <li>Todo lo de Esencial</li>
+          <li>WhatsApp de tu negocio con IA que contesta como tú</li>
+          <li>Avisos automáticos: pedidos, citas, tickets y cobranza</li>
+          <li>Hasta 25 usuarios</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <h3>Crecimiento</h3>
+        <p class="p-para">Para varios canales, sucursales o negocios en un solo lugar.</p>
+        <div class="p-precio"><span class="p-desde">Desde</span>$12,000 <small>al mes + IVA</small></div>
+        <ul>
+          <li>Todo lo de Operación</li>
+          <li>WhatsApp, Instagram y Facebook en una bandeja</li>
+          <li>Varias sucursales o negocios con permisos por persona</li>
+          <li>Tablero del dueño con todo el grupo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="arranque">
+      <div class="p-precio"><span class="p-desde">Arranque, una sola vez</span>Desde $35,000 <small>+ IVA</small></div>
+      <p>Diagnóstico, diseño, construcción, carga de tus datos y capacitación. Precio fijo y por escrito antes de empezar: 50% al firmar y 50% cuando ya lo estás usando.</p>
+    </div>
+    <div class="incluye">
+      <div>
+        <h3>La mensualidad incluye</h3>
+        <ul>
+          <li>Plataforma, servidores y respaldos</li>
+          <li>Inteligencia artificial incluida, con uso razonable</li>
+          <li>Mensajes de WhatsApp para atender a tus clientes</li>
+          <li>Soporte y hasta 4 horas de ajustes al mes</li>
+        </ul>
+      </div>
+      <div>
+        <h3>No incluye</h3>
+        <ul>
+          <li>Presupuesto de anuncios: lo pagas directo a Meta o Google</li>
+          <li>Sistemas que ya pagas, como Shopify o tu punto de venta</li>
+          <li>Campañas masivas por WhatsApp: se cobran al costo</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Para crecer</h3>
+        <ul>
+          <li>Cada área nueva se cotiza a precio fijo, con descuento si reutiliza lo que ya tienes</li>
+          <li>Tus datos son tuyos: si te vas, te los entregamos completos</li>
+        </ul>
+      </div>
+    </div>
+    <p class="nota-precio">Precios en pesos mexicanos más IVA. Contrato mínimo de 6 meses. El plan lo definimos juntos en la llamada según lo que necesitas conectar.</p>
   </div>
 </section>
 
@@ -467,7 +565,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
       <details><summary>¿Usan inteligencia artificial?</summary><p>Sí, cuando ayuda: por ejemplo, para leer facturas o documentos, ordenar información o automatizar tareas repetitivas. Pero no te vendemos inteligencia artificial; te vendemos menos trabajo repetido y la información junta.</p></details>
       <details><summary>¿Qué pasa si mi sistema actual cambia?</summary><p>Ajustamos la conexión. Para eso es la mensualidad: soporte, mejoras y cambios conforme tu empresa y tus herramientas cambian.</p></details>
       <details><summary>¿Cuánto tarda?</summary><p>Depende de lo que encontremos en el diagnóstico. Empezamos por una sola conexión para que veas resultados pronto, y la fecha de entrega te la damos por escrito antes de empezar.</p></details>
-      <details><summary>¿Cuánto cuesta?</summary><p id="faq-precio">La llamada de 30 minutos no tiene costo. El diagnóstico y la primera conexión tienen precio fijo, que te damos por escrito antes de empezar, según el tamaño de tu operación.</p></details>
+      <details><summary>¿Cuánto cuesta?</summary><p id="faq-precio">La llamada de 30 minutos no tiene costo. El arranque es desde $35,000 una sola vez e incluye el diagnóstico, y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA, según lo que conectemos. Te damos el precio exacto por escrito antes de empezar.</p></details>
       <details><summary>¿Sirve para mi industria?</summary><p>Sí. No trabajamos para un solo giro: diseñamos cada sistema según cómo opera tu empresa, sea comercio, servicios, manufactura, construcción o cualquier otra.</p></details>
     </div>
   </div>
@@ -783,8 +881,8 @@ const CONFIG = {
     [/^(hola|buen[oa]s|qu[eé] tal|hey|saludos)\b/i, 'Hola. Aquí puedes preguntarme lo que quieras sobre Unaria, o seguir con las preguntas para calcular cuánto te cuesta capturar lo mismo varias veces.'],
     [/demo|ejemplo|c[oó]mo se ve|ense[ñn]a|ver el sistema|prueba gratis|probar/i, 'En la llamada de 30 minutos te enseñamos cómo se ve, con datos de ejemplo, y lo aterrizamos a tu caso.'],
     [/diagn[oó]stico/i, 'En el diagnóstico mapeamos tus sistemas, dónde se captura lo mismo dos o tres veces y cuánto te cuesta. Te llevas un mapa con números y prioridades, tengas o no tengas sistemas hoy.'],
-    [/precio|cu[aá]nto (cuesta|cobran|sale|vale)|costo|cobran|cotiza|presupuesto|tarifa|mensualidad/i, 'La llamada de 30 minutos no tiene costo. El diagnóstico y la primera conexión tienen precio fijo, y la mensualidad depende de lo que conectemos. Todo te lo damos por escrito antes de empezar, según el tamaño de tu operación.'],
-    [/garant|no funciona|riesgo|y si no (me )?sirve|falla/i, 'Por eso empezamos chico: un diagnóstico y una primera conexión a precio fijo, para que veas resultados antes de crecer. Alcance, precio y fechas van por escrito.'],
+    [/precio|cu[aá]nto (cuesta|cobran|sale|vale)|costo|cobran|cotiza|presupuesto|tarifa|mensualidad/i, 'La llamada de 30 minutos no tiene costo. El arranque es desde $35,000 una sola vez (incluye el diagnóstico) y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA. El precio exacto te lo damos por escrito antes de empezar.'],
+    [/garant|no funciona|riesgo|y si no (me )?sirve|falla/i, 'Por eso empezamos chico: un arranque a precio fijo con lo que más horas te ahorra, para que veas resultados antes de crecer. La segunda mitad del arranque se paga cuando ya lo estás usando. Alcance, precio y fechas van por escrito.'],
     [/contrato|plazo forzoso|forzoso|cancelar|permanencia|dejar de pagar|salirme|irme/i, 'Las condiciones van por escrito antes de empezar. Y si un día decides irte, tu información es tuya: te la entregamos completa en un formato que puedas abrir, como Excel.'],
     [/tarda|cu[aá]nto tiempo|cu[aá]ndo (estar|queda|lo tengo)|semanas|meses|r[aá]pido/i, 'Depende de lo que encontremos en el diagnóstico. Empezamos por una sola conexión para que veas resultados pronto, y la fecha de entrega te la damos por escrito.'],
     [/no tengo (ning[uú]n|nada|sistema)|de cero|libreta|en papel|por d[oó]nde empiezo|no s[eé] qu[eé] necesito/i, 'Es muy buen punto de partida. Empezamos con lo que tengas (Excel, libretas, WhatsApp), lo ordenamos y lo pasamos a un sistema a tu medida, paso a paso y sin que tengas que aprender algo complicado.'],
