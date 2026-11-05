@@ -1,4 +1,4 @@
-// Datos de ejemplo del demo de los negocios de Javi (unaria.mx/demo/?demo=chilabike): Chilabike, Curandero (Loyverse, en
+// Datos de ejemplo del demo de Grupo A.M, los negocios de Javi (unaria.mx/demo/?demo=chilabike): Chilabike, Curandero (Loyverse, en
 // js/demo/datos-loyverse.js), Lattico (sin Loyverse todavía) y Casa María (en preparación).
 // Chilabike: Todo es inventado y se acomoda a la fecha de hoy.
 // Fase 1: los mensajes de WhatsApp, Instagram y Facebook caen en una sola bandeja; los anuncios de Meta llevan directo
@@ -10,7 +10,7 @@
   const COLOR = '#C9500C';
   window.__MARCA = {
     demo: true, contacto: 'Monterrey, N.L.', asistente: false,
-    nombre: 'Negocios de Javi', marca: ['Negocios de Javi'], logos: [],
+    nombre: 'Grupo A.M', marca: ['Grupo A.M'], logos: [],
     color: COLOR, color2: '#A8430A', colorSuave: '#FDEBDD',
     // Un solo sistema para todos sus negocios: cada uno es una opción del menú y adentro vive su mundo
     menuGeneral: [{ id: 'resumen' }],
@@ -175,6 +175,6 @@
       { id: 'paq-2', nombre: 'Fiesta', precio_persona: null, minimo: null, incluye: 'Estación con chilaqueros, las 3 salsas, proteínas y barra de toppings' },
       { id: 'paq-3', nombre: 'Tornafiesta', precio_persona: null, minimo: null, incluye: 'Cajitas a media noche, salsas aparte' },
     ];
-    return { organizaciones: [{ id: ORG, nombre: 'Negocios de Javi', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, ...lv };
+    return { organizaciones: [{ id: ORG, nombre: 'Grupo A.M', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, ...lv };
   };
 })();
