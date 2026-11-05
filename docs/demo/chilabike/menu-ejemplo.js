@@ -28,16 +28,16 @@ window.MENU_CHILABIKE = {
   envio: 35,
   pagos: ['Efectivo', 'Transferencia'],
   sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
-  // Dónde está cada sucursal (los links que manda Javier por el chat). dias: solo esos días de la semana (0 = domingo).
+  // Dónde está cada sucursal (los links que manda Javier por el chat; lat/lng aproximados para el radar del Centro de mando). dias: solo esos días de la semana (0 = domingo).
   ubicaciones: {
-    'San Pedro': { mapa: 'https://maps.app.goo.gl/K9raaonPuX851hHSA' },
-    'San Jerónimo': { mapa: 'https://maps.app.goo.gl/eVBVrVha2xWyrFS67' },
-    'Mitras': { direccion: 'Celaya 3133, Col. Mitras Centro, Monterrey', referencia: 'Frente a la Facultad de Medicina', mapa: 'https://goo.gl/maps/dNdRETziyLy7Ge476' },
-    'Cumbres': { mapa: 'https://maps.app.goo.gl/Qtzb6orMnviqnAvw8' },
-    'Centro': { mapa: 'https://maps.app.goo.gl/eksbWVScQesS8kX4A' },
-    'Venustiano Carranza': { mapa: 'https://maps.google.com/?q=25.679914,-100.330696' },
-    'San Pedro de Pinta': { mapa: 'https://maps.google.com/?q=25.655132,-100.371178', nota: 'Solo domingos', dias: [0] },
-    'Tec': { mapa: 'https://maps.app.goo.gl/E7GQjaJzuw98ogmbA' },
+    'San Pedro': { lat: 25.6573, lng: -100.4022, mapa: 'https://maps.app.goo.gl/K9raaonPuX851hHSA' },
+    'San Jerónimo': { lat: 25.6768, lng: -100.3655, mapa: 'https://maps.app.goo.gl/eVBVrVha2xWyrFS67' },
+    'Mitras': { lat: 25.6905, lng: -100.3517, direccion: 'Celaya 3133, Col. Mitras Centro, Monterrey', referencia: 'Frente a la Facultad de Medicina', mapa: 'https://goo.gl/maps/dNdRETziyLy7Ge476' },
+    'Cumbres': { lat: 25.729, lng: -100.4, mapa: 'https://maps.app.goo.gl/Qtzb6orMnviqnAvw8' },
+    'Centro': { lat: 25.67, lng: -100.3125, mapa: 'https://maps.app.goo.gl/eksbWVScQesS8kX4A' },
+    'Venustiano Carranza': { lat: 25.679914, lng: -100.330696, mapa: 'https://maps.google.com/?q=25.679914,-100.330696' },
+    'San Pedro de Pinta': { lat: 25.655132, lng: -100.371178, mapa: 'https://maps.google.com/?q=25.655132,-100.371178', nota: 'Solo domingos', dias: [0] },
+    'Tec': { lat: 25.6516, lng: -100.2905, mapa: 'https://maps.app.goo.gl/E7GQjaJzuw98ogmbA' },
   },
   // Eventos: así cotiza Javier (precio por persona, mínimo de órdenes según el horario, lo que incluye y el anticipo).
   eventos: {

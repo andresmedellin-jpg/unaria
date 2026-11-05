@@ -181,6 +181,7 @@ function graficaDias(V, r) {
   if (r.n === 1) return `<p class="vt-vacio">Venta de hoy: <b>${dinero(por.get(r.a) || 0)}</b>. Para ver la gráfica, escoge un periodo más largo.</p>`;
   const max = Math.max(...ds.map((d) => por.get(d) || 0), 1), W = 1000, H = 200, bw = W / ds.length;
   const prom = ds.reduce((s, d) => s + (por.get(d) || 0), 0) / ds.length;
+  if (document.body.classList.contains('tema-mando')) return curvaDias(ds, por, max, prom);
   const marcas = ds.map((d, i) => ({ d, i })).filter(({ d, i }) => ds.length <= 14 || new Date(d + 'T12:00:00').getDate() === 1 || i % Math.ceil(ds.length / 8) === 0);
   return `<div class="vt-graf"><svg viewBox="0 0 ${W} ${H + 24}" preserveAspectRatio="none" role="img" aria-label="Venta por día">
     ${ds.map((d, i) => { const v = por.get(d) || 0, h = (v / max) * H, dom = new Date(d + 'T12:00:00').getDay() === 0;
@@ -188,6 +189,25 @@ function graficaDias(V, r) {
     <line x1="0" x2="${W}" y1="${H - (prom / max) * H}" y2="${H - (prom / max) * H}" stroke="var(--text-2)" stroke-dasharray="6 6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
   </svg><div class="vt-ejes">${marcas.map(({ d, i }) => `<span style="left:${((i + 0.5) / ds.length) * 100}%">${fechaC(d)}</span>`).join('')}</div>
   <p class="vt-leyenda"><i></i> venta del día · <b>- - -</b> promedio ${dinero(prom)} por día</p></div>`;
+}
+
+// Tema Mando: la venta por día como curva luminosa (en lugar de barras), con el promedio y el mejor día marcados
+function curvaDias(ds, por, max, prom) {
+  const W = 1000, H = 210, n = ds.length, X = (i) => (n === 1 ? W / 2 : (i / (n - 1)) * W), Y = (v) => H - (v / (max * 1.1)) * H;
+  const P = ds.map((d, i) => [X(i), Y(por.get(d) || 0)]);
+  let d = `M${P[0][0]} ${P[0][1]}`;
+  for (let i = 1; i < P.length; i++) { const [x0, y0] = P[i - 1], [x1, y1] = P[i], c = (x1 - x0) / 2; d += ` C${x0 + c} ${y0} ${x1 - c} ${y1} ${x1} ${y1}`; }
+  const mejor = ds.reduce((b, x, i) => ((por.get(x) || 0) > (por.get(ds[b]) || 0) ? i : b), 0);
+  const marcas = ds.map((x, i) => ({ x, i })).filter(({ x, i }) => n <= 14 || new Date(x + 'T12:00:00').getDate() === 1 || i % Math.ceil(n / 8) === 0);
+  return `<div class="vt-graf"><svg viewBox="0 -14 ${W} ${H + 24}" preserveAspectRatio="none" role="img" aria-label="Venta por día" style="overflow:visible">
+    <defs><linearGradient id="vt-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/><stop offset="1" stop-color="var(--primary)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${d} L${W} ${H} L0 ${H} Z" fill="url(#vt-area)"/>
+    <line x1="0" x2="${W}" y1="${Y(prom)}" y2="${Y(prom)}" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 6" vector-effect="non-scaling-stroke"/>
+    <path d="${d}" fill="none" stroke="color-mix(in srgb, var(--primary) 70%, white)" stroke-width="2.5" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 8px var(--primary))"/>
+    ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="9" fill="transparent"><title>${fechaC(ds[i])}: ${dinero(por.get(ds[i]) || 0)}</title></circle>`).join('')}
+  </svg><span class="vt-mejor" style="left:${(X(mejor) / W) * 100}%;top:${((P[mejor][1] + 14) / (H + 24) * 200).toFixed(1)}px"><i></i>${fechaC(ds[mejor])} · ${dinero(por.get(ds[mejor]) || 0)}</span>
+  <div class="vt-ejes">${marcas.map(({ x, i }) => `<span style="left:${(X(i) / W) * 100}%">${fechaC(x)}</span>`).join('')}</div>
+  <p class="vt-leyenda"><i></i> venta del día · <b>- - -</b> promedio ${dinero(prom)} por día · el punto es el mejor día</p></div>`;
 }
 
 function horas(H, r) {
@@ -203,7 +223,7 @@ function horas(H, r) {
   for (let h = desde; h <= hasta; h++) html += `<span class="hh">${h}</span>`;
   for (let d = 1; d <= 7; d++) {
     html += `<span class="dd">${DIAS[d - 1]}</span>`;
-    for (let h = desde; h <= hasta; h++) { const v = m[d + '-' + h] || 0; html += `<i style="background:${v ? `color-mix(in srgb, var(--primary) ${Math.round(12 + (v / max) * 88)}%, white)` : 'var(--surface-2)'}" title="${DIAS[d - 1]} ${h}:00 · ${dinero(v)} en promedio"></i>`; }
+    for (let h = desde; h <= hasta; h++) { const v = m[d + '-' + h] || 0; html += `<i style="background:${v ? `color-mix(in srgb, var(--primary) ${Math.round(12 + (v / max) * 88)}%, var(--hm-base, white))` : 'var(--surface-2)'}" title="${DIAS[d - 1]} ${h}:00 · ${dinero(v)} en promedio"></i>`; }
   }
   return html + '</div><p class="vt-leyenda">Más oscuro = más venta. Sirve para acomodar turnos y saber cuándo conviene una promoción.</p>';
 }
@@ -258,6 +278,8 @@ function estilos() {
   if (document.getElementById('vt-estilos')) return;
   const s = document.createElement('style'); s.id = 'vt-estilos';
   s.textContent = `
+  .vt-graf { position:relative; } .vt-mejor { position:absolute; transform:translate(-50%,calc(-100% - 12px)); font:600 11.5px var(--f-texto); white-space:nowrap; background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.15); padding:3px 8px; border-radius:999px; pointer-events:none; }
+  .vt-mejor i { position:absolute; left:50%; bottom:-16.5px; width:9px; height:9px; margin-left:-4.5px; border-radius:50%; background:#fff; box-shadow:0 0 10px var(--primary); }
   .vt-estado { font-size:12.5px; font-weight:600; border-radius:999px; padding:5px 11px; white-space:nowrap; }
   .vt-estado.ok { background:#ECFDF3; color:#067647; } .vt-estado.imp { background:#FEF0C7; color:#B54708; } .vt-estado.err { background:#FEE4E2; color:#B42318; }
   .vt-barra { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }

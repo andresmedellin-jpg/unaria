@@ -29,12 +29,19 @@ const vistas = {
   pedidos: () => import('./modulos/pedidos.js'),
   menu: () => import('./modulos/menu.js'),
   resumen: () => import('./modulos/resumen.js'),
+  mando: () => import('./modulos/mando.js'),
   preparacion: () => import('./modulos/preparacion.js'),
 };
 
 // ================= MARCA =================
 (function aplicarMarca() {
   document.title = MARCA.nombre;
+  // Tema propio de un cliente (MARCA.tema, p. ej. 'mando' para Grupo A.M): su hoja de estilos y su script, encima de la base
+  if (MARCA.tema) {
+    document.body.classList.add('tema-' + MARCA.tema);
+    const v = (document.querySelector('link[href*="css/app.css"]')?.getAttribute('href').match(/\?v=[\w-]+/) || [''])[0];
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `css/tema-${MARCA.tema}.css${v}`; document.head.appendChild(l);
+  }
   if (MARCA.color) {
     const r = document.documentElement.style;
     r.setProperty('--primary', MARCA.color);
@@ -202,6 +209,7 @@ async function entrar(user) {
     $('shell').hidden = false;
     navegar();
     iniciarAsistente();
+    if (MARCA.tema) import(`./tema-${MARCA.tema}.js`).then((t) => t.iniciar?.(estado.miembro)).catch((e) => console.warn('tema', e));
     if (miembro.debe_cambiar_password) pedirNuevaPassword({ obligatoria: true });
   })().finally(() => (entrando = null));
   return entrando;
@@ -330,9 +338,10 @@ async function navegar() {
   if (grupo) {
     const pest = document.createElement('div');
     pest.className = 'sub-modulos';
-    pest.innerHTML = `<div class="tabs" role="tablist">${grupo.subs.map((m) => `<a role="tab" href="${ir(m.id)}" aria-selected="${m.id === mod.id}">${esc(m.titulo)}</a>`).join('')}</div>`;
+    pest.innerHTML = `<div class="tabs" role="tablist">${grupo.subs.map((m) => `<a role="tab" href="${ir(m.id)}" aria-selected="${m.id === mod.id}" data-base="${esc(m.vista || m.id)}"><span class="tab-ico" aria-hidden="true">${m.icono || ''}</span>${esc(m.titulo)}</a>`).join('')}</div>`;
     view.replaceChildren(pest, caja);
   } else view.replaceChildren(caja);
+  document.dispatchEvent(new CustomEvent('unaria:navegar', { detail: { mod, entrada } }));
   try {
     const m = await (vistas[mod.vista || mod.id] || pendiente)();
     if (mio !== turno) return;

@@ -13,7 +13,9 @@
     nombre: 'Grupo A.M', marca: ['Grupo A.M'], logos: [],
     color: COLOR, color2: '#A8430A', colorSuave: '#FDEBDD',
     // Un solo sistema para todos sus negocios: cada uno es una opción del menú y adentro vive su mundo
-    menuGeneral: [{ id: 'resumen' }],
+    // Tema propio: centro de mando oscuro (css/tema-mando.css + js/tema-mando.js); el inicio es el Centro de mando
+    tema: 'mando',
+    menuGeneral: [{ id: 'mando', titulo: 'Mando' }],
     negocios: [
       { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', color: '#C9500C', empresa_id: 'emp-chb',
         modulos: ['bandeja', 'pedidos', 'eventos', 'menu', 'anuncios'], titulos: { bandeja: 'Mensajes' } },

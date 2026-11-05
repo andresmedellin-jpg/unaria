@@ -109,6 +109,7 @@ export const MODULOS = [
   // Ventas del punto de venta (Loyverse), por negocio
   { id: 'ventas',     grupo: 'Ventas',    titulo: 'Ventas',           icono: ICONOS.ventas,     roles: ['dueno','administracion'], listo: true, opcional: true },
   // Varios negocios de un mismo dueño: resumen de todos y pantalla de "en preparación" para un negocio que apenas arranca
+  { id: 'mando',      grupo: 'General',   titulo: 'Centro de mando',  icono: ICONOS.resumen,    roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'resumen',    grupo: 'General',   titulo: 'Resumen',          icono: ICONOS.resumen,    roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'preparacion', grupo: 'General',  titulo: 'En preparación',   icono: ICONOS.obras,      roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'cotizaciones', grupo: 'Ventas',  titulo: 'Cotizaciones',     icono: ICONOS.cotizaciones, roles: ['dueno','administracion','cobranza'], listo: true, opcional: true },
