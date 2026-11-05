@@ -30,7 +30,7 @@
     ],
     ajustes: ['usuarios'],
     chilabike: {
-      negocio: 'Chilabike', dueno: 'Javier', pagina: './chilabike/',
+      negocio: 'Chilabike', dueno: 'Javier', pagina: './chilabike/', chat: './chilabike/chat/',
       sucursales: ['San Pedro', 'San Jerónimo', 'Mitras', 'San Pedro de Pinta', 'Cumbres', 'Centro', 'Venustiano Carranza', 'Tec'],
       tipos: ['Cumpleaños', 'Boda o XV', 'Desayuno de oficina', 'Reunión', 'Festival', 'Otro'],
       paquetes: ['Desayuno de oficina', 'Fiesta', 'Tornafiesta'],
@@ -159,6 +159,18 @@
           anuncio_id: s.canal === 'Google' ? 'ad-google' : null, notas: s.notas, creado_en: s.creado_en, nuevo: true });
       });
     } catch (e) { /* sin almacenamiento: solo los de ejemplo */ }
+    // Pedidos y cotizaciones hechos con el menú interactivo (../chilabike/arma/) en este navegador
+    try {
+      JSON.parse(localStorage.getItem('chilabike-demo-pedidos') || '[]').forEach((p, k) => {
+        const canal = { WhatsApp: 'whatsapp', Instagram: 'instagram', Messenger: 'facebook' }[p.canal] || 'whatsapp';
+        const c = { id: 'conv-menu-' + k, org_id: ORG, canal, contacto: canal === 'instagram' ? '@cliente.demo' : 'Cliente del menú (demo)', telefono: canal === 'whatsapp' ? '8100000000' : null,
+          anuncio_id: null, etiqueta: p.tipo === 'evento' ? 'evento' : 'pedido', estado: 'abierta', leida: false, por_contestar: true,
+          ultimo: p.texto.split('\n')[0], ultimo_en: p.creado_en, extraccion: p.evento || null,
+          sugerida: p.tipo === 'evento' ? '¡Gracias! Para ' + p.evento.personas + ' personas te queda el paquete ' + p.evento.paquete + ' en $[__] por persona. ¿Te aparto la fecha?' : '¡Listo! Tu pedido ya está en la cocina 🍳 Te aviso cuando salga.' };
+        conversaciones.unshift(c);
+        mensajes.push({ id: id('msg'), org_id: ORG, conversacion_id: c.id, de: 'cliente', texto: p.texto, creado_en: p.creado_en });
+      });
+    } catch (e) { /* sin almacenamiento */ }
 
     const miembros = [
       { org_id: ORG, user_id: 'demo-usuario', nombre: 'Javier Andonie Moreno', usuario: 'javier', rol: 'dueno', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z' },

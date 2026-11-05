@@ -1,0 +1,191 @@
+<!doctype html>
+<!-- DEMO de Unaria para Chilabike: así se ve pedir por WhatsApp, Instagram o Messenger con el menú interactivo.
+     El chat es una simulación; el menú ("Arma tu cajita", ../arma/) es la página real que se abre dentro de cada app. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pedir por chat · Chilabike (demo)</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light only">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+:root { --negro:#121110; --crema:#FBF6EF; --naranja:#F26B1D; --texto:#2B2724; --gris:#6E6760; --linea:#E9E1D6; color-scheme:light;
+  --f-disp:'Bricolage Grotesque','Arial Black',Arial,sans-serif; --f-txt:'DM Sans',Arial,sans-serif; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--crema); color:var(--texto); font:400 16px/1.5 var(--f-txt); -webkit-font-smoothing:antialiased; }
+.demo { background:#FFF3C4; color:#5C4300; font-size:13px; text-align:center; padding:6px 14px; }
+.cont { max-width:1100px; margin:0 auto; padding:24px 16px 40px; display:grid; grid-template-columns:minmax(0,1fr); gap:28px; }
+@media (min-width:900px) { .cont { grid-template-columns:400px minmax(0,1fr); align-items:start; padding-top:36px; } .lado { position:sticky; top:24px; order:2; } }
+.tabs { display:flex; gap:6px; background:#EFE8DE; padding:4px; border-radius:999px; margin-bottom:12px; }
+.tabs button { flex:1; font:inherit; font-size:14px; font-weight:700; border:0; background:transparent; color:var(--gris); padding:9px 6px; border-radius:999px; cursor:pointer; }
+.tabs button.on { background:#fff; color:var(--negro); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.tel { position:relative; width:100%; max-width:400px; height:760px; margin:0 auto; border-radius:44px; background:#111; padding:12px; box-shadow:0 30px 70px -30px rgba(0,0,0,.6); }
+.pant { position:relative; height:100%; border-radius:34px; overflow:hidden; display:flex; flex-direction:column; background:var(--fondo); }
+.top { display:flex; align-items:center; gap:10px; padding:16px 14px 10px; background:var(--barra); color:var(--barra-t); }
+.top .av { width:36px; height:36px; border-radius:50%; background:var(--naranja); display:grid; place-items:center; font-size:16px; flex:none; }
+.top b { display:block; font-size:15px; } .top small { font-size:12px; opacity:.75; }
+.hilo { flex:1; overflow:auto; padding:14px 12px; display:flex; flex-direction:column; gap:8px; scroll-behavior:smooth; }
+.b { max-width:82%; padding:8px 11px; border-radius:16px; font-size:14.5px; line-height:1.4; white-space:pre-line; animation:in .25s ease both; overflow-wrap:anywhere; }
+@keyframes in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.b.ellos { align-self:flex-start; background:var(--b-ellos); color:var(--b-ellos-t); border-top-left-radius:4px; }
+.b.yo { align-self:flex-end; background:var(--b-yo); color:var(--b-yo-t); border-top-right-radius:4px; }
+.b small { display:block; font-size:10.5px; opacity:.6; text-align:right; margin-top:2px; }
+.b .form { font-size:11.5px; font-weight:700; opacity:.7; display:block; margin-bottom:3px; }
+.botones { align-self:flex-start; width:82%; display:grid; gap:4px; margin-top:-4px; animation:in .25s ease both; }
+.botones button { font:inherit; font-size:14.5px; font-weight:600; border:0; background:var(--b-ellos); color:var(--accion); padding:10px; border-radius:12px; cursor:pointer; }
+.rapidas { display:flex; gap:6px; overflow-x:auto; padding:6px 12px; scrollbar-width:none; }
+.rapidas button { flex:none; font:inherit; font-size:14px; font-weight:600; border:1.5px solid var(--accion); color:var(--accion); background:transparent; padding:7px 13px; border-radius:999px; cursor:pointer; }
+.tarjeta { align-self:flex-start; width:78%; border-radius:16px; overflow:hidden; background:var(--b-ellos); color:var(--b-ellos-t); animation:in .25s ease both; box-shadow:0 1px 1px rgba(0,0,0,.06); }
+.tarjeta .img { height:120px; background:linear-gradient(110deg,#4F8A2B 0 33%,#B8321D 33% 66%,#F26B1D 66%); display:flex; align-items:flex-end; padding:10px; color:#fff; font:800 20px var(--f-disp); }
+.tarjeta .tx { padding:10px 12px 4px; font-size:14px; } .tarjeta .tx b { display:block; font-size:15px; }
+.tarjeta button { width:100%; font:inherit; font-weight:700; font-size:14.5px; border:0; border-top:1px solid rgba(0,0,0,.08); background:transparent; color:var(--accion); padding:11px; cursor:pointer; }
+.escribe { display:flex; gap:8px; padding:8px 10px 14px; background:var(--barra-baja); align-items:center; }
+.escribe input { flex:1; min-width:0; font:inherit; font-size:15px; border:0; border-radius:999px; padding:10px 14px; background:var(--input); }
+.escribe button { width:40px; height:40px; border-radius:50%; border:0; background:var(--accion); color:#fff; font-size:17px; cursor:pointer; flex:none; }
+.puntos { align-self:flex-start; background:var(--b-ellos); border-radius:16px; padding:12px 14px; display:flex; gap:4px; }
+.puntos i { width:7px; height:7px; border-radius:50%; background:#999; animation:p 1s infinite; } .puntos i:nth-child(2) { animation-delay:.15s; } .puntos i:nth-child(3) { animation-delay:.3s; }
+@keyframes p { 50% { opacity:.3; } }
+.hoja { position:absolute; inset:0; top:auto; height:94%; background:#fff; border-radius:22px 22px 0 0; transform:translateY(105%); transition:transform .35s cubic-bezier(.2,.8,.2,1); display:flex; flex-direction:column; z-index:5; box-shadow:0 -10px 40px rgba(0,0,0,.3); }
+.hoja.on { transform:none; }
+.hoja .barra { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #eee; font-size:13px; color:#555; }
+.hoja .barra b { color:#111; font-size:14px; } .hoja .barra button { margin-left:auto; border:0; background:#f1f1f1; border-radius:50%; width:30px; height:30px; cursor:pointer; font-size:15px; }
+.hoja iframe { flex:1; border:0; width:100%; }
+.lado h1 { font-family:var(--f-disp); font-size:clamp(30px,5vw,44px); line-height:1.05; letter-spacing:-.02em; margin:0 0 10px; color:var(--negro); }
+.lado h1 span { color:var(--naranja); }
+.lado p { color:var(--gris); margin:0 0 16px; }
+.cards { display:grid; gap:10px; }
+.card { background:#fff; border:1px solid var(--linea); border-radius:16px; padding:14px 16px; }
+.card > b { display:block; color:var(--negro); margin-bottom:2px; } .card span b { color:var(--negro); } .card span { color:var(--gris); font-size:14.5px; }
+.prueba { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.prueba a { font-size:14px; font-weight:700; color:var(--negro); background:#fff; border:1.5px solid var(--linea); border-radius:999px; padding:8px 14px; text-decoration:none; }
+/* temas */
+.wa { --fondo:#EFEAE2; --barra:#075E54; --barra-t:#fff; --b-ellos:#fff; --b-ellos-t:#111; --b-yo:#D9FDD3; --b-yo-t:#111; --accion:#00A884; --barra-baja:#F0F2F5; --input:#fff; }
+.ig { --fondo:#fff; --barra:#fff; --barra-t:#111; --b-ellos:#EFEFEF; --b-ellos-t:#111; --b-yo:linear-gradient(135deg,#7638FA,#D300C5 60%,#FF7A00); --b-yo-t:#fff; --accion:#7638FA; --barra-baja:#fff; --input:#EFEFEF; }
+.fb { --fondo:#fff; --barra:#fff; --barra-t:#111; --b-ellos:#E9E9EB; --b-ellos-t:#111; --b-yo:#0084FF; --b-yo-t:#fff; --accion:#0084FF; --barra-baja:#fff; --input:#F0F0F0; }
+.ig .top, .fb .top { border-bottom:1px solid #eee; }
+.ig .b.yo { background:var(--b-yo); }
+</style>
+</head>
+<body>
+<div class="demo"><b>Demo de Unaria</b> · simulación del chat; el menú que se abre es el real. Precios de muestra.</div>
+<div class="cont">
+  <div class="lado">
+    <h1>Pedir chilaquiles por chat, <span>como en Subway.</span></h1>
+    <p>El cliente escribe "hola" por WhatsApp, Instagram o Facebook, toca un botón y arma su cajita paso a paso: salsa, proteína, toppings y bebida. El pedido llega completo al chat y a la bandeja de Chilabike.</p>
+    <div class="cards">
+      <div class="card"><b>WhatsApp</b><span>El menú se abre <b>dentro del chat</b>, como un formulario de WhatsApp (se llama WhatsApp Flow). No sale de la app.</span></div>
+      <div class="card"><b>Instagram y Messenger</b><span>Botones rápidos en el chat, y el menú se abre dentro de la misma app como una página. Al terminar, el pedido regresa al chat.</span></div>
+      <div class="card"><b>Si prefiere escribir</b><span>"Quiero 2 rojos con pollo" también funciona: el asistente lo entiende y le arma el pedido.</span></div>
+      <div class="card"><b>Para Chilabike</b><span>Cada pedido llega con todo: qué, cuánto, a dónde y cómo paga. Nada de ir preguntando. Y queda en la bandeja del sistema.</span></div>
+    </div>
+    <div class="prueba"><a href="../arma/" target="_blank" rel="noopener">Abrir solo el menú</a><a href="../arma/?modo=evento" target="_blank" rel="noopener">Menú para cotizar evento</a><a href="../../?demo=chilabike#/chilabike-bandeja" target="_blank" rel="noopener">Ver la bandeja</a></div>
+  </div>
+
+  <div>
+    <div class="tabs" role="tablist"><button data-c="wa" class="on">WhatsApp</button><button data-c="ig">Instagram</button><button data-c="fb">Messenger</button></div>
+    <div class="tel"><div class="pant wa" id="pant">
+      <div class="top"><span class="av">🌶</span><span><b id="nom">Chilabike</b><small id="sub">cuenta de empresa</small></span></div>
+      <div class="hilo" id="hilo"></div>
+      <div class="rapidas" id="rapidas"></div>
+      <div class="escribe"><input id="txt" placeholder="Escribe un mensaje" autocomplete="off"><button id="env" aria-label="Enviar">➤</button></div>
+      <div class="hoja" id="hoja"><div class="barra"><span id="hoja-t"></span><button id="cerrar" aria-label="Cerrar">✕</button></div><iframe id="marco" title="Menú de Chilabike"></iframe></div>
+    </div></div>
+  </div>
+</div>
+<script>
+var gen = 0, canal = 'wa', hilo = document.getElementById('hilo'), rap = document.getElementById('rapidas'), num = 128;
+var NOM = { wa: ['Chilabike', 'cuenta de empresa'], ig: ['chilabike.mty', 'Chila Bike'], fb: ['Chilabike', 'Suele responder en minutos'] };
+var hora = function () { return new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); };
+var espera = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+function burbuja(quien, texto, extra) {
+  var d = document.createElement('div'); d.className = 'b ' + quien;
+  d.innerHTML = (extra || '') + texto.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }) + '<small>' + hora() + '</small>';
+  hilo.appendChild(d); hilo.scrollTop = hilo.scrollHeight; return d;
+}
+async function bot(texto, botones) {
+  var mia = gen;
+  if (mia !== gen) return;
+  var p = document.createElement('div'); p.className = 'puntos'; p.innerHTML = '<i></i><i></i><i></i>'; hilo.appendChild(p); hilo.scrollTop = hilo.scrollHeight;
+  await espera(700 + Math.min(900, texto.length * 8)); p.remove();
+  if (mia !== gen) return;   // cambiaron de app mientras escribía
+  burbuja('ellos', texto); opciones(botones || []);
+}
+// WhatsApp: botones debajo del mensaje · Instagram y Messenger: respuestas rápidas arriba del teclado
+function opciones(lista) {
+  rap.innerHTML = '';
+  if (!lista.length) return;
+  if (canal === 'wa') {
+    var g = document.createElement('div'); g.className = 'botones';
+    lista.forEach(function (o) { var b = document.createElement('button'); b.textContent = o[0]; b.onclick = function () { g.remove(); elegir(o); }; g.appendChild(b); });
+    hilo.appendChild(g);
+  } else lista.forEach(function (o) { var b = document.createElement('button'); b.textContent = o[0]; b.onclick = function () { rap.innerHTML = ''; elegir(o); }; rap.appendChild(b); });
+  hilo.scrollTop = hilo.scrollHeight;
+}
+function elegir(o) { burbuja('yo', o[0]); o[1](); }
+function tarjeta(titulo, texto, boton, accion) {
+  var t = document.createElement('div'); t.className = 'tarjeta';
+  t.innerHTML = '<div class="img">' + titulo + '</div><div class="tx"><b>' + texto[0] + '</b>' + texto[1] + '</div><button>' + boton + '</button>';
+  t.querySelector('button').onclick = accion; hilo.appendChild(t); hilo.scrollTop = hilo.scrollHeight;
+}
+var INICIO = [['🌶️ Pedir mi cajita', function () { abrirMenu(false); }], ['🎉 Cotizar un evento', function () { abrirMenu(true); }], ['📍 Sucursales y horario', sucursales]];
+async function abrirMenu(evento) {
+  await bot(evento ? '¡Qué buen plan! 🙌 Cotízalo aquí en un minuto:' : '¡Va! Arma tu cajita como la quieras 👇');
+  tarjeta(evento ? 'Cotiza tu evento' : 'Arma tu cajita', evento ? ['Eventos Chilabike', 'Fecha, personas y tu barra de chilaquiles.'] : ['Menú Chilabike', 'Salsa, proteína, toppings y bebida.'],
+    canal === 'wa' ? (evento ? '📋 Cotizar' : '📋 Ver menú y pedir') : (evento ? 'Cotizar evento' : 'Abrir menú'), function () { hoja(evento); });
+}
+function hoja(evento) {
+  document.getElementById('hoja-t').innerHTML = canal === 'wa' ? '<b>Chilabike</b> · formulario de WhatsApp' : '🔒 <b>chilabike.mx</b> · se abre dentro de ' + (canal === 'ig' ? 'Instagram' : 'Messenger');
+  document.getElementById('marco').src = '../arma/?canal=' + canal + (evento ? '&modo=evento' : '');
+  document.getElementById('hoja').classList.add('on');
+}
+document.getElementById('cerrar').onclick = function () { document.getElementById('hoja').classList.remove('on'); };
+async function sucursales() {
+  await bot('Estamos en San Pedro, San Jerónimo, Mitras, San Pedro de Pinta, Cumbres, Centro, Venustiano Carranza y Tec 📍\nAbrimos de lunes a sábado en la mañana.', [['🌶️ Pedir mi cajita', function () { abrirMenu(false); }]]);
+}
+window.addEventListener('message', async function (e) {
+  if (!e.data || !e.data.chilabike) return;
+  var p = e.data.pedido;
+  await espera(500); document.getElementById('hoja').classList.remove('on');
+  await espera(350);
+  burbuja('yo', p.texto, canal === 'wa' ? '<span class="form">📋 Respuesta del formulario</span>' : '');
+  if (p.tipo === 'evento') {
+    var ev = p.evento;
+    await bot('¡Gracias! 🎉 Para ' + ev.personas + ' personas te queda el paquete ' + ev.paquete + ' en $[__] por persona.\n¿Te aparto la fecha?', [['✅ Sí, apartar', async function () {
+      await bot('Para apartar es un anticipo del [__]% por transferencia. Te paso los datos y me mandas el comprobante por aquí 🙌'); }], ['🤔 Tengo dudas', async function () {
+      await bot('Claro, dime y te contesto. Si prefieres, Javier te marca.'); }]]);
+  } else {
+    num++;
+    if (p.pago === 'Transferencia') await bot('¡Recibido! 🙌 Tu pedido #' + num + ' suma ' + '$' + p.total + '.\nTransfiere a la CLABE [__] y manda tu comprobante por aquí. En cuanto llegue, entra a cocina.');
+    else await bot('¡Listo! 🙌 Tu pedido #' + num + ' ya está en la cocina 🍳\nTotal: $' + p.total + ' en efectivo. Te aviso cuando salga.');
+    await espera(2200); await bot('🛵 Tu pedido #' + num + ' ya va en camino. Llega en unos 25 min.');
+  }
+});
+// Texto libre: el asistente lo entiende (en el demo, unas frases de ejemplo)
+async function libre(t) {
+  burbuja('yo', t);
+  var s = t.toLowerCase(), n = (s.match(/\d+/) || ['1'])[0];
+  var salsa = /mixt/.test(s) ? 'mixtos' : /roj/.test(s) ? 'rojos' : /verd/.test(s) ? 'verdes' : null;
+  var prot = /arrach/.test(s) ? 'arrachera' : /huevo/.test(s) ? 'huevo' : /chorizo/.test(s) ? 'chorizo' : /pollo/.test(s) ? 'pollo' : null;
+  if (/evento|boda|cumple|fiesta|xv|personas/.test(s)) return abrirMenu(true);
+  if (salsa) return bot('Va, te anoto ' + n + ' cajita' + (n > 1 ? 's' : '') + ' de ' + salsa + (prot ? ' con ' + prot : '') + ' 🌶️\n¿Le pones algo más o así está bien?', [['➕ Agregar toppings', function () { abrirMenu(false); }], ['👌 Así está bien', async function () {
+    await bot('Perfecto. ¿A domicilio o pasas por él?', [['🛵 A domicilio', async function () { await bot('Pásame tu dirección y te digo el total con envío.'); }], ['🏪 Paso por él', async function () { await bot('¿A qué sucursal vas? Te lo tenemos listo en 15 min.'); }]]); }]]);
+  if (/hola|buen|que tal|qué tal|hey/.test(s)) return bienvenida();
+  return bot('Te ayudo con eso 🙌 ¿Quieres pedir o cotizar un evento?', INICIO);
+}
+async function bienvenida() { await bot('¡Hola! 👋 Bienvenido a Chilabike, si los pruebas repites 🌶️\n¿Qué se te antoja hoy?', INICIO); }
+var txt = document.getElementById('txt');
+document.getElementById('env').onclick = function () { var t = txt.value.trim(); if (t) { txt.value = ''; libre(t); } };
+txt.onkeydown = function (e) { if (e.key === 'Enter') document.getElementById('env').click(); };
+function reiniciar() {
+  gen++;
+  document.getElementById('pant').className = 'pant ' + canal; document.getElementById('nom').textContent = NOM[canal][0]; document.getElementById('sub').textContent = NOM[canal][1];
+  hilo.innerHTML = ''; rap.innerHTML = ''; document.getElementById('hoja').classList.remove('on');
+  setTimeout(function () { burbuja('yo', 'Hola'); bienvenida(); }, 300);
+}
+document.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () { document.querySelectorAll('[data-c]').forEach(function (x) { x.classList.toggle('on', x === b); }); canal = b.dataset.c; reiniciar(); }; });
+reiniciar();
+</script>
+</body>
+</html>

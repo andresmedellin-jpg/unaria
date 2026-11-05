@@ -12,7 +12,7 @@ let raiz, convs = [], msgs = [], anuncios = [], eventos = [];
 
 export async function render(view) {
   raiz = view; estilos();
-  document.getElementById('page-actions').innerHTML = '';
+  document.getElementById('page-actions').innerHTML = V.chat ? `<a class="btn btn-ghost" href="${esc(V.chat)}" target="_blank" rel="noopener">Probar el menú por chat</a>` : '';
   st.sel = paramHash('c') || st.sel;
   await cargar();
 }

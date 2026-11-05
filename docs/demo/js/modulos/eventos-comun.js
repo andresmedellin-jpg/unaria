@@ -3,7 +3,7 @@ import { db, esc, toast, abrirModal, cerrarModal, fmt } from '../lib.js';
 import { MARCA } from '../config.js';
 
 export const V = Object.assign({
-  negocio: 'el negocio', dueno: 'el dueño', pagina: '',
+  negocio: 'el negocio', dueno: 'el dueño', pagina: '', chat: '',
   sucursales: [], tipos: ['Cumpleaños', 'Boda o XV', 'Empresarial', 'Reunión', 'Otro'], paquetes: ['Básico', 'Completo'],
 }, MARCA.chilabike || MARCA.eventos || {});
 
