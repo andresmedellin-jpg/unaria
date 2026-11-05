@@ -202,8 +202,8 @@ function curvaDias(ds, por, max, prom) {
   return `<div class="vt-graf"><svg viewBox="0 -14 ${W} ${H + 24}" preserveAspectRatio="none" role="img" aria-label="Venta por día" style="overflow:visible">
     <defs><linearGradient id="vt-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary)" stop-opacity=".5"/><stop offset="1" stop-color="var(--primary)" stop-opacity="0"/></linearGradient></defs>
     <path d="${d} L${W} ${H} L0 ${H} Z" fill="url(#vt-area)"/>
-    <line x1="0" x2="${W}" y1="${Y(prom)}" y2="${Y(prom)}" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 6" vector-effect="non-scaling-stroke"/>
-    <path d="${d}" fill="none" stroke="color-mix(in srgb, var(--primary) 70%, white)" stroke-width="2.5" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 8px var(--primary))"/>
+    <line x1="0" x2="${W}" y1="${Y(prom)}" y2="${Y(prom)}" stroke="rgb(var(--k, 0 0 0) / .35)" stroke-dasharray="4 6" vector-effect="non-scaling-stroke"/>
+    <path d="${d}" fill="none" stroke="color-mix(in srgb, var(--primary) 80%, var(--text))" stroke-width="2.5" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 8px var(--primary))"/>
     ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="9" fill="transparent"><title>${fechaC(ds[i])}: ${dinero(por.get(ds[i]) || 0)}</title></circle>`).join('')}
   </svg><span class="vt-mejor" style="left:${(X(mejor) / W) * 100}%;top:${((P[mejor][1] + 14) / (H + 24) * 200).toFixed(1)}px"><i></i>${fechaC(ds[mejor])} · ${dinero(por.get(ds[mejor]) || 0)}</span>
   <div class="vt-ejes">${marcas.map(({ x, i }) => `<span style="left:${(X(i) / W) * 100}%">${fechaC(x)}</span>`).join('')}</div>

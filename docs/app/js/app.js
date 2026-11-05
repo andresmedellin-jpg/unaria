@@ -39,6 +39,10 @@ const vistas = {
   // Tema propio de un cliente (MARCA.tema, p. ej. 'mando' para Grupo A.M): su hoja de estilos y su script, encima de la base
   if (MARCA.tema) {
     document.body.classList.add('tema-' + MARCA.tema);
+    // Versión clara u oscura del tema: ?modo=claro|oscuro (se recuerda en este navegador) o el botón de arriba
+    let modo = new URLSearchParams(location.search).get('modo');
+    try { if (modo) localStorage.setItem('tema-modo', modo); else modo = localStorage.getItem('tema-modo'); } catch (e) { /* sin almacenamiento */ }
+    if (modo === 'claro') document.body.classList.add('claro');
     const v = (document.querySelector('link[href*="css/app.css"]')?.getAttribute('href').match(/\?v=[\w-]+/) || [''])[0];
     const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `css/tema-${MARCA.tema}.css${v}`; document.head.appendChild(l);
   }

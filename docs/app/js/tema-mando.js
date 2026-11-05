@@ -43,7 +43,12 @@ export function iniciar() {
     const v = document.createElement('span'); v.className = 'vivo'; v.innerHTML = '<i></i>EN VIVO<span class="vivo-hora"></span>';
     const k = document.createElement('button'); k.type = 'button'; k.className = 'buscar-k'; k.innerHTML = `${GLIFOS.buscar.replace('<svg', '<svg width="15" height="15"')}<span>Buscar o ir a…</span><kbd>⌘K</kbd>`;
     k.addEventListener('click', abrirBuscador);
-    top.insertBefore(v, acc); top.insertBefore(k, acc);
+    const sol = g('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>'), luna = g('<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>');
+    const md = document.createElement('button'); md.type = 'button'; md.className = 'modo-btn';
+    const pinta = () => { const c = document.body.classList.contains('claro'); md.innerHTML = c ? luna : sol; md.title = c ? 'Versión oscura' : 'Versión clara'; md.setAttribute('aria-label', md.title); };
+    md.addEventListener('click', () => { const c = document.body.classList.toggle('claro'); try { localStorage.setItem('tema-modo', c ? 'claro' : 'oscuro'); } catch (e) { /* sin almacenamiento */ } pinta(); });
+    pinta();
+    top.insertBefore(v, acc); top.insertBefore(k, acc); top.insertBefore(md, acc);
     const hora = () => { v.querySelector('.vivo-hora').textContent = ' · ' + new Date().toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }); };
     hora(); clearInterval(reloj); reloj = setInterval(hora, 15000);
   }

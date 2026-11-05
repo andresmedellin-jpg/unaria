@@ -11,7 +11,8 @@
   window.__MARCA = {
     demo: true, contacto: 'Monterrey, N.L.', asistente: false,
     nombre: 'Grupo A.M', marca: ['Grupo A.M'], logos: [],
-    color: COLOR, color2: '#A8430A', colorSuave: '#FDEBDD',
+    // Color del grupo (fuera de un negocio): dorado sobrio con azul marino en el riel
+    color: '#A8874B', color2: '#86693A', colorSuave: '#F3EEE4',
     // Un solo sistema para todos sus negocios: cada uno es una opción del menú y adentro vive su mundo
     // Tema propio: centro de mando oscuro (css/tema-mando.css + js/tema-mando.js); el inicio es el Centro de mando
     tema: 'mando',
