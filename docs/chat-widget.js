@@ -5,7 +5,7 @@
      data-saludo="Hola. ¿Qué es lo que más tiempo le quita a tu negocio?"
      data-opciones="Capturo lo mismo en varios lados|No sé cuánto vendo|Todo en Excel y WhatsApp"
      data-color="#BF4D17" data-logo="https://cliente.com/logo.png" data-aviso="https://unaria.mx/aviso-de-privacidad"
-     data-whatsapp="8112345678" data-agenda="https://..." data-correo="hola@unaria.mx"
+     data-whatsapp="8112345678" data-agenda="https://..." data-correo="angelgalvan@unaria.mx"
      data-contenedor="#lugar"   (opcional: además de la burbuja, se muestra dentro de ese elemento)
      data-flotante="no"         (opcional: sin burbuja)></script>
    Colores: la página puede definir --uc-acento, --uc-fondo, --uc-superficie, --uc-texto, --uc-gris, --uc-linea,

@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
   let saludo = '';
   while (mensajes.length && mensajes[0].role !== 'user') saludo += (saludo ? '\n' : '') + mensajes.shift()!.content;
   if (!mensajes.length || mensajes[mensajes.length - 1].role !== 'user') return json({ error: 'Falta el mensaje' }, 400, h);
-  if (total > LIM.total) return json({ texto: 'La plática ya va muy larga. Para seguir, agenda una llamada de 30 minutos o escríbenos a hola@unaria.mx y con gusto te atendemos.', opciones: [], completo: false }, 200, h);
+  if (total > LIM.total) return json({ texto: 'La plática ya va muy larga. Para seguir, agenda una llamada de 30 minutos o escríbenos a angelgalvan@unaria.mx y con gusto te atendemos.', opciones: [], completo: false }, 200, h);
 
   const herramientas: any[] = [{
     name: 'registrar_datos',
