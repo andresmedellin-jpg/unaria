@@ -25,6 +25,9 @@ const vistas = {
   bandeja: () => import('./modulos/bandeja.js'),
   eventos: () => import('./modulos/eventos.js'),
   anuncios: () => import('./modulos/anuncios.js'),
+  ventas: () => import('./modulos/ventas.js'),
+  resumen: () => import('./modulos/resumen.js'),
+  preparacion: () => import('./modulos/preparacion.js'),
 };
 
 // ================= MARCA =================
@@ -223,8 +226,8 @@ function entradasMenu() {
     const subs = e.id ? de([e.id]) : de(e.modulos || []);
     if (!subs.length) return null;
     const unico = subs.length === 1 && !e.siempreGrupo;
-    return { clave: e.id || 'g' + i, titulo: unico && !e.id ? subs[0].titulo : (e.titulo || subs[0].titulo), corto: e.corto,
-      icono: e.icono ? (mios.find((m) => m.id === e.icono)?.icono || subs[0].icono) : subs[0].icono, subs, abajo: !!e.abajo };
+    return { clave: e.id || 'g' + i, titulo: unico && !e.id ? subs[0].titulo : (e.titulo || subs[0].titulo), corto: e.corto, negocio: !!e.negocio,
+      icono: e.iconoHtml || (e.icono ? (mios.find((m) => m.id === e.icono)?.icono || subs[0].icono) : subs[0].icono), subs, abajo: !!e.abajo };
   };
   const lista = MARCA.menu.map(armar).filter(Boolean);
   const aj = armar({ titulo: 'Configuración', modulos: MARCA.ajustes || [], siempreGrupo: true }, 'aj');
@@ -302,9 +305,18 @@ async function navegar() {
   document.querySelectorAll('#nav a, #nav-abajo a, #barra-movil a').forEach((a) => a.classList.toggle('active', enMenu(a)));
   $('sidebar').classList.remove('open');
   // En el menú corto, los módulos de un mismo grupo se muestran como pestañas arriba de la pantalla
-  const grupo = MARCA.menu ? entradas.find((e) => e.subs.length > 1 && e.subs.some((m) => m.id === mod.id)) : null;
-  $('page-title').textContent = grupo ? grupo.titulo : mod.titulo;
+  const entrada = MARCA.menu ? entradas.find((e) => e.subs.some((m) => m.id === mod.id)) : null;
+  const grupo = entrada && entrada.subs.length > 1 ? entrada : null;
+  // En un negocio (MARCA.negocios) el título es el negocio; sus módulos, las pestañas
+  $('page-title').textContent = entrada?.negocio || grupo ? entrada.titulo : mod.titulo;
   $('page-actions').innerHTML = '';
+  document.getElementById('modal-root').innerHTML = '';   // una ventana abierta no se queda al cambiar de pantalla
+  // Cada negocio con su color (MARCA.negocios[].color); fuera de un negocio, el de la marca
+  {
+    const r = document.documentElement.style, c = mod.negocio?.color || MARCA.color;
+    if (c) { r.setProperty('--primary', c); r.setProperty('--primary-2', mod.negocio?.color ? `color-mix(in srgb, ${c} 82%, black)` : (MARCA.color2 || c));
+      r.setProperty('--primary-soft', mod.negocio?.color ? `color-mix(in srgb, ${c} 12%, white)` : (MARCA.colorSuave || '')); }
+  }
   // Cada vez que se abre un módulo se le da una caja nueva. Si una carga anterior sigue en camino
   // (doble clic, cambio rápido de pantalla, sesión que se renueva), termina en su caja vieja y no estorba.
   const mio = ++turno;

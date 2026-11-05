@@ -1,4 +1,6 @@
-// Datos de ejemplo del demo de Chilabike (unaria.mx/demo/?demo=chilabike). Todo es inventado y se acomoda a la fecha de hoy.
+// Datos de ejemplo del demo de los negocios de Javi (unaria.mx/demo/?demo=chilabike): Chilabike, Curandero (Loyverse, en
+// js/demo/datos-loyverse.js), Lattico (sin Loyverse todavía) y Casa María (en preparación).
+// Chilabike: Todo es inventado y se acomoda a la fecha de hoy.
 // Fase 1: los mensajes de WhatsApp, Instagram y Facebook caen en una sola bandeja; los anuncios de Meta llevan directo
 // a un mensaje y cada conversación trae de qué anuncio vino; las solicitudes de evento se vuelven fichas en el calendario.
 // Lo que alguien manda en la página de eventos del demo (unaria.mx/demo/chilabike/) se guarda en este navegador
@@ -8,10 +10,22 @@
   const COLOR = '#C9500C';
   window.__MARCA = {
     demo: true, contacto: 'Monterrey, N.L.', asistente: false,
-    nombre: 'Chilabike · Eventos y mensajes', marca: ['Chilabike'], logos: [],
+    nombre: 'Negocios de Javi', marca: ['Negocios de Javi'], logos: [],
     color: COLOR, color2: '#A8430A', colorSuave: '#FDEBDD',
-    modulos: ['bandeja', 'eventos', 'anuncios', 'usuarios'],
-    menu: [{ id: 'bandeja', corto: 'Mensajes' }, { id: 'eventos' }, { id: 'anuncios' }],
+    // Un solo sistema para todos sus negocios: cada uno es una opción del menú y adentro vive su mundo
+    menuGeneral: [{ id: 'resumen' }],
+    negocios: [
+      { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', color: '#C9500C', empresa_id: 'emp-chb',
+        modulos: ['bandeja', 'eventos', 'anuncios'], titulos: { bandeja: 'Mensajes' } },
+      { id: 'curandero', nombre: 'Curandero', giro: 'Café · Mitras', inicial: 'Cu', color: '#2F5D50', empresa_id: 'emp-cur', modulos: ['ventas'] },
+      { id: 'lattico', nombre: 'Lattico', giro: 'Por conectar', inicial: 'La', color: '#6B4FA0', empresa_id: 'emp-lat', modulos: ['ventas'],
+        notaLoyverse: 'Lattico todavía no tiene Loyverse. En cuanto lo contrate, aquí se conecta con su propio token y sus ventas quedan separadas de las de Curandero.' },
+      { id: 'casamaria', nombre: 'Casa María', giro: 'Rentas', inicial: 'CM', color: '#8A6D1F', empresa_id: 'emp-cm', modulos: ['preparacion'],
+        titulos: { preparacion: 'Rentas y plano' }, pendiente: 'Falta el plano y la lista de rentas',
+        preparacion: { titulo: 'Casa María: rentas y plano', texto: 'Aquí va a vivir todo lo de la casa: el plano final y la administración de sus rentas.',
+          va: ['El plano de la casa con cada espacio que se renta', 'Inquilinos, contratos y fechas de vencimiento', 'Cobro de la renta de cada mes: quién pagó, quién debe y recibos', 'Gastos de la casa y lo que deja cada mes'],
+          falta: ['El plano final (PDF o foto)', 'La lista de lo que se renta: espacio, inquilino, renta, día de pago y depósito'] } },
+    ],
     ajustes: ['usuarios'],
     chilabike: {
       negocio: 'Chilabike', dueno: 'Javi', pagina: './chilabike/',
@@ -149,12 +163,16 @@
       { org_id: ORG, user_id: 'demo-u1', nombre: 'Jimmy', usuario: 'jimmy', rol: 'administracion', roles: [], empresas: null, activo: true, debe_cambiar_password: false, creado_en: '2026-11-03T12:00:00Z', ultimo_acceso: hace(180) },
     ];
     const E1 = { id: 'emp-chb', org_id: ORG, nombre: 'Chilabike', nombre_corto: 'Chilabike', color: COLOR, activo: true };
+    const empresas = [E1, { id: 'emp-cur', org_id: ORG, nombre: 'Curandero', nombre_corto: 'Curandero', color: '#2F5D50', activo: true },
+      { id: 'emp-lat', org_id: ORG, nombre: 'Lattico', nombre_corto: 'Lattico', color: '#6B4FA0', activo: true },
+      { id: 'emp-cm', org_id: ORG, nombre: 'Casa María', nombre_corto: 'Casa María', color: '#8A6D1F', activo: true }];
+    const lv = window.__DEMO_LOYVERSE ? window.__DEMO_LOYVERSE(ORG) : {};
     const centros = window.__MARCA.chilabike.sucursales.map((s, k) => ({ id: 'suc-' + k, org_id: ORG, empresa_id: E1.id, nombre: s, tipo: 'sucursal', activo: true, en_gastos: true }));
     const paquetes = [
       { id: 'paq-1', nombre: 'Desayuno de oficina', precio_persona: null, minimo: null, incluye: 'Cajita de 450 g (verdes, rojos o mixtos) con proteína y bebida, factura' },
       { id: 'paq-2', nombre: 'Fiesta', precio_persona: null, minimo: null, incluye: 'Estación con chilaqueros, las 3 salsas, proteínas y barra de toppings' },
       { id: 'paq-3', nombre: 'Tornafiesta', precio_persona: null, minimo: null, incluye: 'Cajitas a media noche, salsas aparte' },
     ];
-    return { organizaciones: [{ id: ORG, nombre: 'Chilabike', plan: 'demo' }], miembros, empresas: [E1], centros, anuncios, conversaciones, mensajes, eventos, paquetes };
+    return { organizaciones: [{ id: ORG, nombre: 'Negocios de Javi', plan: 'demo' }], miembros, empresas, centros, anuncios, conversaciones, mensajes, eventos, paquetes, ...lv };
   };
 })();

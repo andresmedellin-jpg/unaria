@@ -39,7 +39,9 @@ export const hace = (iso) => {
   if (m < 1) return 'ahora'; if (m < 60) return `hace ${m} min`; const h = Math.round(m / 60); if (h < 24) return `hace ${h} h`;
   const d = Math.round(h / 24); return d === 1 ? 'ayer' : `hace ${d} días`;
 };
-export const ir = (id, q = '') => `${location.pathname}${location.search}#/${id}${q ? '?' + q : ''}`;
+// Liga a otro módulo del mismo negocio (con MARCA.negocios los ids llevan el negocio: chilabike-eventos)
+const prefijo = () => (location.hash.match(/^#\/([a-z0-9]+-)(?:bandeja|eventos|anuncios)\b/) || [])[1] || '';
+export const ir = (id, q = '') => `${location.pathname}${location.search}#/${prefijo()}${id}${q ? '?' + q : ''}`;
 export const paramHash = (k) => new URLSearchParams(location.hash.split('?')[1] || '').get(k);
 
 // ---------- ficha del evento (nuevo, desde una conversación o para editar) ----------

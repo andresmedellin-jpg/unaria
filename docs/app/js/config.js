@@ -41,6 +41,8 @@ const ICONOS = {
   prospectos: svg('<path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/>'),
   bandeja:    svg('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/>'),
   eventos:    svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3v3H8z"/>'),
+  ventas:     svg('<path d="M4 4h2l2.4 10.2a1.5 1.5 0 0 0 1.5 1.1h7.6a1.5 1.5 0 0 0 1.5-1.2L20.5 8H7"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/>'),
+  resumen:    svg('<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>'),
   anuncios:   svg('<path d="M3 11v3a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'),
 };
 
@@ -100,6 +102,11 @@ export const MODULOS = [
   { id: 'bandeja',    grupo: 'Ventas',    titulo: 'Mensajes',         icono: ICONOS.bandeja,    roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'eventos',    grupo: 'Ventas',    titulo: 'Eventos',          icono: ICONOS.eventos,    roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'anuncios',   grupo: 'Ventas',    titulo: 'Anuncios',         icono: ICONOS.anuncios,   roles: ['dueno','administracion'], listo: true, opcional: true },
+  // Ventas del punto de venta (Loyverse), por negocio
+  { id: 'ventas',     grupo: 'Ventas',    titulo: 'Ventas',           icono: ICONOS.ventas,     roles: ['dueno','administracion'], listo: true, opcional: true },
+  // Varios negocios de un mismo dueño: resumen de todos y pantalla de "en preparación" para un negocio que apenas arranca
+  { id: 'resumen',    grupo: 'General',   titulo: 'Resumen',          icono: ICONOS.resumen,    roles: ['dueno','administracion'], listo: true, opcional: true },
+  { id: 'preparacion', grupo: 'General',  titulo: 'En preparación',   icono: ICONOS.obras,      roles: ['dueno','administracion'], listo: true, opcional: true },
   { id: 'cotizaciones', grupo: 'Ventas',  titulo: 'Cotizaciones',     icono: ICONOS.cotizaciones, roles: ['dueno','administracion','cobranza'], listo: true, opcional: true },
   { id: 'inventario', grupo: 'Ventas',    titulo: 'Inventario',       icono: ICONOS.inventario, roles: ['dueno','administracion','operacion'], listo: true, opcional: true },
   { id: 'patrimonio', grupo: 'Finanzas',  titulo: 'Patrimonio',       icono: ICONOS.patrimonio, roles: ['dueno','socio'], listo: true },
@@ -181,6 +188,24 @@ export const CATEGORIA_AYUDA = MARCA.ayuda || {
 };
 export const FORMAS_PAGO = ['Transferencia','Efectivo','Tarjeta','Cheque','Otro'];
 export const FORMAS_COBRO = ['Transferencia','Efectivo','Depósito','Tarjeta','Otro'];
+// Varios negocios de un mismo dueño (p. ej. Javi: Chilabike, Curandero, Lattico, Casa María). Con MARCA.negocios =
+// [{ id, nombre, empresa_id, color, inicial, modulos: ['ventas', …], titulos: { ventas: '…' } }], cada negocio es UNA opción
+// del menú y sus módulos son las pestañas de adentro. El mismo módulo (p. ej. Ventas) se repite por negocio y recibe su
+// negocio en mod.negocio. Arriba va MARCA.menuGeneral (p. ej. Resumen) y abajo, Configuración (MARCA.ajustes).
+if (MARCA.negocios) {
+  const ids = [];
+  MARCA.negocios.forEach((n) => (n.modulos || []).forEach((mid) => {
+    const b = MODULOS.find((m) => m.id === mid);
+    if (!b) return;
+    const id = `${n.id}-${mid}`;
+    MODULOS.push({ ...b, id, grupo: n.nombre, titulo: (n.titulos || {})[mid] || b.titulo, vista: b.vista || mid, negocio: n, opcional: true });
+    ids.push(id);
+  }));
+  const insignia = (n) => `<span class="neg-ico" style="background:${n.color || 'var(--primary)'}">${n.inicial || n.nombre.charAt(0)}</span>`;
+  MARCA.modulos = [...(MARCA.menuGeneral || []).map((e) => e.id), ...ids, ...(MARCA.ajustes || [])];
+  MARCA.menu = [...(MARCA.menuGeneral || []),
+    ...MARCA.negocios.map((n) => ({ titulo: n.nombre, modulos: (n.modulos || []).map((m) => `${n.id}-${m}`), iconoHtml: insignia(n), siempreGrupo: true, negocio: true }))];
+}
 // Módulos que se ven en esta instalación (los "opcional" solo si la marca los pide) y con su título de la marca
 MODULOS.forEach((m) => { if (MARCA.titulos[m.id]) m.titulo = MARCA.titulos[m.id]; });
 export const MODULOS_ACTIVOS = MODULOS.filter((m) => (MARCA.modulos ? MARCA.modulos.includes(m.id) : !m.opcional));
