@@ -165,7 +165,8 @@ function destino(p, D) {
 function origen(p, D) {
   if (p.sucursal && D.ubic[p.sucursal]?.lat) return [D.ubic[p.sucursal].lat, D.ubic[p.sucursal].lng];
   const [la, ln] = destino(p, D); let mejor = null, dm = 1e9;
-  Object.entries(D.ubic).forEach(([k, u]) => { if (!u.lat) return; const d = (u.lat - la) ** 2 + (u.lng - ln) ** 2; if (d < dm) { dm = d; mejor = u; } });
+  const hoyDia = new Date().getDay();  // sale de la sucursal más cercana que abre hoy (San Pedro de Pinta, solo domingos)
+  Object.entries(D.ubic).forEach(([k, u]) => { if (!u.lat || (u.dias && !u.dias.includes(hoyDia))) return; const d = (u.lat - la) ** 2 + (u.lng - ln) ** 2; if (d < dm) { dm = d; mejor = u; } });
   return mejor ? [mejor.lat, mejor.lng] : [la + 0.01, ln - 0.01];
 }
 function radar(D) {
@@ -180,9 +181,11 @@ function radar(D) {
     const [x, y] = proy(u.lat, u.lng, W, H), activos = D.pedidos.filter((p) => p.sucursal === k && ['nuevo', 'cocina'].includes(p.estado)).length;
     return `<g class="mk-suc" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><rect x="-5" y="-5" width="10" height="10" rx="2.5" fill="${c}" transform="rotate(45)"/>${activos ? `<circle r="9" class="mk-ping" stroke="${c}"/>` : ''}<text x="10" y="4" class="mk-suc-t">${esc(k)}${u.dias ? ' · dom' : ''}</text></g>`;
   }).join('');
-  // Curandero (o cualquier negocio con sucursal propia) en Mitras, junto a Chilabike
+  // Curandero: Mitras (junto a Chilabike, Celaya 3133) y Tec (recién abierta, junto a la sucursal Tec)
   const cur = NEG().find((n) => n.id === 'curandero');
-  const curP = cur && D.ubic.Mitras?.lat ? proy(D.ubic.Mitras.lat - 0.0035, D.ubic.Mitras.lng + 0.004, W, H) : null;
+  const curL = cur ? [['Curandero', D.ubic.Mitras, -0.0035, 0.004], ['Curandero Tec', D.ubic.Tec, -0.0035, 0.004]]
+    .filter(([, u]) => u?.lat).map(([t, u, dla, dln]) => [t, proy(u.lat + dla, u.lng + dln, W, H)]) : [];
+  const curP = curL.length ? curL : null;
   const camino = D.pedidos.filter((p) => p.estado === 'camino').map((p, i) => {
     const [ola, oln] = origen(p, D), [dla, dln] = destino(p, D);
     const [x1, y1] = proy(ola, oln, W, H), [x2, y2] = proy(dla, dln, W, H);
@@ -201,7 +204,7 @@ function radar(D) {
     <path d="M${cerro[0] - 26} ${cerro[1] + 10} L${cerro[0] - 10} ${cerro[1] - 12} L${cerro[0]} ${cerro[1] - 2} L${cerro[0] + 10} ${cerro[1] - 16} L${cerro[0] + 28} ${cerro[1] + 10}" class="mk-cerro"/><text x="${cerro[0]}" y="${cerro[1] + 24}" class="mk-eje" text-anchor="middle">Cerro de la Silla</text>
     <g class="mk-giro" style="transform-origin:${cx}px ${cy}px"><path d="M${cx} ${cy} L${cx + 12.5 * kmPx} ${cy} A${12.5 * kmPx} ${12.5 * kmPx} 0 0 0 ${cx + 12.5 * kmPx * Math.cos(-0.7)} ${cy + 12.5 * kmPx * Math.sin(-0.7)} Z" fill="url(#mk-cono)"/></g>
     ${camino}${nuevos}${sucs}
-    ${curP ? `<g transform="translate(${curP[0].toFixed(1)} ${curP[1].toFixed(1)})"><circle r="6" fill="${cur.color}" stroke="var(--halo, #0B0C0F)" stroke-width="2"/><text x="10" y="14" class="mk-suc-t" fill="var(--text-2)">Curandero</text></g>` : ''}
+    ${curL.map(([t, [x, y]]) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="6" fill="${cur.color}" stroke="var(--halo, #0B0C0F)" stroke-width="2"/><text x="10" y="14" class="mk-suc-t" fill="var(--text-2)">${t}</text></g>`).join('')}
     <circle cx="${cx}" cy="${cy}" r="2.5" fill="var(--tinta-svg, #fff)" opacity=".6"/>
   </svg>
   <div class="mk-radar-ley"><span><i class="r" style="background:${c}"></i>Sucursal Chilabike</span><span><i class="m"></i>Pedido en camino</span><span><i class="n" style="border-color:${c}"></i>Pedido nuevo</span>${curP ? `<span><i class="c" style="background:${cur.color}"></i>Curandero</span>` : ''}</div></div>`;

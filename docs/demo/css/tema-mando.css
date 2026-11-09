@@ -297,3 +297,9 @@ body.tema-mando::after { content: ""; position: fixed; inset: 0; pointer-events:
 .tema-mando:not(.claro) .mn-paso { background: var(--vidrio); border-color: var(--border); border-radius: 18px; }
 .tema-mando:not(.claro) .mn-n { box-shadow: 0 0 14px -2px var(--primary); }
 @media (max-width: 760px) { .tema-mando:not(.claro) .top-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 44vw; } .tema-mando:not(.claro) .top-tit { min-width: 0; } .tema-mando:not(.claro) .topbar h1 { min-width: 0; } }
+/* GA-04: en pantallas medianas el encabezado se acomoda en dos renglones en lugar de salirse de la pantalla */
+@media (min-width: 761px) and (max-width: 1180px) {
+  .tema-mando .topbar { flex-wrap: wrap; row-gap: 10px; }
+  .tema-mando .topbar-actions { flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+  .tema-mando .topbar-actions .btn { white-space: nowrap; }
+}

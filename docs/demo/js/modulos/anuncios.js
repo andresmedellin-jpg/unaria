@@ -16,7 +16,7 @@ export async function render(view) {
     const sol = evs.filter((x) => x.anuncio_id === ad.id);
     // contactos: conversaciones del anuncio + solicitudes que llegaron sin conversación (formulario)
     const contactos = conv + sol.filter((x) => !x.conversacion_id).length;
-    const cotizados = sol.filter((x) => x.estado !== 'solicitud' && x.estado !== 'cancelado').length;
+    const cotizados = sol.filter((x) => x.estado !== 'solicitud' && x.estado !== 'cancelado').length + Number(ad.previas_cotizados || 0);   // + a quienes ya se les mandó precio antes
     const vend = sol.filter((x) => VENDIDOS.includes(x.estado));
     const vendido = vend.reduce((s, x) => s + Number(x.monto || 0), 0);
     return { ad, contactos, cotizados, apartados: vend.length, vendido };

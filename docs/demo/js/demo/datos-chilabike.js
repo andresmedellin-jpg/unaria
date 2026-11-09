@@ -61,10 +61,10 @@
 
     // ---------- anuncios (Meta lleva directo al mensaje; Google, a la página) ----------
     const anuncios = [
-      { id: 'ad-bodas', nombre: 'Bodas y XV · tornafiesta', plataforma: 'Instagram', destino: 'WhatsApp', inicio: dia(-21), inversion: 14500, previas: 41, activo: true },
-      { id: 'ad-posadas', nombre: 'Posadas de empresa', plataforma: 'Facebook', destino: 'Messenger', inicio: dia(-12), inversion: 9800, previas: 19, activo: true },
-      { id: 'ad-cumple', nombre: 'Tu cumple con Chilabike', plataforma: 'Instagram', destino: 'Mensaje de Instagram', inicio: dia(-30), inversion: 7200, previas: 52, activo: true },
-      { id: 'ad-google', nombre: 'Google · eventos Monterrey', plataforma: 'Google', destino: 'Página de eventos', inicio: dia(-18), inversion: 6500, previas: 14, activo: true },
+      { id: 'ad-bodas', nombre: 'Bodas y XV · tornafiesta', plataforma: 'Instagram', destino: 'WhatsApp', inicio: dia(-21), inversion: 16800, previas: 180, previas_cotizados: 58, activo: true },
+      { id: 'ad-posadas', nombre: 'Posadas de empresa', plataforma: 'Facebook', destino: 'Messenger', inicio: dia(-12), inversion: 9800, previas: 70, previas_cotizados: 26, activo: true },
+      { id: 'ad-cumple', nombre: 'Tu cumple con Chilabike', plataforma: 'Instagram', destino: 'Mensaje de Instagram', inicio: dia(-30), inversion: 7200, previas: 120, previas_cotizados: 38, activo: true },
+      { id: 'ad-google', nombre: 'Google · eventos Monterrey', plataforma: 'Google', destino: 'Página de eventos', inicio: dia(-18), inversion: 6500, previas: 35, previas_cotizados: 11, activo: true },
     ];
 
     // ---------- conversaciones (en el tono de Chilabike) ----------
@@ -140,34 +140,34 @@
       if (e.traslado == null && e.monto != null) e.traslado = /saltillo|montemorelos/i.test(e.direccion) ? 3000 : /santiago|allende|carretera/i.test(e.direccion) ? 900 : /fundidora|centro/i.test(e.direccion) ? 500 : 650;
       if (e.monto != null && COT.precioPersona) { const pagado = e.anticipo && e.anticipo >= e.monto; e.monto = e.personas * COT.precioPersona + (e.traslado || 0); e.anticipo = pagado ? e.monto : e.anticipo ? e.monto * (COT.anticipo || 50) / 100 : 0; }
       eventos.push(e); return e; };
-    const evCarlos = E({ tipo: 'Desayuno de oficina', fecha: fPosada, hora: '09:00', personas: 120, direccion: 'Oficinas Grupo Industrial Norte, Valle Oriente', paquete: 'Desayuno de oficina', estado: 'cotizado',
-      contacto: 'Carlos Medina · Grupo Industrial Norte', telefono: null, sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', conversacion_id: cCarlos.id, monto: 38400, notas: 'Requiere factura. Cotización enviada por correo.', hace_dias: 1 });
+    const evCarlos = E({ tipo: 'Desayuno de oficina', fecha: fPosada, hora: '09:00', personas: 120, direccion: 'Oficinas Grupo Industrial Norte, Valle Oriente', paquete: 'En la mañana', estado: 'cotizado',
+      contacto: 'Carlos Medina · Grupo Industrial Norte', telefono: null, sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', conversacion_id: cCarlos.id, monto: 13850, notas: 'Requiere factura. Cotización enviada por correo.', hace_dias: 1 });
     cCarlos.evento_id = evCarlos.id;
-    const evAna = E({ tipo: 'Boda o XV', fecha: fBodaAna, hora: '00:30', personas: 250, direccion: 'Hacienda San Miguel, Allende', paquete: 'Fiesta', estado: 'apartado',
-      contacto: 'Ana Lucía Cantú', telefono: '8112098854', sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', conversacion_id: cAna.id, monto: 72500, anticipo: 21750, notas: 'Anticipo recibido por transferencia.', hace_dias: 2 });
+    const evAna = E({ tipo: 'Boda o XV', fecha: fBodaAna, hora: '00:30', personas: 250, direccion: 'Hacienda San Miguel, Allende', paquete: 'Madrugada', estado: 'apartado',
+      contacto: 'Ana Lucía Cantú', telefono: '8112098854', sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', conversacion_id: cAna.id, monto: 28400, anticipo: 14200, notas: 'Anticipo recibido por transferencia.', hace_dias: 2 });
     cAna.evento_id = evAna.id;
-    E({ tipo: 'Cumpleaños', fecha: finde(3), hora: '20:00', personas: 35, direccion: 'Col. Contry, Monterrey', paquete: 'Fiesta', estado: 'confirmado', contacto: 'Luis Fernando Ríos', telefono: '8119907321',
-      sucursal: 'Centro', canal: 'Instagram', anuncio_id: 'ad-cumple', monto: 9100, anticipo: 9100, notas: 'Pagado completo.', hace_dias: 12 });
-    E({ tipo: 'Boda o XV', fecha: finde(10), hora: '01:00', personas: 300, direccion: 'Salón Arboleda, Carretera Nacional', paquete: 'Tornafiesta', estado: 'confirmado', contacto: 'Familia Elizondo', telefono: '8180012765',
-      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', monto: 87000, anticipo: 26100, notas: 'XV años de Regina. Llegar 30 min antes para montaje.', hace_dias: 18 });
-    E({ tipo: 'Desayuno de oficina', fecha: dia(6), hora: '08:30', personas: 80, direccion: 'Torre Avalanz, San Pedro', paquete: 'Desayuno de oficina', estado: 'apartado', contacto: 'Daniela Soto · Avalanz', telefono: '8112340099',
-      sucursal: 'San Pedro de Pinta', canal: 'Facebook', anuncio_id: 'ad-posadas', monto: 25600, anticipo: 7680, notas: 'Desayuno de cierre de trimestre.', hace_dias: 6 });
-    E({ tipo: 'Reunión', fecha: finde(17, true), hora: '12:00', personas: 25, direccion: 'Col. Mitras Centro', paquete: 'Fiesta', estado: 'apartado', contacto: 'Jorge Villarreal', telefono: '8127763410',
-      sucursal: 'Mitras', canal: 'Página', anuncio_id: 'ad-google', monto: 6500, anticipo: 1950, notas: 'Llegó del formulario de la página (anuncio de Google).', hace_dias: 2 });
-    E({ tipo: 'Cumpleaños', fecha: finde(24), hora: '18:00', personas: 50, direccion: 'Jardín de eventos, Cumbres', paquete: 'Fiesta', estado: 'solicitud', contacto: 'Karla Méndez', telefono: '8115582201',
+    E({ tipo: 'Cumpleaños', fecha: finde(3), hora: '20:00', personas: 65, direccion: 'Col. Contry, Monterrey', paquete: 'Después de las 8:00 pm', estado: 'confirmado', contacto: 'Luis Fernando Ríos', telefono: '8119907321',
+      sucursal: 'Centro', canal: 'Instagram', anuncio_id: 'ad-cumple', monto: 7800, anticipo: 7800, notas: 'Pagado completo.', hace_dias: 12 });
+    E({ tipo: 'Boda o XV', fecha: finde(10), hora: '01:00', personas: 300, direccion: 'Salón Arboleda, Carretera Nacional', paquete: 'Madrugada', estado: 'confirmado', contacto: 'Familia Elizondo', telefono: '8180012765',
+      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', monto: 33900, anticipo: 16950, notas: 'XV años de Regina. Llegar 30 min antes para montaje.', hace_dias: 18 });
+    E({ tipo: 'Desayuno de oficina', fecha: dia(6), hora: '08:30', personas: 80, direccion: 'Torre Avalanz, San Pedro', paquete: 'En la mañana', estado: 'apartado', contacto: 'Daniela Soto · Avalanz', telefono: '8112340099',
+      sucursal: 'San Pedro de Pinta', canal: 'Facebook', anuncio_id: 'ad-posadas', monto: 9450, anticipo: 4725, notas: 'Desayuno de cierre de trimestre.', hace_dias: 6 });
+    E({ tipo: 'Reunión', fecha: finde(17, true), hora: '12:00', personas: 35, direccion: 'Col. Mitras Centro', paquete: 'En la mañana', estado: 'apartado', contacto: 'Jorge Villarreal', telefono: '8127763410',
+      sucursal: 'Mitras', canal: 'Página', anuncio_id: 'ad-google', monto: 4350, anticipo: 2175, notas: 'Llegó del formulario de la página (anuncio de Google).', hace_dias: 2 });
+    E({ tipo: 'Cumpleaños', fecha: finde(24), hora: '18:00', personas: 50, direccion: 'Jardín de eventos, Cumbres', paquete: 'Después de las 2:00 pm', estado: 'solicitud', contacto: 'Karla Méndez', telefono: '8115582201',
       sucursal: 'Cumbres', canal: 'Página', anuncio_id: 'ad-google', notas: 'Llegó del formulario de la página.', hace_dias: 0.2 });
     E({ tipo: 'Festival', fecha: finde(31), hora: '14:00', personas: 1000, direccion: 'Parque Fundidora', paquete: null, estado: 'cotizado', contacto: 'Producción Futur Festival', telefono: null,
-      sucursal: 'Centro', canal: 'Instagram', anuncio_id: null, monto: 120000, notas: 'Stand con 3 estaciones. Revisar permiso del parque.', hace_dias: 4 });
-    E({ tipo: 'Desayuno de oficina', fecha: dia(-5), hora: '09:00', personas: 60, direccion: 'Oficinas Cemex, San Pedro', paquete: 'Desayuno de oficina', estado: 'realizado', contacto: 'Mónica Garza', telefono: '8110043321',
-      sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', monto: 19200, anticipo: 19200, hace_dias: 20 });
-    E({ tipo: 'Cumpleaños', fecha: finde(-10), hora: '19:30', personas: 45, direccion: 'Casa en Lomas del Valle', paquete: 'Fiesta', estado: 'realizado', contacto: 'Andrea Lozano', telefono: '8186671029',
-      sucursal: 'San Pedro', canal: 'Instagram', anuncio_id: 'ad-cumple', monto: 11700, anticipo: 11700, hace_dias: 25 });
-    E({ tipo: 'Boda o XV', fecha: finde(-3), hora: '01:00', personas: 220, direccion: 'Quinta Real, San Pedro', paquete: 'Tornafiesta', estado: 'realizado', contacto: 'Fernanda y Diego', telefono: '8111094456',
-      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', monto: 63800, anticipo: 63800, hace_dias: 30 });
-    E({ tipo: 'Cumpleaños', fecha: finde(-17, true), hora: '14:00', personas: 60, direccion: 'Quinta en Santiago', paquete: 'Fiesta', estado: 'realizado', contacto: 'Familia Treviño', telefono: '8183021147',
-      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: null, monto: 15600, anticipo: 15600, notas: 'Cliente de siempre (recomendación).', hace_dias: 40 });
-    E({ tipo: 'Reunión', fecha: finde(13, true), hora: '13:00', personas: 30, direccion: 'Col. Del Valle', paquete: 'Fiesta', estado: 'cancelado', contacto: 'Iván Cárdenas', telefono: '8126601234',
-      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: null, monto: 7800, notas: 'Cambió de fecha, va a volver a escribir.', hace_dias: 9 });
+      sucursal: 'Centro', canal: 'Instagram', anuncio_id: null, monto: 112500, notas: 'Stand con 3 estaciones. Revisar permiso del parque.', hace_dias: 4 });
+    E({ tipo: 'Desayuno de oficina', fecha: dia(-5), hora: '09:00', personas: 60, direccion: 'Oficinas Cemex, San Pedro', paquete: 'En la mañana', estado: 'realizado', contacto: 'Mónica Garza', telefono: '8110043321',
+      sucursal: 'San Pedro', canal: 'Facebook', anuncio_id: 'ad-posadas', monto: 7250, anticipo: 7250, hace_dias: 20 });
+    E({ tipo: 'Cumpleaños', fecha: finde(-10), hora: '19:30', personas: 45, direccion: 'Casa en Lomas del Valle', paquete: 'Después de las 2:00 pm', estado: 'realizado', contacto: 'Andrea Lozano', telefono: '8186671029',
+      sucursal: 'San Pedro', canal: 'Instagram', anuncio_id: 'ad-cumple', monto: 5450, anticipo: 5450, hace_dias: 25 });
+    E({ tipo: 'Boda o XV', fecha: finde(-3), hora: '01:00', personas: 220, direccion: 'Quinta Real, San Pedro', paquete: 'Madrugada', estado: 'realizado', contacto: 'Fernanda y Diego', telefono: '8111094456',
+      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: 'ad-bodas', monto: 25100, anticipo: 25100, hace_dias: 30 });
+    E({ tipo: 'Cumpleaños', fecha: finde(-17, true), hora: '14:00', personas: 60, direccion: 'Quinta en Santiago', paquete: 'Después de las 2:00 pm', estado: 'realizado', contacto: 'Familia Treviño', telefono: '8183021147',
+      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: null, monto: 7250, anticipo: 7250, notas: 'Cliente de siempre (recomendación).', hace_dias: 40 });
+    E({ tipo: 'Reunión', fecha: finde(13, true), hora: '13:00', personas: 35, direccion: 'Col. Del Valle', paquete: 'En la mañana', estado: 'cancelado', contacto: 'Iván Cárdenas', telefono: '8126601234',
+      sucursal: 'San Pedro', canal: 'WhatsApp', anuncio_id: null, monto: 4350, notas: 'Cambió de fecha, va a volver a escribir.', hace_dias: 9 });
 
     // Lo que se mandó desde la página de eventos del demo (en este navegador)
     try {
@@ -184,14 +184,14 @@
     const it = (cantidad, resumen, precio) => ({ cantidad, producto: 'Cajita de chilaquiles', precio_unit: precio, total: precio * cantidad, resumen });
     let numP = 140;
     [
-      { numero: 132, canal: 'whatsapp', contacto: 'Daniela Robles', telefono: '8112003344', entrega: 'domicilio', direccion: 'Río Nazas 230, Del Valle', pago: 'Efectivo', cambio: '$500', estado: 'entregado', hace: 170, items: [it(2, 'Rojos · Pollo · Aguacate · Refresco 600 ml', 214)] },
+      { numero: 132, canal: 'whatsapp', contacto: 'Daniela Robles', telefono: '8112003344', entrega: 'domicilio', direccion: 'Río Nazas 230, Del Valle', mapa: 'https://maps.google.com/?q=25.6561,-100.3626', pago: 'Efectivo', cambio: '$500', estado: 'entregado', hace: 170, items: [it(2, 'Rojos · Pollo · Aguacate · Refresco 600 ml', 214)] },
       { numero: 133, canal: 'instagram', contacto: '@marce.tg', entrega: 'recoger', sucursal: 'Tec', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 150, items: [it(1, 'Verdes · Huevo estrellado · Café de olla', 185)] },
-      { numero: 134, canal: 'whatsapp', contacto: 'Oficina Grupo Lamosa', telefono: '8183551200', entrega: 'domicilio', direccion: 'Av. Pedro Ramírez Vázquez 200, Valle Oriente', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 120, items: [it(6, 'Mixtos · Pollo · Refresco 600 ml', 189), it(2, 'Verdes · Sin proteína · Agua', 175)] },
-      { numero: 135, canal: 'facebook', contacto: 'Roberto Salinas', entrega: 'domicilio', direccion: 'Calzada del Valle 400, Del Valle', pago: 'Efectivo', cambio: 'Exacto', estado: 'camino', hace: 34, items: [it(2, 'Rojos · Que pique 🔥 · Arrachera · Chiltepín · Agua', 230)] },
-      { numero: 136, canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', entrega: 'domicilio', direccion: 'San Jerónimo 1200', pago: 'Efectivo', cambio: '$1,000', estado: 'cocina', hace: 27, items: [it(3, 'Rojos · Pollo · Refresco 600 ml', 189), it(1, 'Verdes · Pollo · Refresco 600 ml', 189)], conversacion: 'Sofía Garza' },
+      { numero: 134, canal: 'whatsapp', contacto: 'Oficina Grupo Lamosa', telefono: '8183551200', entrega: 'domicilio', direccion: 'Av. Pedro Ramírez Vázquez 200, Valle Oriente', mapa: 'https://maps.google.com/?q=25.6452,-100.3338', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 120, items: [it(6, 'Mixtos · Pollo · Refresco 600 ml', 189), it(2, 'Verdes · Sin proteína · Agua', 175)] },
+      { numero: 135, canal: 'facebook', contacto: 'Roberto Salinas', entrega: 'domicilio', direccion: 'Calzada del Valle 400, Del Valle', mapa: 'https://maps.google.com/?q=25.6527,-100.3588', pago: 'Efectivo', cambio: 'Exacto', estado: 'camino', hace: 34, items: [it(2, 'Rojos · Que pique 🔥 · Arrachera · Chiltepín · Agua', 230)] },
+      { numero: 136, canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', entrega: 'domicilio', direccion: 'San Jerónimo 1200', mapa: 'https://maps.google.com/?q=25.6793,-100.3702', pago: 'Efectivo', cambio: '$1,000', estado: 'cocina', hace: 27, items: [it(3, 'Rojos · Pollo · Refresco 600 ml', 189), it(1, 'Verdes · Pollo · Refresco 600 ml', 189)], conversacion: 'Sofía Garza' },
       { numero: 137, canal: 'instagram', contacto: '@dani.glzz', entrega: 'recoger', sucursal: 'Cumbres', pago: 'Transferencia', estado: 'cocina', hace: 18, items: [it(1, 'Mixtos · Sin picante · Sin proteína · Aguacate, Queso extra · Agua', 215)] },
-      { numero: 138, canal: 'whatsapp', contacto: 'Paty Leal', telefono: '8126601173', entrega: 'domicilio', direccion: 'Celaya 3010, Mitras Centro', pago: 'Efectivo', cambio: '$200', estado: 'nuevo', hace: 6, items: [it(1, 'Verdes · Chorizo · Doble crema · Refresco 600 ml', 219)], conversacion: 'Paty Leal' },
-      { numero: 139, canal: 'facebook', contacto: 'Luis Herrera', entrega: 'domicilio', direccion: 'Hidalgo 450, Centro', pago: 'Transferencia', estado: 'nuevo', hace: 2, items: [it(2, 'Rojos · Huevo estrellado · Frijoles extra · Café de olla', 195)] },
+      { numero: 138, canal: 'whatsapp', contacto: 'Paty Leal', telefono: '8126601173', entrega: 'domicilio', direccion: 'Celaya 3010, Mitras Centro', mapa: 'https://maps.google.com/?q=25.6894,-100.3502', pago: 'Efectivo', cambio: '$200', estado: 'nuevo', hace: 6, items: [it(1, 'Verdes · Chorizo · Doble crema · Refresco 600 ml', 219)], conversacion: 'Paty Leal' },
+      { numero: 139, canal: 'facebook', contacto: 'Luis Herrera', entrega: 'domicilio', direccion: 'Hidalgo 450, Centro', mapa: 'https://maps.google.com/?q=25.6716,-100.3152', pago: 'Transferencia', estado: 'nuevo', hace: 2, items: [it(2, 'Rojos · Huevo estrellado · Frijoles extra · Café de olla', 195)] },
     ].forEach((o) => { const conv = o.conversacion ? conversaciones.find((c) => c.contacto === o.conversacion) : null; delete o.conversacion; P({ ...o, conversacion_id: conv?.id || null }); });
 
     // Pedidos y cotizaciones hechos con el menú interactivo (../chilabike/arma/) en este navegador
