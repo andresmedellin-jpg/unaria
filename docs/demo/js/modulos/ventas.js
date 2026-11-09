@@ -121,6 +121,7 @@ async function pintar() {
       <div class="vt-kpi"><span>Ticket promedio</span><b>${dinero(prom)}</b>${flecha(pct(prom, promP))}</div>
       <div class="vt-kpi"><span>Propinas</span><b>${dinero(propinas)}</b><small>${tickets ? Math.round((conCliente / Math.min(40, tickets)) * 100) : 0}% de los últimos tickets con cliente registrado</small></div>
     </div>
+    <div class="vt-panel vt-opo" id="vt-opo"><h3><span>✦ Oportunidades <small>lo que la IA encontró en las últimas 4 semanas</small></span></h3><div class="cargando">La IA está revisando tus ventas…</div></div>
     <div class="vt-panel"><h3>Venta por día</h3>${graficaDias(V, r)}</div>
     <div class="vt-grid">
       <div class="vt-panel"><h3>Productos <span class="vt-mini">${[['venta', 'por venta'], ['cantidad', 'por piezas'], ['margen', 'por margen']].map(([k, t]) => `<button data-o="${k}" class="${st.vistaProd === k ? 'on' : ''}">${t}</button>`).join('')}</span></h3>${productos(pr.data || [])}</div>
@@ -145,6 +146,7 @@ async function pintar() {
   raiz.querySelectorAll('[data-o]').forEach((b) => b.addEventListener('click', () => { st.vistaProd = b.dataset.o; pintar(); }));
   raiz.querySelectorAll('[data-tk]').forEach((b) => b.addEventListener('click', () => verTicket(b.dataset.tk)));
   inventario();
+  oportunidades();
 }
 
 const fechaC = (f) => new Date(f + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
@@ -274,6 +276,79 @@ async function inventario() {
     return `<div class="vt-cl"><span><b>${esc(a?.nombre || '')}${v?.nombre ? ' · ' + esc(v.nombre) : ''}</b><small>${esc(tiendas.find((t) => t.id === x.tienda_id)?.nombre || '')}</small></span><b class="${x.existencia <= 3 ? 'vt-baja' : ''}">${esc(Number(x.existencia))}</b></div>`; }).join('')}</div>` : '<p class="vt-vacio">Nada por acabarse (10 o menos).</p>'}`;
 }
 
+// GA-07: Oportunidades. Con los datos de Loyverse de las últimas 4 semanas busca dónde hay dinero que no se está ganando:
+// horas flojas (con promoción sugerida), productos de buen margen que casi no se venden, cómo va cada sucursal,
+// buenos clientes que dejaron de venir y qué reabastecer. En el sistema real, Claude escribe el texto cada mañana con estos
+// números; en el demo, el texto sale de una plantilla con los mismos números.
+async function oportunidades() {
+  const caja = raiz.querySelector('#vt-opo'); if (!caja) return;
+  const hoy = hoyISO(), d28 = sumar(hoy, -27), d7 = sumar(hoy, -6), ayer = sumar(hoy, -1);
+  const [hr, pr, vd, cl, iv, va] = await Promise.all([
+    porCuenta(db().from('v_lv_horas').select('*').gte('dia', d28).lte('dia', ayer)),
+    porCuenta(db().from('v_lv_productos_dia').select('*').gte('dia', d28).lte('dia', ayer)),
+    porCuenta(db().from('v_lv_ventas_dia').select('*').gte('dia', d7).lte('dia', ayer)),
+    porCuenta(db().from('lv_clientes').select('id, nombre, visitas, total_gastado, ultima_visita')),
+    porCuenta(db().from('lv_inventario').select('*')),
+    porCuenta(db().from('lv_variantes').select('id, articulo_id, nombre')),
+  ]);
+  const L = [], nomT = (id) => tiendas.find((t) => t.id === id)?.nombre || 'la sucursal';
+  const hh = (h) => `${((h + 11) % 12) + 1}${h < 12 ? ' am' : ' pm'}`;
+  const H = hr.data || [];
+
+  // 1. Hora floja entre semana en la sucursal principal (la que más vende)
+  const porT = agrupar(H, 'tienda_id', 'venta').sort((a, b) => b.v - a.v), principal = porT[0]?.k;
+  if (principal) {
+    const hs = H.filter((x) => x.tienda_id === principal && x.dow <= 5), nd = new Set(hs.map((x) => x.dia)).size || 1;
+    const prom = {}; hs.forEach((x) => { prom[x.hora] = (prom[x.hora] || 0) + Number(x.venta || 0) / nd; });
+    const horas = Object.keys(prom).map(Number).sort((a, b) => a - b).filter((h) => h > Math.min(...Object.keys(prom).map(Number)) && h < Math.max(...Object.keys(prom).map(Number)));
+    let peor = null; horas.forEach((h) => { if (prom[h + 1] != null) { const v = prom[h] + prom[h + 1]; if (!peor || v < peor.v) peor = { h, v }; } });
+    const pico = Math.max(...Object.values(prom));
+    if (peor && pico) L.push({ ico: '🕒', t: `De ${hh(peor.h)} a ${hh(peor.h + 2)} ${nomT(principal)} casi no vende`,
+      d: `Entre semana vende ${dinero(peor.v / 2)} por hora en ese rato, contra ${dinero(pico)} en su mejor hora.`,
+      a: `Promoción solo en ese horario: café + pan a precio fijo, o 2×1 en bebidas frías para los de la Facultad de Medicina.` });
+  }
+  // 2. Buen margen, poca venta
+  const m = new Map(); (pr.data || []).forEach((p) => { const x = m.get(p.articulo_id) || { nombre: p.nombre, cant: 0, venta: 0, costo: 0 }; x.cant += Number(p.cantidad || 0); x.venta += Number(p.venta || 0); x.costo += Number(p.costo || 0); m.set(p.articulo_id, x); });
+  const prods = [...m.values()].filter((x) => x.venta > 0 && x.costo > 0 && x.cant > 0).map((x) => ({ ...x, mg: (x.venta - x.costo) / x.venta, pz: (x.venta - x.costo) / x.cant }));
+  if (prods.length > 4) {
+    const mediana = (l) => [...l].sort((a, b) => a - b)[Math.floor(l.length / 2)];
+    const med = mediana(prods.map((x) => x.cant)), pzMed = mediana(prods.map((x) => x.pz));
+    const esc_ = prods.filter((x) => x.cant < med && x.pz > pzMed).sort((a, b) => b.pz - a.pz).slice(0, 2);
+    if (esc_.length) L.push({ ico: '💰', t: `${esc_.map((x) => x.nombre).join(' y ')}: dejan mucho y se venden poco`,
+      d: esc_.map((x) => `${x.nombre} deja ${dinero(x.pz)} por pieza (${Math.round(x.mg * 100)}%) y se vendieron ${Math.round(x.cant)} en 4 semanas`).join('; ') + `. Lo normal en la carta es ${dinero(pzMed)} por pieza.`,
+      a: `Que en caja lo ofrezcan con el pan, ponerlo en la pizarra o en una historia de Instagram esta semana.` });
+  }
+  // 3. Cómo va cada sucursal (últimos 7 días)
+  if (tiendas.length > 1) {
+    const V7 = vd.data || [], est = tiendas.map((t) => { const l = V7.filter((x) => x.tienda_id === t.id), v = l.reduce((s, x) => s + Number(x.venta || 0), 0), tk = l.reduce((s, x) => s + Number(x.tickets || 0), 0), dd = new Set(l.map((x) => x.dia)).size || 1;
+      const hs = {}; H.filter((x) => x.tienda_id === t.id).forEach((x) => { hs[x.hora] = (hs[x.hora] || 0) + Number(x.venta || 0); }); const fuerte = Object.entries(hs).sort((a, b) => b[1] - a[1])[0]?.[0];
+      return { t, dia: v / dd, prom: tk ? v / tk : 0, fuerte: fuerte != null ? Number(fuerte) : null }; }).sort((a, b) => b.dia - a.dia);
+    const [a, b] = est;
+    if (a && b && b.dia) L.push({ ico: '📍', t: `${b.t.nombre} ya vende ${Math.round((b.dia / a.dia) * 100)}% de lo que vende ${a.t.nombre}`,
+      d: `Últimos 7 días: ${dinero(b.dia)} al día contra ${dinero(a.dia)}; ticket promedio ${dinero(b.prom)} contra ${dinero(a.prom)}.${b.fuerte != null ? ` Su hora fuerte es la de ${hh(b.fuerte)}${a.fuerte != null && a.fuerte !== b.fuerte ? `; la de ${a.t.nombre}, la de ${hh(a.fuerte)}` : ''}.` : ''}`,
+      a: `Acomodar el personal de ${b.t.nombre} a su hora fuerte y probar una promoción de mañana para estudiantes.` });
+  }
+  // 4. Buenos clientes que dejaron de venir
+  const hace = (f) => Math.floor((Date.now() - new Date(f)) / 864e5);
+  const idos = (cl.data || []).filter((c) => c.ultima_visita && c.visitas >= 25 && hace(c.ultima_visita) >= 18).sort((a, b) => b.total_gastado - a.total_gastado).slice(0, 3);
+  if (idos.length) L.push({ ico: '👋', t: `${idos.length} ${idos.length === 1 ? 'cliente frecuente dejó' : 'clientes frecuentes dejaron'} de venir`,
+    d: idos.map((c) => `${c.nombre} (${c.visitas} visitas, ${dinero(c.total_gastado)}) no viene desde hace ${hace(c.ultima_visita)} días`).join(' · ') + '.',
+    a: `Mandarles un mensaje con un café de cortesía. Cuando conectemos su WhatsApp, sale desde aquí.` });
+  // 5. Qué reabastecer: lo que se acaba en menos de 2 días al ritmo de venta
+  const vmap = new Map((va.data || []).map((v) => [v.id, v])), ritmo = {};
+  (pr.data || []).forEach((p) => { const k = p.articulo_id + '|' + p.tienda_id; ritmo[k] = (ritmo[k] || 0) + Number(p.cantidad || 0) / 24; });
+  const faltan = (iv.data || []).map((x) => { const a = vmap.get(x.variante_id)?.articulo_id, art = articulos.find((y) => y.id === a), r = ritmo[a + '|' + x.tienda_id] || 0;
+    return { nombre: art?.nombre, tienda: nomT(x.tienda_id), ex: Number(x.existencia), r }; }).filter((x) => x.nombre && x.r && x.ex / x.r < 2).sort((a, b) => a.ex / a.r - b.ex / b.r).slice(0, 3);
+  if (faltan.length) L.push({ ico: '📦', t: `Reabastecer hoy: ${faltan.map((x) => x.nombre).join(', ')}`,
+    d: faltan.map((x) => `${x.nombre} en ${x.tienda}: quedan ${x.ex}, se venden unos ${Math.round(x.r)} al día`).join(' · ') + '.',
+    a: `Pedirlo a producción antes de la hora fuerte.` });
+
+  caja.innerHTML = `<h3><span>✦ Oportunidades <small>lo que la IA encontró en las últimas 4 semanas</small></span></h3>
+    ${L.length ? `<div class="vt-opos">${L.map((o) => `<div class="vt-op"><span class="i">${o.ico}</span><div><b>${esc(o.t)}</b><p>${esc(o.d)}</p><p class="a">→ ${esc(o.a)}</p></div></div>`).join('')}</div>`
+      : '<p class="vt-vacio">Todavía no hay suficientes ventas para encontrar oportunidades.</p>'}
+    <p class="vt-nota">${MARCA.demo ? 'En el demo el texto sale de una plantilla con los números del ejemplo; en el sistema real lo escribe la IA cada mañana con tus ventas.' : 'Se actualiza cada mañana con tus ventas de Loyverse.'}</p>`;
+}
+
 function estilos() {
   if (document.getElementById('vt-estilos')) return;
   const s = document.createElement('style'); s.id = 'vt-estilos';
@@ -292,6 +367,11 @@ function estilos() {
   .vt-kpi { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:grid; gap:2px; }
   .vt-kpi span { font-size:12.5px; color:var(--text-2); } .vt-kpi b { font-size:24px; letter-spacing:-.01em; } .vt-kpi small { font-size:12px; }
   .vt-sube { color:#067647 !important; } .vt-baja { color:#B42318 !important; }
+  .vt-opo { border-color:color-mix(in srgb, var(--primary) 35%, var(--border)); background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--surface)), var(--surface)); }
+  .vt-opos { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:10px; }
+  .vt-op { display:flex; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 12px; }
+  .vt-op .i { font-size:20px; line-height:1.2; } .vt-op b { font-size:14px; display:block; margin-bottom:3px; } .vt-op p { margin:0; font-size:13px; color:var(--text-2); line-height:1.45; }
+  .vt-op p.a { margin-top:6px; color:var(--text); font-weight:600; }
   .vt-panel { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:12px; min-width:0; }
   .vt-panel h3 { font-size:14.5px; margin:0 0 10px; display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; } .vt-panel h3 small { font-size:12px; font-weight:400; }
   .vt-mini { display:inline-flex; gap:2px; } .vt-mini button { font-size:12px; padding:4px 8px; } .vt-mini button.on { background:var(--primary-soft); color:var(--primary); }

@@ -201,6 +201,9 @@ export function estilos() {
   .chb-chat-head { display:flex; gap:12px; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
   .chb-chat-head .av { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:#fff; flex:none; }
   .chb-chat-head .q { flex:1; min-width:0; display:grid; gap:3px; } .chb-chat-head .q b { font-size:15px; }
+  .pp-fila { display:grid; grid-template-columns:64px 1fr 92px 30px; gap:6px; margin-top:6px; }
+  .pp-quitar { border:1px solid var(--border); background:var(--surface); border-radius:8px; color:var(--text-3); font-size:18px; cursor:pointer; }
+  .chb-ficha label.chb-ia .pp-fila input { background:#F5F0FF; border-color:#B9A6F5; }
   .chb-ia-caja { margin:12px 14px 0; border:1px solid #D9CCFB; background:linear-gradient(135deg,#F8F5FF,#FFF7F0); border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
   .chb-ia-caja p { margin:0; flex:1; min-width:200px; font-size:13.5px; color:#3F2A78; } .chb-ia-caja p b { display:block; font-size:14px; }
   .chb-hecho { margin:12px 14px 0; background:#ECFDF3; border:1px solid #ABEFC6; color:#05603A; border-radius:10px; padding:10px 14px; font-size:13.5px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }

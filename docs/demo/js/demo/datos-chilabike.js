@@ -103,8 +103,16 @@
       ['javi', 'Perfecto. Son $110 por persona: $13,200 más $650 de traslado y montaje a Valle Oriente, $13,850 en total. Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, montaje tipo buffet y personal, con factura. Le mando la cotización formal por correo hoy mismo 📄', 30],
       ['cliente', 'Excelente, quedo atento.', 0],
     ]);
-    const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', sugerida: 'Hola Sofía! Claro, las mandamos desde San Jerónimo. Son 3 cajitas de rojos con pollo y 1 de verdes, $[__] más envío. ¿A qué dirección te las llevamos?', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14 }, [
-      ['cliente', 'Hola, ¿me pueden mandar 3 cajitas de rojos con pollo y una de verdes a San Jerónimo? 🙏', 0],
+    // Pedido por chat libre (no por el menú): la IA lo arma con "Crear pedido desde esta conversación" (GA-06)
+    const cSofia = C({ canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', anuncio_id: null, etiqueta: 'pedido', hace: 14,
+      sugerida: 'Listo Sofía ✅ Son 3 de rojos con pollo y 1 de verdes con huevo estrellado: $600 + $35 de envío = $635. Sale de San Jerónimo en unos 30 min y te llevamos cambio de $1,000 🙌',
+      pedidoIA: { items: [{ cantidad: 3, resumen: 'Rojos · Pollo', precio_unit: 150 }, { cantidad: 1, resumen: 'Verdes · Huevo estrellado', precio_unit: 150 }],
+        entrega: 'domicilio', direccion: 'Av. San Jerónimo 1350, depto 4B (frente al Oxxo)', mapa: 'https://maps.google.com/?q=25.6787,-100.3741',
+        sucursal: 'San Jerónimo', pago: 'Efectivo', cambio: '$1,000', envio: 35 } }, [
+      ['cliente', 'Hola, ¿me pueden mandar 3 cajitas de rojos con pollo y una de verdes a San Jerónimo? 🙏', 6],
+      ['javi', '¡Claro Sofía! ¿La de verdes con qué proteína? Y pásame tu dirección 📍', 4],
+      ['cliente', 'Con huevo estrellado. Es Av. San Jerónimo 1350, depto 4B, frente al Oxxo', 1],
+      ['cliente', 'Pago en efectivo, traigo billete de $1,000', 0],
     ]);
     const cRoberto = C({ canal: 'facebook', contacto: 'Roberto Salinas', sugerida: 'Va Roberto 🤘 El sábado a las 11 para 60 sale en $110 por persona: $6,600, más el traslado y montaje (en San Pedro anda entre $500 y $850; te lo confirmo cuando me mandes la ubicación de la terraza 📍). Incluye salsas roja y verde, pollo y chicharrón guisado, toppings, platos y cubiertos, carrito y personal. Apartas con el 50%. ¿Requieren factura?', anuncio_id: null, etiqueta: 'evento', hace: 60 * 5,
       extraccion: { tipo: 'Reunión', fecha: fExa, hora: '11:00', personas: 60, direccion: 'Terraza en San Pedro (por confirmar)', paquete: 'En la mañana', sucursal: 'Tec', notas: 'Reunión de exalumnos del Tec, generación 2006. Lugar por confirmar.' } }, [
@@ -188,7 +196,7 @@
       { numero: 133, canal: 'instagram', contacto: '@marce.tg', entrega: 'recoger', sucursal: 'Tec', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 150, items: [it(1, 'Verdes · Huevo estrellado · Café de olla', 185)] },
       { numero: 134, canal: 'whatsapp', contacto: 'Oficina Grupo Lamosa', telefono: '8183551200', entrega: 'domicilio', direccion: 'Av. Pedro Ramírez Vázquez 200, Valle Oriente', mapa: 'https://maps.google.com/?q=25.6452,-100.3338', pago: 'Transferencia', pagado: true, estado: 'entregado', hace: 120, items: [it(6, 'Mixtos · Pollo · Refresco 600 ml', 189), it(2, 'Verdes · Sin proteína · Agua', 175)] },
       { numero: 135, canal: 'facebook', contacto: 'Roberto Salinas', entrega: 'domicilio', direccion: 'Calzada del Valle 400, Del Valle', mapa: 'https://maps.google.com/?q=25.6527,-100.3588', pago: 'Efectivo', cambio: 'Exacto', estado: 'camino', hace: 34, items: [it(2, 'Rojos · Que pique 🔥 · Arrachera · Chiltepín · Agua', 230)] },
-      { numero: 136, canal: 'whatsapp', contacto: 'Sofía Garza', telefono: '8183340912', entrega: 'domicilio', direccion: 'San Jerónimo 1200', mapa: 'https://maps.google.com/?q=25.6793,-100.3702', pago: 'Efectivo', cambio: '$1,000', estado: 'cocina', hace: 27, items: [it(3, 'Rojos · Pollo · Refresco 600 ml', 189), it(1, 'Verdes · Pollo · Refresco 600 ml', 189)], conversacion: 'Sofía Garza' },
+      { numero: 136, canal: 'whatsapp', contacto: 'Héctor Villarreal', telefono: '8183340955', entrega: 'domicilio', direccion: 'San Jerónimo 1200', mapa: 'https://maps.google.com/?q=25.6793,-100.3702', pago: 'Efectivo', cambio: '$1,000', estado: 'cocina', hace: 27, items: [it(3, 'Rojos · Pollo · Refresco 600 ml', 189), it(1, 'Verdes · Pollo · Refresco 600 ml', 189)] },
       { numero: 137, canal: 'instagram', contacto: '@dani.glzz', entrega: 'recoger', sucursal: 'Cumbres', pago: 'Transferencia', estado: 'cocina', hace: 18, items: [it(1, 'Mixtos · Sin picante · Sin proteína · Aguacate, Queso extra · Agua', 215)] },
       { numero: 138, canal: 'whatsapp', contacto: 'Paty Leal', telefono: '8126601173', entrega: 'domicilio', direccion: 'Celaya 3010, Mitras Centro', mapa: 'https://maps.google.com/?q=25.6894,-100.3502', pago: 'Efectivo', cambio: '$200', estado: 'nuevo', hace: 6, items: [it(1, 'Verdes · Chorizo · Doble crema · Refresco 600 ml', 219)], conversacion: 'Paty Leal' },
       { numero: 139, canal: 'facebook', contacto: 'Luis Herrera', entrega: 'domicilio', direccion: 'Hidalgo 450, Centro', mapa: 'https://maps.google.com/?q=25.6716,-100.3152', pago: 'Transferencia', estado: 'nuevo', hace: 2, items: [it(2, 'Rojos · Huevo estrellado · Frijoles extra · Café de olla', 195)] },

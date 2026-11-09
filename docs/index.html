@@ -247,6 +247,7 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .plan li { padding-left: 20px; position: relative; }
 .plan li::before { content: ""; position: absolute; left: 0; top: .5em; width: 9px; height: 9px; border-radius: 2px; background: var(--acento); }
 .arranque { margin-top: 12px; border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 22px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 32px; align-items: center; }
+.plan .p-arr { margin: 8px 0 0; font: 500 .9rem var(--f-texto); color: var(--gris); }
 .arranque .p-precio { font: 700 1.6rem/1 var(--f-display); color: var(--tinta); letter-spacing: -.02em; }
 .arranque p { color: var(--gris); }
 .mas-precio { margin-top: 18px; border: 0; }
@@ -408,9 +409,10 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
         <h3>Esencial</h3>
         <p class="p-para">Para ordenar la operación interna y dejar de capturar doble.</p>
         <div class="p-precio">$4,500 <small>al mes + IVA</small></div>
+        <p class="p-arr">Arranque desde $35,000</p>
         <ul>
           <li>Portal de tu negocio con asistente de IA</li>
-          <li>Conectado a lo que ya usas: Excel, Aspel, Shopify</li>
+          <li>Conectado a lo que ya usas, como Excel o Shopify; tus datos de Aspel se importan</li>
           <li>Hasta 10 usuarios, cada quien ve lo suyo</li>
           <li>Soporte y ajustes menores</li>
         </ul>
@@ -420,9 +422,10 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
         <h3>Operación</h3>
         <p class="p-para">Para negocios que atienden a sus clientes por WhatsApp.</p>
         <div class="p-precio">$8,000 <small>al mes + IVA</small></div>
+        <p class="p-arr">Arranque desde $50,000</p>
         <ul>
           <li>Todo lo de Esencial</li>
-          <li>WhatsApp de tu negocio con IA que contesta como tú</li>
+          <li>WhatsApp de tu negocio: la IA te deja la respuesta escrita, tú la revisas y la mandas</li>
           <li>Avisos automáticos: pedidos, citas, tickets y cobranza</li>
           <li>Hasta 25 usuarios</li>
         </ul>
@@ -431,6 +434,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
         <h3>Crecimiento</h3>
         <p class="p-para">Para varios canales, sucursales o negocios en un solo lugar.</p>
         <div class="p-precio"><span class="p-desde">Desde</span>$12,000 <small>al mes + IVA</small></div>
+        <p class="p-arr">Arranque desde $70,000</p>
         <ul>
           <li>Todo lo de Operación</li>
           <li>WhatsApp, Instagram y Facebook en una bandeja</li>
@@ -441,7 +445,7 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     </div>
     <div class="arranque">
       <div class="p-precio"><span class="p-desde">Arranque, una sola vez</span>Desde $35,000 <small>+ IVA</small></div>
-      <p>Diagnóstico, diseño, construcción, carga de tus datos y capacitación. Precio fijo y por escrito antes de empezar: 50% al firmar y 50% cuando ya lo estás usando.</p>
+      <p>Diagnóstico, diseño, construcción, carga de tus datos y capacitación. Depende del plan: desde $35,000 en Esencial, $50,000 en Operación y $70,000 en Crecimiento. Precio fijo y por escrito antes de empezar: 50% al firmar y 50% cuando ya lo estás usando o 30 días después de la entrega, lo que pase primero.</p>
     </div>
     <details class="mas-precio"><summary>Qué incluye la mensualidad y qué no</summary>
     <div class="incluye">
@@ -450,8 +454,8 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
         <ul>
           <li>Plataforma, servidores y respaldos</li>
           <li>Inteligencia artificial incluida, con uso razonable</li>
-          <li>Mensajes de WhatsApp para atender a tus clientes</li>
-          <li>Soporte y hasta 4 horas de ajustes al mes</li>
+          <li>Mensajes de WhatsApp para atender a tus clientes, con uso razonable</li>
+          <li>Soporte y hasta 4 horas de ajustes al mes (no se acumulan)</li>
         </ul>
       </div>
       <div>
@@ -508,9 +512,9 @@ details p { padding: 0 0 22px; color: var(--gris); max-width: 68ch; }
     <div class="preguntas">
       <details><summary>¿Tengo que dejar mis sistemas?</summary><p>No. Nos conectamos a los que ya usas y los juntamos en un solo lugar. Si alguno de verdad te estorba, te lo decimos, pero la decisión es tuya.</p></details>
       <details><summary>¿Y si no tengo ningún sistema?</summary><p>También es para ti. Empezamos con lo que tengas (Excel, libretas, WhatsApp) y lo convertimos en un sistema a tu medida, sin que tengas que aprender algo complicado.</p></details>
-      <details><summary>¿Mis datos son míos si dejo de trabajar con ustedes?</summary><p>Sí. Tu información es tuya. Cada cliente tiene su propia base de datos, separada de las demás, y si un día decides irte te la entregamos completa en un formato que puedas abrir, como Excel. Cada persona de tu equipo entra con su usuario y ve solo lo que le toca.</p></details>
+      <details><summary>¿Mis datos son míos si dejo de trabajar con ustedes?</summary><p>Sí, tu información es tuya. Está separada de la de los demás clientes y nadie más puede verla; si lo pides, la movemos a tu propia base de datos. Si un día decides irte, te la entregamos completa en un formato que puedas abrir, como Excel. Cada persona de tu equipo entra con su usuario y ve solo lo que le toca.</p></details>
       <details><summary>¿Cuánto tarda?</summary><p>Depende de lo que encontremos en el diagnóstico. Empezamos por una sola conexión para que veas resultados pronto, y la fecha de entrega te la damos por escrito antes de empezar.</p></details>
-      <details><summary>¿Cuánto cuesta?</summary><p id="faq-precio">La llamada de 30 minutos no tiene costo. El arranque es desde $35,000 una sola vez e incluye el diagnóstico, y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA, según lo que conectemos. Te damos el precio exacto por escrito antes de empezar.</p></details>
+      <details><summary>¿Cuánto cuesta?</summary><p id="faq-precio">La llamada de 30 minutos no tiene costo. El arranque es una sola vez, desde $35,000 según el plan, e incluye el diagnóstico, y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA, según lo que conectemos. Te damos el precio exacto por escrito antes de empezar.</p></details>
       <details><summary>¿Sirve para mi industria?</summary><p>Sí. No trabajamos para un solo giro: diseñamos cada sistema según cómo opera tu empresa, sea comercio, servicios, manufactura, construcción o cualquier otra.</p></details>
     </div>
   </div>
@@ -842,15 +846,15 @@ const CONFIG = {
     [/^(hola|buen[oa]s|qu[eé] tal|hey|saludos)\b/i, 'Hola. Aquí puedes preguntarme lo que quieras sobre Unaria, o seguir con las preguntas para calcular cuánto te cuesta capturar lo mismo varias veces.'],
     [/demo|ejemplo|c[oó]mo se ve|ense[ñn]a|ver el sistema|prueba gratis|probar/i, 'En la llamada de 30 minutos te enseñamos cómo se ve, con datos de ejemplo, y lo aterrizamos a tu caso.'],
     [/diagn[oó]stico/i, 'En el diagnóstico mapeamos tus sistemas, dónde se captura lo mismo dos o tres veces y cuánto te cuesta. Te llevas un mapa con números y prioridades, tengas o no tengas sistemas hoy.'],
-    [/precio|cu[aá]nto (cuesta|cobran|sale|vale)|costo|cobran|cotiza|presupuesto|tarifa|mensualidad/i, 'La llamada de 30 minutos no tiene costo. El arranque es desde $35,000 una sola vez (incluye el diagnóstico) y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA. El precio exacto te lo damos por escrito antes de empezar.'],
-    [/garant|no funciona|riesgo|y si no (me )?sirve|falla/i, 'Por eso empezamos chico: un arranque a precio fijo con lo que más horas te ahorra, para que veas resultados antes de crecer. La segunda mitad del arranque se paga cuando ya lo estás usando. Alcance, precio y fechas van por escrito.'],
+    [/precio|cu[aá]nto (cuesta|cobran|sale|vale)|costo|cobran|cotiza|presupuesto|tarifa|mensualidad/i, 'La llamada de 30 minutos no tiene costo. El arranque es una sola vez, desde $35,000 según el plan (incluye el diagnóstico) y la mensualidad con todo incluido va de $4,500 a $12,000 o más al mes, más IVA. El precio exacto te lo damos por escrito antes de empezar.'],
+    [/garant|no funciona|riesgo|y si no (me )?sirve|falla/i, 'Por eso empezamos chico: un arranque a precio fijo con lo que más horas te ahorra, para que veas resultados antes de crecer. La segunda mitad del arranque se paga cuando ya lo estás usando o a los 30 días de la entrega. Alcance, precio y fechas van por escrito.'],
     [/contrato|plazo forzoso|forzoso|cancelar|permanencia|dejar de pagar|salirme|irme/i, 'Las condiciones van por escrito antes de empezar. Y si un día decides irte, tu información es tuya: te la entregamos completa en un formato que puedas abrir, como Excel.'],
     [/tarda|cu[aá]nto tiempo|cu[aá]ndo (estar|queda|lo tengo)|semanas|meses|r[aá]pido/i, 'Depende de lo que encontremos en el diagnóstico. Empezamos por una sola conexión para que veas resultados pronto, y la fecha de entrega te la damos por escrito.'],
     [/no tengo (ning[uú]n|nada|sistema)|de cero|libreta|en papel|por d[oó]nde empiezo|no s[eé] qu[eé] necesito/i, 'Es muy buen punto de partida. Empezamos con lo que tengas (Excel, libretas, WhatsApp), lo ordenamos y lo pasamos a un sistema a tu medida, paso a paso y sin que tengas que aprender algo complicado.'],
     [/dejar mis|cambiar (mis|de) sistema|reemplaz|migrar|quitar (mi|el)/i, 'No tienes que dejar tus sistemas. Nos conectamos a los que ya usas y los juntamos. Si alguno de verdad te estorba, te lo decimos, pero la decisión es tuya.'],
     [/m[ií]os|mis datos|mi informaci[oó]n|me voy|due[ñn]o de (mis|la) (datos|informaci)|exportar|me los (dan|entregan)/i, 'Sí, tu información es tuya. Cada cliente tiene su propia base de datos y, si te vas, te la entregamos completa.'],
     [/privacidad|aviso/i, 'Puedes leer nuestro aviso de privacidad en el pie de la página. Solo te pedimos datos al final, y solo si aceptas el aviso.'],
-    [/segur|hack|respaldo|contrase|acceso|permiso|robar|perder (la|mi) informaci/i, 'Cada persona de tu equipo entra con su propio usuario y ve solo lo que le toca. Tu base de datos está separada de la de otros clientes y tiene respaldos automáticos.'],
+    [/segur|hack|respaldo|contrase|acceso|permiso|robar|perder (la|mi) informaci/i, 'Cada persona de tu equipo entra con su propio usuario y ve solo lo que le toca. Tu información está separada de la de otros clientes, nadie más puede verla, y tiene respaldos automáticos. Si lo pides o creces, te pasamos a tu propia base.'],
     [/inteligencia|\bia\b|\bai\b|chatgpt|robot|automatiz/i, 'Usamos inteligencia artificial y automatización cuando ayudan: por ejemplo, para leer facturas, ordenar información o hacer tareas repetitivas solas. Pero lo que te entregamos es el resultado: menos trabajo repetido y la información junta.'],
     [/factur|cfdi|timbr|\bsat\b|\bpac\b|complemento de pago/i, 'Sí. Podemos hacer que tus ventas o pedidos generen la factura sola, timbrada a través de un proveedor autorizado por el SAT, y que quede lista para tu contador.'],
     [/portal/i, 'Es de lo que más nos piden: llenar el portal de tu cliente o proveedor con lo que ya capturaste, en vez de hacerlo a mano otra vez. Si se puede en tu caso, lo confirmamos en el diagnóstico.'],

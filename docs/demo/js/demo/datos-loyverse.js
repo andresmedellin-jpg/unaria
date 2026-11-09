@@ -1,4 +1,4 @@
-// Datos de ejemplo de Loyverse para el demo (Curandero, café en Mitras): 120 días de tickets con sus líneas y pagos,
+// Datos de ejemplo de Loyverse para el demo (Curandero: Mitras y Tec, abierta hace unas 3 semanas): 120 días de tickets con sus líneas y pagos,
 // catálogo, clientes, empleados e inventario, como los dejaría la función "loyverse" en la base. Todo inventado
 // (menú y precios de muestra) y siempre igual (semilla fija). También arma las vistas v_lv_* que en la base son SQL.
 (function () {
@@ -14,7 +14,8 @@
 
     const lv_cuentas = [{ id: CID, org_id: ORG, empresa_id: 'emp-cur', merchant_id: 'demo-curandero', negocio: 'Curandero', moneda: 'MXN', activo: true, estado: 'al_dia',
       historial_desde: null, ultimo_sync: new Date(Date.now() - 4 * 60e3).toISOString(), ultimo_error: null, resumen: {} }];
-    const lv_tiendas = [{ ...base, id: 'st-mitras', nombre: 'Curandero Mitras', direccion: 'Celaya 3133, Mitras Centro, Monterrey' }];
+    const lv_tiendas = [{ ...base, id: 'st-mitras', nombre: 'Curandero Mitras', direccion: 'Celaya 3133, Mitras Centro, Monterrey' },
+      { ...base, id: 'st-tec', nombre: 'Curandero Tec', direccion: 'Zona Tec, Monterrey' }];
     const CATS = [['cat-caf', 'Café'], ['cat-beb', 'Bebidas frías'], ['cat-des', 'Desayunos'], ['cat-pan', 'Pan y postres']];
     const lv_categorias = CATS.map(([id, nombre]) => ({ ...base, id, nombre, borrado: false }));
     // [id, nombre, categoría, precio, costo, popularidad, inventario]
@@ -31,7 +32,7 @@
     const lv_articulos = MENU.map(([id, nombre, cat, , , , inv]) => ({ ...base, id, nombre, categoria_id: cat, controla_inventario: inv, es_compuesto: false, borrado: false }));
     const lv_variantes = MENU.map(([id, , , precio, costo]) => ({ ...base, id: id + '-v', articulo_id: id, nombre: null, sku: null, precio, costo, borrado: false }));
     const lv_tipos_pago = [['pt-ef', 'Efectivo', 'CASH'], ['pt-tj', 'Tarjeta', 'CARD'], ['pt-tr', 'Transferencia', 'OTHER']].map(([id, nombre, tipo]) => ({ ...base, id, nombre, tipo, borrado: false }));
-    const lv_empleados = [['em-1', 'Fer (barista)'], ['em-2', 'Diego (barista)'], ['em-3', 'Sofi (caja)']].map(([id, nombre]) => ({ ...base, id, nombre, tiendas: ['st-mitras'], borrado: false }));
+    const lv_empleados = [['em-1', 'Fer (barista)'], ['em-2', 'Diego (barista)'], ['em-3', 'Sofi (caja)'], ['em-4', 'Caro (barista Tec)']].map(([id, nombre]) => ({ ...base, id, nombre, tiendas: [id === 'em-4' ? 'st-tec' : 'st-mitras'], borrado: false }));
     const NOMBRES = ['Ana Garza', 'Luis Treviño', 'Mariana Cantú', 'Jorge Villarreal', 'Sofía Martínez', 'Daniel Salinas', 'Paola Rodríguez', 'Andrés González', 'Valeria Lozano', 'Ricardo Flores',
       'Fernanda Elizondo', 'Diego Hernández', 'Regina Leal', 'Emilio Garza', 'Camila Sepúlveda', 'Pablo Zambrano', 'Natalia Guerra', 'Rodrigo Cárdenas', 'Lucía Medina', 'Mauricio Ríos',
       'Dra. Karla Peña', 'Dr. Iván Quiroga', 'Alejandra Ramos', 'Tomás Delgado', 'Ximena Ochoa', 'Sebastián Tamez', 'Renata Montemayor', 'Óscar Benavides', 'Daniela Vela', 'Héctor Alanís'];
@@ -41,13 +42,18 @@
     const lv_tickets = [], lv_lineas = [], lv_pagos = [];
     const HOY = new Date(); let num = 10000;
     const curva = { 8: 1.5, 9: 1.7, 10: 1.2, 11: .8, 12: .8, 13: 1.3, 14: 1.1, 15: .6, 16: .6, 17: .7 };
+    // Tec: estudiantes, más de mediodía a la tarde
+    const curvaTec = { 8: .6, 9: .8, 10: .9, 11: 1, 12: 1.3, 13: 1.6, 14: 1.5, 15: 1.2, 16: 1.1, 17: 1 };
+    // Buenos clientes que dejaron de venir (para la tarjeta de Oportunidades): días desde su última visita
+    const BAJA = { 'cl-1': 27, 'cl-3': 34, 'cl-20': 23 };
+    const TEC_DESDE = 24;
     for (let k = 119; k >= 0; k--) {
       const d = new Date(HOY); d.setDate(d.getDate() - k);
       const dow = d.getDay(); if (dow === 0) continue;                         // domingo cerrado
       const crec = 1 + (119 - k) / 119 * 0.18;                                 // el negocio va creciendo
       let n = Math.round((dow === 6 ? 95 : dow === 1 ? 62 : 74) * crec * (0.85 + rnd() * 0.3));
       if (k === 0) { const h = new Date().getHours(); n = Math.round(n * Math.max(0, Math.min(1, (h - 8) / 10))); }
-      for (let t = 0; t < n; t++) {
+      const dia1 = (n, curva, tienda) => { for (let t = 0; t < n; t++) {
         const hora = Number(pesos(Object.entries(curva).map(([h, w]) => [h, w])));
         const f = new Date(d); f.setHours(hora, entre(0, 59), entre(0, 59), 0);
         if (k === 0 && f > new Date()) continue;
@@ -62,13 +68,20 @@
           lv_lineas.push({ ...base, numero, n: i + 1, articulo_id: m[0], variante_id: m[0] + '-v', nombre: m[1], variante: null, cantidad: q, precio: m[3], total: tot, bruto: tot, costo: m[4], costo_total: m[4] * q, descuento: 0, modificadores: m[2] === 'cat-caf' && rnd() < .3 ? [{ name: 'Leche', option: elige(['Avena', 'Almendra', 'Deslactosada']) }] : [] }); });
         const pago = pesos([['pt-tj', 55], ['pt-ef', 35], ['pt-tr', 10]]);
         const propina = pago === 'pt-tj' && rnd() < .55 ? Math.round(total * elige([.1, .1, .15])) : 0;
-        const cli = rnd() < .32 ? lv_clientes[Math.floor(Math.pow(rnd(), 1.25) * lv_clientes.length)] : null;
+        let cli = rnd() < .32 ? lv_clientes[Math.floor(Math.pow(rnd(), 1.25) * lv_clientes.length)] : null;
+        if (cli && BAJA[cli.id] && k < BAJA[cli.id]) cli = null;
         const cancelado = rnd() < .006 ? new Date(f.getTime() + 3 * 60e3).toISOString() : null;
-        lv_tickets.push({ ...base, numero, tipo: 'SALE', fecha: f.toISOString(), dia: diaLocal(f), tienda_id: 'st-mitras', empleado_id: elige(['em-1', 'em-2', 'em-3']),
+        lv_tickets.push({ ...base, numero, tipo: 'SALE', fecha: f.toISOString(), dia: diaLocal(f), tienda_id: tienda, empleado_id: tienda === 'st-tec' ? 'em-4' : elige(['em-1', 'em-2', 'em-3']),
           cliente_id: cli?.id || null, opcion_consumo: pesos([['Comer aquí', 55], ['Para llevar', 40], ['A domicilio', 5]]), total, impuestos: Math.round(total / 1.16 * 0.16 * 100) / 100,
           descuento: 0, propina, cancelado_en: cancelado, nota: null, datos: {} });
         lv_pagos.push({ ...base, numero, n: 1, tipo_pago_id: pago, nombre: lv_tipos_pago.find((p) => p.id === pago).nombre, tipo: lv_tipos_pago.find((p) => p.id === pago).tipo, monto: total + propina, pagado_en: f.toISOString() });
         if (cli && !cancelado) { cli.visitas++; cli.total_gastado += total; cli.puntos = Math.round(cli.total_gastado * 0.05); cli.primera_visita ||= f.toISOString(); cli.ultima_visita = f.toISOString(); }
+      } };
+      dia1(n, curva, 'st-mitras');
+      if (k <= TEC_DESDE) {   // Curandero Tec: arranca chico y va subiendo
+        let nt = Math.round((22 + (TEC_DESDE - k) * 0.7) * (dow === 6 ? 0.8 : 1) * (0.85 + rnd() * 0.3));
+        if (k === 0) { const h = new Date().getHours(); nt = Math.round(nt * Math.max(0, Math.min(1, (h - 8) / 10))); }
+        dia1(nt, curvaTec, 'st-tec');
       }
     }
     // Unas devoluciones
@@ -78,7 +91,7 @@
       lv_lineas.push({ ...l, numero, n: 1 });
       lv_pagos.push({ ...base, numero, n: 1, tipo_pago_id: 'pt-ef', nombre: 'Efectivo', tipo: 'CASH', monto: l.total, pagado_en: t.fecha });
     });
-    const lv_inventario = MENU.filter((m) => m[6]).map((m) => ({ ...base, variante_id: m[0] + '-v', tienda_id: 'st-mitras', existencia: entre(1, 24), actualizado: new Date().toISOString() }));
+    const lv_inventario = ['st-mitras', 'st-tec'].flatMap((tienda) => MENU.filter((m) => m[6]).map((m) => ({ ...base, variante_id: m[0] + '-v', tienda_id: tienda, existencia: entre(1, tienda === 'st-tec' ? 12 : 24), actualizado: new Date().toISOString() })));
 
     // ---------- vistas (en la base son SQL: 0032_loyverse.sql) ----------
     const tk = new Map(lv_tickets.map((t) => [t.numero, t]));
@@ -88,13 +101,13 @@
     const v_lv_ventas_dia = agrupa(vivos, (t) => t.dia + t.tienda_id, (t) => ({ ...base, dia: t.dia, tienda_id: t.tienda_id, tickets: 0, venta: 0, impuestos: 0, descuentos: 0, propinas: 0, clientes: 0, _c: new Set() }),
       (a, t) => { if (t.tipo === 'SALE') a.tickets++; a.venta += signo(t) * t.total; a.impuestos += signo(t) * t.impuestos; a.propinas += t.propina; if (t.cliente_id) { a._c.add(t.cliente_id); a.clientes = a._c.size; } })
       .map(({ _c, ...x }) => x);
-    const v_lv_productos_dia = agrupa(lv_lineas.filter((l) => tk.has(l.numero) && !tk.get(l.numero).cancelado_en), (l) => tk.get(l.numero).dia + l.articulo_id,
+    const v_lv_productos_dia = agrupa(lv_lineas.filter((l) => tk.has(l.numero) && !tk.get(l.numero).cancelado_en), (l) => tk.get(l.numero).dia + tk.get(l.numero).tienda_id + l.articulo_id,
       (l) => ({ ...base, dia: tk.get(l.numero).dia, tienda_id: tk.get(l.numero).tienda_id, articulo_id: l.articulo_id, variante_id: l.variante_id, nombre: l.nombre, variante: null, cantidad: 0, venta: 0, costo: 0 }),
       (a, l) => { const s = signo(tk.get(l.numero)); a.cantidad += s * l.cantidad; a.venta += s * l.total; a.costo += s * (l.costo_total || 0); });
-    const v_lv_pagos_dia = agrupa(lv_pagos.filter((p) => tk.has(p.numero) && !tk.get(p.numero).cancelado_en), (p) => tk.get(p.numero).dia + p.nombre,
+    const v_lv_pagos_dia = agrupa(lv_pagos.filter((p) => tk.has(p.numero) && !tk.get(p.numero).cancelado_en), (p) => tk.get(p.numero).dia + tk.get(p.numero).tienda_id + p.nombre,
       (p) => ({ ...base, dia: tk.get(p.numero).dia, tienda_id: tk.get(p.numero).tienda_id, forma: p.nombre, tipo: p.tipo, monto: 0, pagos: 0 }),
       (a, p) => { a.monto += signo(tk.get(p.numero)) * (p.monto - (tk.get(p.numero).propina || 0)); a.pagos++; });
-    const v_lv_horas = agrupa(vivos, (t) => { const f = new Date(t.fecha); return t.dia + '-' + f.getHours(); },
+    const v_lv_horas = agrupa(vivos, (t) => { const f = new Date(t.fecha); return t.dia + t.tienda_id + '-' + f.getHours(); },
       (t) => { const f = new Date(t.fecha); return { ...base, tienda_id: t.tienda_id, dia: t.dia, dow: ((f.getDay() + 6) % 7) + 1, hora: f.getHours(), tickets: 0, venta: 0 }; },
       (a, t) => { if (t.tipo === 'SALE') a.tickets++; a.venta += signo(t) * t.total; });
 

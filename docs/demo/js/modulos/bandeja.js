@@ -1,31 +1,35 @@
 // Mensajes: WhatsApp, Instagram y Facebook en una sola bandeja. Cada conversación trae su canal, si vino de un anuncio
 // (Meta manda de cuál cuando el anuncio lleva a un mensaje) y una etiqueta que pone la IA: evento, pedido u otro.
 // Se contesta desde aquí (la IA sugiere la respuesta; la persona la revisa y la manda) o desde las apps de siempre.
-// Una solicitud de evento se vuelve ficha del calendario con un clic ("Crear evento desde esta conversación").
-// Tablas: conversaciones, mensajes, anuncios, eventos.
-import { db, esc, toast } from '../lib.js';
-import { V, CANALES, estilos, icoIA, hace, fichaEvento, tagEstado, fechaCorta, ir, paramHash } from './eventos-comun.js';
+// Una solicitud de evento se vuelve ficha del calendario con un clic ("Crear evento desde esta conversación") y un pedido
+// pedido por chat libre se vuelve pedido del tablero ("Crear pedido desde esta conversación").
+// Tablas: conversaciones, mensajes, anuncios, eventos, pedidos, menus.
+import { db, esc, toast, abrirModal, cerrarModal } from '../lib.js';
+import { V, CANALES, estilos, icoIA, hace, fichaEvento, tagEstado, fechaCorta, ir, paramHash, dinero, telBonito } from './eventos-comun.js';
 
 const ETIQ = { evento: 'Evento', pedido: 'Pedido a domicilio', otro: 'Otro' };
 const st = { sel: null, filtro: 'todos', canal: '', sugerir: null };
-let raiz, convs = [], msgs = [], anuncios = [], eventos = [];
+let raiz, mod, convs = [], msgs = [], anuncios = [], eventos = [], pedidos = [], menu = {};
+const EST_PED = { nuevo: 'Nuevo', cocina: 'En cocina', camino: 'En camino', entregado: 'Entregado', cancelado: 'Cancelado' };
 
-export async function render(view) {
-  raiz = view; estilos();
+export async function render(view, m) {
+  raiz = view; mod = m || mod; estilos();
   document.getElementById('page-actions').innerHTML = V.chat ? `<a class="btn btn-ghost" href="${esc(V.chat)}" target="_blank" rel="noopener">Probar el menú por chat</a>` : '';
   st.sel = paramHash('c') || st.sel;
   await cargar();
 }
 
 async function cargar() {
-  const [c, m, a, e] = await Promise.all([
+  const [c, m, a, e, pd, mn] = await Promise.all([
     db().from('conversaciones').select('*').order('ultimo_en', { ascending: false }),
     db().from('mensajes').select('*').order('creado_en'),
     db().from('anuncios').select('*'),
     db().from('eventos').select('id, estado, fecha, tipo, personas, conversacion_id'),
+    db().from('pedidos').select('id, numero, estado, total, conversacion_id, empresa_id'),
+    mod?.negocio?.empresa_id ? db().from('menus').select('datos').eq('empresa_id', mod.negocio.empresa_id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
   if (c.error) { raiz.innerHTML = `<div class="vacio">No se pudieron cargar los mensajes: ${esc(c.error.message)}</div>`; return; }
-  convs = c.data || []; msgs = m.data || []; anuncios = a.data || []; eventos = e.data || [];
+  convs = c.data || []; msgs = m.data || []; anuncios = a.data || []; eventos = e.data || []; pedidos = pd.data || []; menu = mn.data?.datos || {};
   if (!st.sel && window.innerWidth > 900) st.sel = convs[0]?.id || null;
   pintar();
 }
@@ -72,6 +76,7 @@ function pintar() {
   raiz.querySelectorAll('[data-conv]').forEach((b) => b.addEventListener('click', () => abrir(b.dataset.conv)));
   raiz.querySelector('.chb-volver')?.addEventListener('click', () => { st.sel = null; history.replaceState(null, '', ir('bandeja')); pintar(); });
   raiz.querySelector('#chb-crear')?.addEventListener('click', () => crearEvento(sel));
+  raiz.querySelector('#chb-crear-ped')?.addEventListener('click', () => crearPedido(sel));
   raiz.querySelector('#chb-enviar')?.addEventListener('click', () => enviar(sel));
   raiz.querySelector('#chb-sugerir')?.addEventListener('click', () => { st.sugerir = sel.id; pintar(); raiz.querySelector('#chb-texto')?.focus(); });
   raiz.querySelector('#chb-texto')?.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey)) enviar(sel); });
@@ -97,6 +102,7 @@ function chat(c) {
   const ad = anuncio(c.anuncio_id), k = CANALES[c.canal] || CANALES.pagina;
   const hilo = msgs.filter((m) => m.conversacion_id === c.id);
   const ev = eventos.find((e) => e.id === c.evento_id || e.conversacion_id === c.id);
+  const ped = pedidos.find((p) => p.id === c.pedido_id || p.conversacion_id === c.id);
   return `
     <div class="chb-chat-head">
       <button class="btn btn-ghost btn-sm chb-volver">‹ Mensajes</button>
@@ -105,7 +111,9 @@ function chat(c) {
       <label style="display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--text-2)">${icoIA}<select id="chb-etiq" style="height:30px">${Object.entries(ETIQ).map(([v, t]) => `<option value="${v}"${v === c.etiqueta ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
     </div>
     ${ev ? `<div class="chb-hecho"><span>✓ Ya está en el calendario: <b>${esc(ev.tipo)} · ${esc(ev.personas ?? '?')} personas · ${esc(fechaCorta(ev.fecha))}</b> ${tagEstado(ev.estado)}</span><a class="btn btn-ghost btn-sm" href="${ir('eventos', 'e=' + ev.id)}">Ver evento</a></div>`
-      : c.etiqueta === 'evento' ? `<div class="chb-ia-caja" id="chb-ia-caja"><p><b>${icoIA} Esta conversación pide un evento</b>La IA puede llenar la ficha con lo que dice el chat: fecha, hora, personas, lugar y paquete.</p><button class="btn btn-primary" id="chb-crear">Crear evento desde esta conversación</button></div>` : ''}
+      : c.etiqueta === 'evento' ? `<div class="chb-ia-caja" id="chb-ia-caja"><p><b>${icoIA} Esta conversación pide un evento</b>La IA puede llenar la ficha con lo que dice el chat: fecha, hora, personas, lugar y paquete.</p><button class="btn btn-primary" id="chb-crear">Crear evento desde esta conversación</button></div>`
+      : ped ? `<div class="chb-hecho"><span>✓ Ya está en Pedidos: <b>#${esc(ped.numero)} · ${dinero(ped.total)}</b> <span class="chb-est">${esc(EST_PED[ped.estado] || ped.estado)}</span></span><a class="btn btn-ghost btn-sm" href="${ir('pedidos', 'p=' + ped.id)}">Ver pedido</a></div>`
+      : c.etiqueta === 'pedido' ? `<div class="chb-ia-caja" id="chb-ia-caja"><p><b>${icoIA} Esta conversación pide un pedido</b>La IA arma el pedido con lo que dice el chat: qué pidió, dirección, teléfono, total y forma de pago.</p><button class="btn btn-primary" id="chb-crear-ped">Crear pedido desde esta conversación</button></div>` : ''}
     <div class="chb-hilo">${hilo.map((m) => `<div class="chb-b ${m.de}">${esc(m.texto)}<small>${m.de === 'javi' ? esc(V.dueno) + ' · ' : ''}${new Date(m.creado_en).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}</small></div>`).join('')}</div>
     ${responder(c)}`;
 }
@@ -168,4 +176,92 @@ async function crearEvento(c) {
     alGuardar: async (ev) => { await db().from('conversaciones').update({ evento_id: ev.id }).eq('id', c.id); await cargar(); },
   });
   pintar();
+}
+
+// GA-06: muchos pedidos llegan por chat libre, no por el menú. La IA lee la conversación y arma el pedido (productos,
+// entrega, dirección, sucursal que prepara, teléfono, pago y total); la persona lo revisa y lo manda al tablero.
+// En el demo la lectura ya viene hecha (c.pedidoIA); en el sistema real la hace Claude con el historial y los precios del Menú.
+async function crearPedido(c) {
+  const caja = raiz.querySelector('#chb-ia-caja');
+  caja.innerHTML = '<span class="chb-cargando-ia"><i></i>La IA está leyendo la conversación…</span>';
+  await new Promise((r) => setTimeout(r, 1400));
+  const x = c.pedidoIA || {};
+  const ia = [...Object.keys(x).filter((k) => x[k] != null && x[k] !== '' && !(Array.isArray(x[k]) && !x[k].length)), 'contacto', ...(c.telefono ? ['telefono'] : [])];
+  fichaPedido(c, { contacto: c.contacto, telefono: c.telefono || '', ...x }, ia);
+  pintar();
+}
+
+function fichaPedido(c, p, ia) {
+  const prod = menu.producto || {}, precioBase = Number(prod.precio || 0);
+  const envioBase = Number(p.envio ?? (typeof menu.envio === 'object' ? menu.envio?.costo : menu.envio) ?? 35);
+  const sucs = V.sucursales || [];
+  const marca = (k) => (ia.includes(k) ? ' class="chb-ia"' : '');
+  const fila = (i = {}) => `<div class="pp-fila"><input type="number" min="1" name="cant" value="${esc(i.cantidad ?? 1)}" aria-label="Cantidad">
+    <input type="text" name="desc" value="${esc(i.resumen || '')}" placeholder="Salsa · proteína · extras" aria-label="Qué lleva">
+    <input type="number" min="0" step="1" name="precio" value="${esc(i.precio_unit ?? precioBase)}" aria-label="Precio"><button type="button" class="pp-quitar" aria-label="Quitar">×</button></div>`;
+  const m = abrirModal({
+    titulo: 'Nuevo pedido desde la conversación', ancho: true,
+    cuerpo: `<form class="form chb-ficha" id="pp-f">
+      ${ia.length ? `<p class="chb-ia-nota">${icoIA} La IA armó el pedido con lo que dice la conversación. Revisa lo marcado antes de mandarlo a cocina.</p>` : ''}
+      <label${marca('items')}>¿Qué pidió? <small style="font-weight:400;color:var(--text-3)">cantidad · qué lleva · precio c/u (${esc(prod.nombre || 'producto')})</small>
+        <div id="pp-items">${(p.items?.length ? p.items : [{}]).map(fila).join('')}</div></label>
+      <button type="button" class="btn btn-ghost btn-sm" id="pp-mas" style="justify-self:start">+ Otro producto</button>
+      <div class="form-3">
+        <label${marca('entrega')}>Entrega<select name="entrega"><option value="domicilio"${p.entrega !== 'recoger' ? ' selected' : ''}>A domicilio</option><option value="recoger"${p.entrega === 'recoger' ? ' selected' : ''}>Pasa a recoger</option></select></label>
+        <label${marca('sucursal')}>Sucursal que prepara<select name="sucursal"><option value="">Por definir</option>${sucs.map((s) => `<option${s === p.sucursal ? ' selected' : ''}>${esc(s)}</option>`).join('')}</select></label>
+        <label${marca('envio')} id="pp-envio-l">Envío<input type="number" min="0" step="5" name="envio" value="${esc(envioBase)}"></label>
+      </div>
+      <label${marca('direccion')} id="pp-dir-l">Dirección<input type="text" name="direccion" value="${esc(p.direccion || '')}" placeholder="Calle, número, colonia y referencia"></label>
+      <div class="form-2">
+        <label${marca('contacto')}>Cliente<input type="text" name="contacto" value="${esc(p.contacto || '')}"></label>
+        <label${marca('telefono')}>Teléfono<input type="tel" name="telefono" value="${esc(telBonito(p.telefono || ''))}"></label>
+      </div>
+      <div class="form-2">
+        <label${marca('pago')}>Pago<select name="pago">${['Efectivo', 'Transferencia', 'Tarjeta'].map((o) => `<option${o === p.pago ? ' selected' : ''}>${o}</option>`).join('')}</select></label>
+        <label${marca('cambio')} id="pp-cambio-l">Paga con<input type="text" name="cambio" value="${esc(p.cambio || '')}" placeholder="Exacto, $500, $1,000…"></label>
+      </div>
+      <label${marca('notas')}>Notas<textarea name="notas" rows="2">${esc(p.notas || '')}</textarea></label>
+      <p class="chb-cotiza" id="pp-total"></p>
+      <p class="chb-origen">Llegó por <b>${esc((CANALES[c.canal] || CANALES.pagina).t)}</b>. Al crearlo entra a Pedidos como <b>Nuevo</b>; la respuesta al cliente la mandas tú desde el chat.</p>
+    </form>`,
+    pie: '<button class="btn btn-ghost" data-cerrar>Cancelar</button><button class="btn btn-primary" id="pp-guardar">Crear pedido</button>',
+  });
+  const F = m.querySelector('#pp-f'), lista = m.querySelector('#pp-items');
+  const items = () => [...lista.querySelectorAll('.pp-fila')].map((r) => ({ cantidad: Number(r.querySelector('[name=cant]').value) || 0, resumen: r.querySelector('[name=desc]').value.trim(), precio_unit: Number(r.querySelector('[name=precio]').value) || 0 })).filter((i) => i.cantidad && (i.resumen || i.precio_unit));
+  const calc = () => {
+    const dom = F.entrega.value === 'domicilio', ef = F.pago.value === 'Efectivo';
+    m.querySelector('#pp-dir-l').style.display = dom ? '' : 'none'; m.querySelector('#pp-envio-l').style.display = dom ? '' : 'none';
+    m.querySelector('#pp-cambio-l').style.visibility = ef ? '' : 'hidden';
+    const l = items(), sub = l.reduce((s, i) => s + i.cantidad * i.precio_unit, 0), env = dom ? Number(F.envio.value) || 0 : 0;
+    m.querySelector('#pp-total').innerHTML = l.length ? `<b>${l.reduce((s, i) => s + i.cantidad, 0)} producto(s): ${dinero(sub)}${env ? ` + ${dinero(env)} de envío` : ''} = ${dinero(sub + env)}</b>` : 'Agrega lo que pidió.';
+    return { l, sub, env };
+  };
+  const enlazar = () => lista.querySelectorAll('.pp-quitar').forEach((b) => { b.onclick = () => { if (lista.children.length > 1) b.parentElement.remove(); calc(); }; });
+  m.querySelector('#pp-mas').addEventListener('click', () => { lista.insertAdjacentHTML('beforeend', fila()); enlazar(); calc(); });
+  F.addEventListener('input', calc); F.addEventListener('change', calc); enlazar(); calc();
+  m.querySelector('[data-cerrar]')?.addEventListener('click', cerrarModal);
+  m.querySelector('#pp-guardar').addEventListener('click', async (ev) => {
+    const { l, sub, env } = calc();
+    if (!l.length) return toast('Agrega lo que pidió', true);
+    const dom = F.entrega.value === 'domicilio';
+    if (dom && !F.direccion.value.trim()) return toast('Falta la dirección', true);
+    if (!dom && !F.sucursal.value) return toast('¿En qué sucursal pasa a recoger?', true);
+    ev.currentTarget.disabled = true;
+    const empresa = mod?.negocio?.empresa_id || null;
+    const ult = pedidos.filter((x) => !empresa || x.empresa_id === empresa).reduce((n, x) => Math.max(n, Number(x.numero) || 0), 0);
+    const fila_ = {
+      empresa_id: empresa, numero: ult + 1, canal: c.canal, conversacion_id: c.id, contacto: F.contacto.value.trim() || c.contacto,
+      telefono: F.telefono.value.replace(/\D/g, '').slice(-10) || null, entrega: F.entrega.value,
+      direccion: dom ? F.direccion.value.trim() : null, mapa: dom ? (p.mapa || null) : null, sucursal: F.sucursal.value || null,
+      items: l.map((i) => ({ cantidad: i.cantidad, producto: prod.nombre || 'Producto', precio_unit: i.precio_unit, total: i.cantidad * i.precio_unit, resumen: i.resumen })),
+      pago: F.pago.value, cambio: F.pago.value === 'Efectivo' ? (F.cambio.value.trim() || null) : null, pagado: false,
+      subtotal: sub, envio: env, total: sub + env, notas: F.notas.value.trim() || null, estado: 'nuevo', cambios: [], creado_en: new Date().toISOString(), por: 'conversacion',
+    };
+    const r = await db().from('pedidos').insert(fila_).select().single();
+    if (r.error) { ev.currentTarget.disabled = false; return toast(r.error.message, true); }
+    await db().from('conversaciones').update({ pedido_id: r.data.id }).eq('id', c.id);
+    cerrarModal();
+    toast(`Pedido #${r.data.numero} creado: ya está en Pedidos como Nuevo ✓`);
+    await cargar();
+  });
 }
