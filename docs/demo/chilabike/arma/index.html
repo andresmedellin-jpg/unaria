@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
-:root { --negro:#121110; --crema:#FBF6EF; --papel:#fff; --linea:#E9E1D6; --naranja:#F26B1D; --naranja-osc:#C9500C; --suave:#FDE8DA; --texto:#2B2724; --gris:#6E6760;
+:root { --negro:#121110; --crema:#FBF6EF; --papel:#fff; --linea:#E9E1D6; --naranja:#F66D07; --naranja-osc:#C9500C; --suave:#FDE8DA; --texto:#2B2724; --gris:#6E6760;
   --f-disp:'Bricolage Grotesque','Arial Black',Arial,sans-serif; --f-txt:'DM Sans',Arial,sans-serif; color-scheme:light; }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html, body { margin:0; height:100%; }
@@ -24,7 +24,7 @@ body { background:var(--crema); color:var(--texto); font:400 16px/1.45 var(--f-t
 .app { max-width:480px; margin:0 auto; min-height:100%; display:flex; flex-direction:column; background:var(--crema); }
 header { position:sticky; top:0; z-index:5; background:var(--negro); color:#fff; padding:12px 16px 10px; }
 header .fila { display:flex; align-items:center; gap:10px; }
-header .logo { width:30px; height:30px; border-radius:50%; background:var(--naranja); display:grid; place-items:center; font-size:14px; }
+header .logo { width:32px; height:32px; border-radius:50%; background:#130E0C; display:grid; place-items:center; } header .logo img { width:84%; height:84%; object-fit:contain; }
 header b { font-family:var(--f-disp); font-size:18px; letter-spacing:-.01em; }
 header small { margin-left:auto; color:#BDB4A9; font-size:12px; }
 .pasos { display:flex; gap:4px; margin-top:10px; }
@@ -106,7 +106,7 @@ label.campo { display:grid; gap:6px; font-weight:700; font-size:14px; margin-bot
 <body>
 <div class="app">
   <header>
-    <div class="fila"><span class="logo">🌶</span><b id="h-tit">Arma tu cajita</b><small id="h-canal"></small></div>
+    <div class="fila"><span class="logo"><img src="../../img/clientes/chilabike-logo.png" alt=""></span><b id="h-tit">Arma tu cajita</b><small id="h-canal"></small></div>
     <div class="pasos" id="barra"></div>
   </header>
   <main id="main"><p class="ayuda">Cargando el menú…</p></main>

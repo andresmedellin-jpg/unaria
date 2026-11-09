@@ -206,8 +206,10 @@ if (MARCA.negocios) {
     MODULOS.push({ ...b, id, grupo: n.nombre, titulo: (n.titulos || {})[mid] || b.titulo, vista: b.vista || mid, negocio: n, opcional: true });
     ids.push(id);
   }));
-  // Ícono del negocio: su isotipo (SVG de una tinta, se pinta con sus colores) o sus iniciales
-  const insignia = (n) => n.isotipo
+  // Ícono del negocio: su logo a color (imagen), su isotipo (de una tinta, se pinta con sus colores) o sus iniciales
+  const insignia = (n) => n.logo
+    ? `<span class="neg-ico" style="background:${n.colorFondo || n.color || 'var(--primary)'}"><img src="${n.logo}" alt=""></span>`
+    : n.isotipo
     ? `<span class="neg-ico" style="background:${n.colorFondo || n.color || 'var(--primary)'}"><i style="background:${n.colorTinta || '#fff'};-webkit-mask:url(${n.isotipo}) center/contain no-repeat;mask:url(${n.isotipo}) center/contain no-repeat"></i></span>`
     : `<span class="neg-ico" style="background:${n.color || 'var(--primary)'}">${n.inicial || n.nombre.charAt(0)}</span>`;
   MARCA.negocios.forEach((n) => { n.insignia = insignia(n); });

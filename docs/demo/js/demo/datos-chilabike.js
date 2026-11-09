@@ -7,7 +7,7 @@
 // (localStorage "chilabike-demo-solicitudes") y aquí se agrega como evento nuevo.
 (function () {
   'use strict';
-  const COLOR = '#C9500C';
+  const COLOR = '#F66D07';
   window.__MARCA = {
     demo: true, contacto: 'Monterrey, N.L.', asistente: false,
     nombre: 'Grupo A.M', marca: ['Grupo A.M'], logos: [],
@@ -18,13 +18,17 @@
     tema: 'mando',
     menuGeneral: [{ id: 'mando', titulo: 'Mando' }],
     negocios: [
-      { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', color: '#C9500C', empresa_id: 'emp-chb',
-        modulos: ['bandeja', 'pedidos', 'eventos', 'menu', 'anuncios'], titulos: { bandeja: 'Mensajes' } },
+      { id: 'chilabike', nombre: 'Chilabike', giro: 'Chilaquiles · eventos y domicilio', inicial: 'Ch', empresa_id: 'emp-chb',
+        modulos: ['bandeja', 'pedidos', 'eventos', 'menu', 'anuncios'], titulos: { bandeja: 'Mensajes' },
+        // Manual de identidad: naranja #F66D07 y negro #130E0C; letras Poppins y Satisfy. Ícono: su logo (triángulo con "Chila Bike")
+        color: '#F66D07', color2: '#C9500C', colorSuave: '#FEEBDD', colorFondo: '#130E0C', logo: 'img/clientes/chilabike-logo.png' },
       { id: 'curandero', nombre: 'Curandero', giro: 'Café y pan · Mitras', inicial: 'Cu', empresa_id: 'emp-cur', modulos: ['ventas'],
         // Manual de identidad (Uncommon Studio): #2e3526 · #697148 · #D1C9B3; letras King Graphics y Bicyclette
         color: '#697148', color2: '#2e3526', colorSuave: '#ECE8DC', colorFondo: '#697148', colorTinta: '#D1C9B3', isotipo: 'img/clientes/curandero-isotipo.svg' },
-      { id: 'lattico', nombre: 'Lattico', giro: 'Por conectar', inicial: 'La', color: '#6B4FA0', empresa_id: 'emp-lat', modulos: ['ventas'],
-        notaLoyverse: 'Lattico todavía no tiene Loyverse. En cuanto lo contrate, aquí se conecta con su propio token y sus ventas quedan separadas de las de Curandero.' },
+      { id: 'lattico', nombre: 'L’Attico', giro: 'Pasta en caja · Mitras', inicial: 'LA', empresa_id: 'emp-lat', modulos: ['ventas'],
+        // Manual de identidad: vino #5E1C39, crema #E9DABF y negro #130E0C; letras Playfair Display y Peradony. Ícono: la escalera
+        color: '#5E1C39', color2: '#3F1226', colorSuave: '#F3ECE0', colorFondo: '#5E1C39', colorTinta: '#E9DABF', isotipo: 'img/clientes/lattico-isotipo.png',
+        notaLoyverse: 'L’Attico todavía no tiene Loyverse. En cuanto lo contrate, aquí se conecta con su propio token y sus ventas quedan separadas de las de Curandero.' },
       { id: 'casamaria', nombre: 'Casa María', giro: 'Rentas', inicial: 'CM', color: '#8A6D1F', empresa_id: 'emp-cm', modulos: ['preparacion'],
         titulos: { preparacion: 'Rentas y plano' }, pendiente: 'Falta el plano y la lista de rentas',
         preparacion: { titulo: 'Casa María: rentas y plano', texto: 'Aquí va a vivir todo lo de la casa: el plano final y la administración de sus rentas.',
@@ -212,7 +216,7 @@
     ];
     const E1 = { id: 'emp-chb', org_id: ORG, nombre: 'Chilabike', nombre_corto: 'Chilabike', color: COLOR, activo: true };
     const empresas = [E1, { id: 'emp-cur', org_id: ORG, nombre: 'Curandero', nombre_corto: 'Curandero', color: '#697148', activo: true },
-      { id: 'emp-lat', org_id: ORG, nombre: 'Lattico', nombre_corto: 'Lattico', color: '#6B4FA0', activo: true },
+      { id: 'emp-lat', org_id: ORG, nombre: 'L’Attico', nombre_corto: 'L’Attico', color: '#5E1C39', activo: true },
       { id: 'emp-cm', org_id: ORG, nombre: 'Casa María', nombre_corto: 'Casa María', color: '#8A6D1F', activo: true }];
     const lv = window.__DEMO_LOYVERSE ? window.__DEMO_LOYVERSE(ORG) : {};
     const centros = window.__MARCA.chilabike.sucursales.map((s, k) => ({ id: 'suc-' + k, org_id: ORG, empresa_id: E1.id, nombre: s, tipo: 'sucursal', activo: true, en_gastos: true }));

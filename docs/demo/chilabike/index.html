@@ -13,13 +13,13 @@
 <meta name="color-scheme" content="light only">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=DM+Sans:wght@400;500;700&family=Satisfy&display=swap">
 <style>
 :root {
   --negro: #121110; --negro-2: #1D1B19; --crema: #FBF6EF; --papel: #FFFFFF; --linea: #E9E1D6;
-  --naranja: #F26B1D; --naranja-osc: #C9500C; --naranja-suave: #FDE8DA; --texto: #2B2724; --gris: #6E6760;
+  --naranja: #F66D07; --naranja-osc: #C9500C; --naranja-suave: #FDE8DA; --texto: #2B2724; --gris: #6E6760;
   --verde-wa: #1F8F55;
-  --f-disp: 'Bricolage Grotesque', 'Arial Black', Arial, sans-serif;
+  --f-disp: 'Poppins', 'Arial Black', Arial, sans-serif; /* manual de marca: Poppins y Satisfy */
   --f-txt: 'DM Sans', Arial, sans-serif;
   color-scheme: light;
 }
@@ -39,7 +39,7 @@ h1, h2, h3 { font-family: var(--f-disp); color: var(--negro); margin: 0; letter-
 .top { position: sticky; top: 0; z-index: 20; background: rgba(18,17,16,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .top .c { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .marca { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-family: var(--f-disp); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
-.marca i { width: 34px; height: 34px; border-radius: 50%; background: var(--naranja); display: grid; place-items: center; font-style: normal; font-size: 15px; color: var(--negro); }
+.marca img { width: 42px; height: 42px; object-fit: contain; display: block; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 2px solid transparent;
   font: 700 16px var(--f-txt); text-decoration: none; cursor: pointer; transition: transform .15s ease, background .15s ease; }
 .btn:active { transform: scale(.97); }
@@ -206,7 +206,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
 
 <header class="top">
   <div class="c">
-    <a class="marca" href="#"><i>🌶</i>Chilabike</a>
+    <a class="marca" href="#"><img src="../img/clientes/chilabike-logo.png" alt="">Chilabike</a>
     <a class="btn btn-n" href="#cotiza">Cotizar</a>
   </div>
 </header>
@@ -382,7 +382,7 @@ footer .unaria { font-size: 13px; color: #7C746B; }
 
 <footer>
   <div class="c">
-    <a class="marca" href="#"><i>🌶</i>Chilabike</a>
+    <a class="marca" href="#"><img src="../img/clientes/chilabike-logo.png" alt="">Chilabike</a>
     <div>Instagram <a href="https://www.instagram.com/chilabike.mty/" target="_blank" rel="noopener">@chilabike.mty</a> · WhatsApp 81 2657 2155</div>
     <div><a href="#" data-pendiente>Aviso de privacidad</a></div>
     <div>Si los pruebas, repites · #aGrilearRaza</div>
