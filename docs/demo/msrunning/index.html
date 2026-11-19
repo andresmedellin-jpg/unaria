@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es" style="color-scheme:light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>MS Running · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: la marca de msrunning.com: oscura, seria, de alto rendimiento.
+   IDEA: el tablero de un equipo de competencia, no una app de juguete.
+   PICTURE: la bandeja con la lectura de la IA; en el atleta, su semana como lista de días.
+   COLOUR: negro #0E0E0F, hueso #F5F0E6 y naranja #FF4D2E, igual que su página.
+   TYPE: Archivo Black en mayúsculas para títulos, Inter para texto, JetBrains Mono para etiquetas. LAYOUT: barra, 4 pestañas, rejilla de 3 columnas que se apila en celular. */
+:root{color-scheme:light;--bg:#f5f0e6;--card:#fffdf8;--card2:#faf6ee;--ink:#0e0e0f;--on:#fffdf8;--mute:rgba(14,14,15,.58);--line:rgba(14,14,15,.12);--red:#ff4d2e;--redsoft:rgba(255,77,46,.08);--sel:rgba(14,14,15,.04);
+--z1:rgba(14,14,15,.18);--z2:rgba(14,14,15,.38);--z3:rgba(14,14,15,.7);--z4:#ff9a7f;--z5:#ff4d2e;--ok:#0e0e0f;--warn:#c25a00}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Archivo Black",Inter,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:-.01em;margin:0;line-height:1.05}
+.num{font-family:"Archivo Black",Inter,sans-serif;font-weight:400;letter-spacing:-.02em}
+.mono,.ch,.tag,.pill,.note,.k,th,.filters button,.seg button,nav button,.ptabs button,button{font-family:"JetBrains Mono",ui-monospace,monospace}
+button,input,textarea,select{font-size:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;border-radius:4px;border:1px solid var(--line);background:transparent;padding:0 16px;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+button:hover{border-color:var(--mute)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.prim,.redb{background:var(--red);color:var(--on);border-color:var(--red);font-weight:600}
+.prim:hover,.redb:hover{filter:brightness(1.08);border-color:var(--red)}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px max(3vw,14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand b{font-family:"Archivo Black";font-weight:400;text-transform:uppercase;letter-spacing:.02em}
+.brand small{color:var(--mute);font:12px "JetBrains Mono",monospace}
+.logo{width:42px;height:42px;border-radius:50%;box-shadow:0 0 0 1px var(--line)}
+.seg{display:flex;border:1px solid var(--line);border-radius:4px;padding:3px;gap:3px}
+.seg button{border:0;min-height:38px;color:var(--mute)}
+.seg button.on{background:var(--ink);color:var(--on)}
+nav{display:flex;gap:4px;flex-wrap:wrap;padding:10px max(3vw,14px) 0;border-bottom:1px solid var(--line)}
+nav button{border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--mute)}
+nav button.on{color:var(--ink);border-color:var(--red)}
+nav .cnt{color:var(--red);margin-left:6px}
+main{padding:18px max(3vw,14px) 48px;max-width:1440px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;margin-bottom:16px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.stats .card{border:0;border-radius:0}
+.stat{padding:16px 18px}.stat .num{font-size:clamp(30px,3vw,40px);line-height:1}.stat span{display:block;margin-top:6px;color:var(--mute);font-size:13px}
+.inbox{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr) minmax(0,340px);gap:12px;align-items:start}
+.list{overflow:hidden}
+.filters{display:flex;gap:6px;flex-wrap:wrap;padding:12px}
+.filters button{min-height:32px;padding:0 10px;font-size:11px;border-radius:99px;color:var(--mute)}
+.filters button.on{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.conv{display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:14px 12px;border-top:1px solid var(--line);cursor:pointer;align-items:start;border-left:2px solid transparent}
+.conv:hover{background:var(--sel)}
+.conv.on{background:var(--sel);border-left-color:var(--red)}
+.conv b{display:block;font-weight:600}.conv p{margin:3px 0 0;color:var(--mute);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:12px "JetBrains Mono",monospace;color:var(--ink);border:1px solid var(--line);background:var(--card2)!important}
+.ch,.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;border-radius:3px;padding:1px 6px;white-space:nowrap;border:1px solid var(--line);color:var(--mute)}
+.ch::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px;background:var(--mute)}
+.ch.wa::before{background:#3ddc84}.ch.ig::before,.ch.igp::before{background:#ff7aa8}.ch.web::before{background:var(--ink)}.ch.app::before{background:var(--red)}
+.tag.les{background:var(--red);color:var(--on);border-color:var(--red)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block}
+.chat{display:flex;flex-direction:column;min-height:580px}
+.chead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msgs{flex:1;padding:16px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:80%;padding:10px 14px;border-radius:6px;background:var(--card2);border:1px solid var(--line)}
+.m.me{align-self:flex-end;background:var(--ink);color:var(--on);border-color:var(--ink)}
+.m small{display:block;opacity:.55;font:11px "JetBrains Mono",monospace;margin-top:4px}
+.reply{border-top:1px solid var(--line);padding:14px;display:grid;gap:10px}
+.reply textarea,.plan textarea,#q{width:100%;min-height:120px;border:1px solid var(--line);border-radius:4px;padding:12px;background:var(--bg);font:15px/1.5 Inter,sans-serif;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ai{padding:16px;display:grid;gap:14px}
+.ai h3{font-size:15px}
+.k{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.box{border:1px solid var(--line);border-radius:4px;padding:12px 14px;background:var(--card2)}
+.box.alert{border-color:var(--red);background:var(--redsoft)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}.kv>span:nth-child(odd){color:var(--mute);font:11px/1.9 "JetBrains Mono",monospace;text-transform:uppercase}
+.zones{display:grid;gap:5px}
+.zr{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;font-size:13px}
+.zr b{font:11px "JetBrains Mono",monospace;color:var(--mute)}
+.zr i{height:6px;border-radius:1px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;color:var(--mute);font-weight:400;text-transform:uppercase;letter-spacing:.05em}
+td.r,th.r{text-align:right;white-space:nowrap}
+.bar{height:4px;background:var(--line);border-radius:1px;overflow:hidden;min-width:70px}.bar i{display:block;height:100%}
+.pill{font-size:11px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;vertical-align:1px;background:currentColor}
+.p-ok{color:var(--mute)}.p-warn{color:var(--warn)}.p-bad{color:var(--red)}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:start}
+.pad{padding:18px}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;margin-top:10px;background:var(--line);border:1px solid var(--line)}
+.wk div{background:var(--card);padding:8px;font-size:13px;min-height:84px}
+.wk b{display:block;font:11px "JetBrains Mono",monospace;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.note{font-size:12px;color:var(--mute)}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:var(--on);padding:12px 18px;border-radius:4px;transition:transform .3s;z-index:9;max-width:92vw;font:13px "JetBrains Mono",monospace}
+#toast.on{transform:translateX(-50%)}
+.phone{max-width:430px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.phead{padding:22px 20px 18px;background:var(--card2);border-bottom:1px solid var(--line)}
+.phead .note{color:var(--red)!important;opacity:1!important;text-transform:uppercase;letter-spacing:.06em}
+.phead h2{font-size:30px;margin-top:6px}
+.count{display:flex;gap:12px;align-items:baseline;margin-top:14px}
+.count .num{font-size:64px;line-height:.9;color:var(--red)}
+.count span:last-child{font:12px "JetBrains Mono",monospace;color:var(--mute);text-transform:uppercase}
+.ptabs{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line)}
+.ptabs button{border:0;border-radius:0;font-size:11px;color:var(--mute);min-height:50px;padding:0 4px}
+.ptabs button.on{color:var(--ink);box-shadow:inset 0 -2px var(--red)}
+.pbody{padding:16px;display:grid;gap:10px;min-height:520px;align-content:start}
+.pbody h3{font-size:16px;margin-top:6px}
+.day{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:12px;background:var(--card2)}
+.day.today{border-color:var(--red)}
+.day .d{font:400 24px/1 "Archivo Black",sans-serif;text-align:center}.day .d small{display:block;font:10px "JetBrains Mono",monospace;color:var(--mute);text-transform:uppercase;margin-top:4px}
+.day b{font-weight:600}.day p{margin:3px 0 0;font-size:13px;color:var(--mute)}
+.chk{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1px solid var(--line)}
+.chk.y{background:var(--ink);border-color:var(--ink);color:var(--on)}
+.zb{display:inline-block;font:10px "JetBrains Mono",monospace;color:var(--on);border-radius:2px;padding:1px 5px;margin-left:4px;vertical-align:2px}
+.split{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.split div{background:var(--card2);padding:12px 6px;text-align:center}
+.split .num{font-size:26px;margin-top:4px}
+.login{max-width:400px;margin:40px auto;padding:26px;display:grid;gap:14px}
+.login label{font:11px "JetBrains Mono",monospace;text-transform:uppercase;color:var(--mute);display:grid;gap:6px}
+.login input{width:100%;min-height:48px;border:1px solid var(--line);border-radius:4px;padding:0 12px;background:var(--bg);font:16px Inter,sans-serif;color:var(--ink);text-transform:none}
+ul.cl{margin:0;padding-left:18px;color:var(--mute);font-size:14px}
+@media(max-width:1100px){.inbox{grid-template-columns:minmax(0,300px) minmax(0,1fr)}.inbox .aiw{grid-column:1/-1}}
+@media(max-width:760px){.inbox,.two{grid-template-columns:1fr}.wk{grid-template-columns:repeat(2,minmax(0,1fr))}.m{max-width:92%}.chat{min-height:0}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute);font:11px "JetBrains Mono",monospace;text-transform:uppercase}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+  <div class="brand"><img class="logo" alt="MS Running Team" src="data:image/png;base64,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"><div><b>MS Running</b><br><small>Coach Marcelo Colorado · demo de Unaria con datos de ejemplo</small></div></div>
+  <div class="seg" role="tablist"><button id="vCoach" class="on">Portal de Marcelo</button><button id="vAtl">App del atleta</button></div>
+</header>
+<div id="coach">
+  <nav id="tabs"></nav>
+  <main id="cview"></main>
+</div>
+<div id="atleta" hidden><main id="aview"></main></div>
+<div id="toast" role="status"></div>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),3200)};
+const ZC=['var(--z1)','var(--z2)','var(--z3)','var(--z4)','var(--z5)'];
+const CH={wa:'WhatsApp',ig:'Instagram negocio',igp:'Instagram personal',web:'msrunning.com',app:'App'};
+const COL=['#111','#3a3a3a','#555','#222','#6b6b6b','#2b2b2b','#444','#000'];
+
+const athletes=[
+ {id:'andres',n:'Andrés Medellín',ev:'IRONMAN 70.3 La Quinta',f:'6 dic',dias:17,plan:'Triatlón',cump:92,pago:'pagado',prueba:'3 nov',peso:74,
+  zr:['< 128','128–145','146–158','159–170','> 170'],rit:'Z2 5:35–6:05 /km',ftp:235,zb:['< 130 W','130–176 W','177–211 W','212–246 W','> 246 W'],css:'1:52 /100 m',
+  meta:['0:33','2:47','1:52']},
+ {id:'pepe',n:'Pepe Garza',ev:'Maratón Monterrey',f:'13 dic',dias:24,plan:'Maratón',cump:85,pago:'pagado',prueba:'27 oct',peso:72,zr:['< 130','130–148','149–160','161–172','> 172'],rit:'Z2 5:20–5:45 /km'},
+ {id:'ana',n:'Ana Lucía Treviño',ev:'Medio maratón Saltillo',f:'7 dic',dias:18,plan:'Running',cump:78,pago:'pendiente',prueba:'3 nov',peso:58,zr:['< 135','135–152','153–164','165–176','> 176'],rit:'Z2 6:00–6:30 /km'},
+ {id:'luis',n:'Luis Villarreal',ev:'IRONMAN 70.3 Monterrey',f:'abr 2027',dias:150,plan:'Triatlón',cump:20,pago:'vencido',prueba:'6 oct',peso:81,zr:['< 125','125–142','143–155','156–167','> 167'],rit:'Z2 5:50–6:20 /km'},
+ {id:'rodrigo',n:'Rodrigo Elizondo',ev:'Ultra 50K Chipinque',f:'25 ene',dias:67,plan:'Trail',cump:96,pago:'pagado',prueba:'17 nov',peso:69,zr:['< 132','132–150','151–162','163–174','> 174'],rit:'Z2 5:10–5:40 /km'},
+ {id:'sofia',n:'Sofía Cantú',ev:'HYROX Monterrey',f:'mar 2027',dias:110,plan:'Hyrox',cump:88,pago:'pagado',prueba:'10 nov',peso:60,zr:['< 136','136–153','154–165','166–177','> 177'],rit:'Z2 6:10–6:40 /km'},
+ {id:'diego',n:'Diego Sada',ev:'IRONMAN 70.3 La Quinta',f:'6 dic',dias:17,plan:'Triatlón',cump:81,pago:'pendiente',prueba:'3 nov',peso:77,zr:['< 127','127–144','145–157','158–169','> 169'],rit:'Z2 5:25–5:55 /km',ftp:260,zb:['< 143','143–195','196–234','235–273','> 273']},
+ {id:'mariana',n:'Mariana Garza',ev:'Maratón Monterrey',f:'13 dic',dias:24,plan:'Maratón',cump:90,pago:'pagado',prueba:'27 oct',peso:55,zr:['< 138','138–155','156–167','168–178','> 178'],rit:'Z2 6:05–6:35 /km'}
+];
+const A=id=>athletes.find(a=>a.id===id);
+const precios=new Proxy({},{get:()=>999});
+/* ---------- Hidratación: perfil de sudor de cada atleta ---------- */
+const SW={andres:{tasa:1.1,na:1200,tol:80,src:'Prueba de sudor del 3 nov'},diego:{tasa:0.9,na:800,tol:90,src:'Prueba de sudor del 3 nov'},
+ pepe:{tasa:1.0,na:900,tol:70,src:'Prueba de sudor del 27 oct'},ana:{tasa:0.7,na:700,tol:60,src:'Estimado (sin prueba de sudor)'},
+ luis:{tasa:1.2,na:950,tol:60,src:'Estimado (sin prueba de sudor)'},rodrigo:{tasa:0.9,na:1000,tol:70,src:'Prueba de sudor del 17 nov'},
+ sofia:{tasa:0.8,na:800,tol:60,src:'Estimado (sin prueba de sudor)'},mariana:{tasa:0.6,na:850,tol:60,src:'Prueba de sudor del 27 oct'}};
+const r50=v=>Math.round(v/50)*50,r5=v=>Math.round(v/5)*5,cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* min: duración; z: intensidad 1–5; temp °C; run: true si es carrera a pie (se toma menos líquido) */
+function hyd(id,min,z,temp,run,swim){const p=SW[id];if(!min||swim)return{g:0,ml:0,na:0};
+ const sudor=p.tasa*(temp>25?1.3:1)*(z>=4?1.15:1);
+ const ml=min<45?0:r50(cl(sudor*1000*0.7,400,run?700:1000));
+ const na=min<60?0:r50(cl(sudor*p.na*0.6,300,1500));
+ const g=min<60?0:min<90?30:min<150?60:p.tol;
+ return{g,ml,na}}
+const durOf=t=>{if(!t||/Descanso/.test(t))return 0;let m;
+ if(m=t.match(/(\d+(?:\.\d+)?)\s*h\b/))return +m[1]*60;
+ if(/Ladrillo/.test(t)){const k=[...t.matchAll(/(\d+)\s*km/g)].map(x=>+x[1]);return (k[0]||0)*2+(k[1]||0)*5.5}
+ if(m=t.match(/(\d+)×(\d+)\s*min/))return +m[1]*+m[2]*2+20;
+ if(m=t.match(/(\d+)\s*min/))return +m[1];
+ if(m=t.match(/(\d[\d,]*)\s*m\b/))return +m[1].replace(',','')/1000*20;
+ if(m=t.match(/(\d+)\s*km/))return /Bici/.test(t)?+m[1]*2:/Trail/.test(t)?+m[1]*8:+m[1]*5.8;return 45};
+const zOf=t=>/Z5/.test(t)?5:/Z4|Series|Intervalos/.test(t)?4:/Z3|ritmo/.test(t)?3:2;
+const isRun=t=>/^(Carrera|Rodaje|Fondo|Trail|Series|Tempo)/.test(t);
+const fmt=n=>n.toLocaleString('es-MX');
+
+
+let convs=[
+ {id:1,a:'pepe',ch:'wa',tag:'Nutrición',hace:'8 min',pend:true,msgs:[{de:'él',t:'Marce, el domingo es el fondo de 30k. ¿Cuántos carbs y cuánto sodio llevo?'}],
+  lee:'Pregunta de carbohidratos y sodio para el fondo del domingo (30 km en Z2, unas 2 h 50 min). Su prueba de sudor: 1.0 L/h y 900 mg de sodio por litro.',
+  sug:'¡Va Pepe! Para el fondo del domingo, con tu prueba de sudor:\n• 3 h antes: 145 g de carbs y 500 ml con 500 mg de sodio.\n• Durante: 70 g de carbs por hora, 700 ml por hora y 550 mg de sodio por hora.\n• En total: unos 200 g de carbs, 2 L y 1,550 mg de sodio.\nRitmo en Z2, entre 5:20 y 5:45. Si en el km 25 te sientes bien, cierra los últimos 3 a ritmo de maratón.'},
+ {id:2,a:'ana',ch:'wa',tag:'Lesión',hace:'22 min',pend:true,msgs:[{de:'él',t:'Me duele la rodilla por fuera desde el martes. ¿Corro mañana?'}],
+  lee:'Dolor en la rodilla (lado externo) desde hace 2 días y quiere saber si corre mañana. Le faltan 18 días para su medio maratón. Esto lo decides tú.',
+  sug:'Ana, mañana no corras. Cambia la sesión por 40 min de bici suave, solo si no te duele al pedalear. Te marco hoy en la tarde para revisarlo y ver si conviene que te vea un fisio antes del medio maratón.'},
+ {id:3,a:null,nom:'Fernanda Ríos',ch:'ig',tag:'Cliente nuevo',hace:'1 h',pend:true,msgs:[{de:'él',t:'¡Hola! ¿Cuánto cuesta entrenar con ustedes? Quiero hacer mi primer triatlón 🙂'}],
+  lee:'Posible clienta nueva desde el Instagram del negocio. Quiere hacer su primer triatlón. Viene del anuncio "Tu primer tri 2027".',
+  sug:'¡Hola Fernanda! Qué emoción tu primer triatlón. El plan personalizado cuesta $999 al mes e incluye:\n• Plan a tu medida según tu nivel, tu historial y tu objetivo\n• Seguimiento y ajustes según cómo vayas\n• Comunicación directa conmigo\n• Tu app con tu semana, tus zonas y tu plan de carrera\nLlena tu solicitud en msrunning.com y te marco para platicar 10 minutos. ¿Ya tienes una carrera en mente?'},
+ {id:4,a:null,nom:'Carlos Lozano',ch:'igp',tag:'Cliente nuevo',hace:'2 h',pend:true,msgs:[{de:'él',t:'Bro vi tu historia del Ironman 🔥 ¿Sigues entrenando gente? Quiero correr mi primer maratón'}],
+  lee:'Llegó a tu Instagram personal (@marcelocolorado7), pero es un posible cliente: primer maratón. La IA lo detecta y lo pasa a la bandeja del negocio.',
+  sug:'¡Qué onda Carlos! Sí, claro. El plan personalizado es de $999 al mes: plan a tu medida, seguimiento y la app con tu semana. Si te late, llena la solicitud en msrunning.com y te marco. Para el Maratón Monterrey 2027 te da tiempo de sobra.'},
+ {id:5,a:'andres',ch:'wa',tag:'Cambio de plan',hace:'3 h',pend:true,msgs:[{de:'él',t:'Marce, mañana me toca el tempo en bici pero tengo junta en la mañana. ¿Lo muevo al sábado?'}],
+  lee:'Por WhatsApp pide pasar la bici tempo del Vie 20 al Sáb 21 (motivo: trabajo). No cumple tus criterios: el ladrillo se quedaría entre semana y quedarían dos sesiones fuertes seguidas. Lo que sí cuadra: pasarla al Jue 19.',
+  sug:'Al sábado no, porque ya tienes el ladrillo y sería mucha carga. Te la paso al jueves 19 en la tarde, ¿va? Ya queda en tu reloj.',
+  accion:'Aprobar el Jue 19',req:{i:4,j:3}},
+ {id:6,a:'luis',ch:'wa',tag:'Pago',hace:'5 h',pend:true,msgs:[{de:'él',t:'Ya te deposité lo de octubre y noviembre 👍'}],
+  lee:'Dice que pagó octubre y noviembre ($1,998). En cobros aparece vencido. También lleva 2 semanas casi sin entrenar (20% cumplido).',
+  sug:'¡Gracias Luis! Ya quedó registrado. Oye, vi que estas dos semanas casi no has entrenado. ¿Todo bien? Si quieres te ajusto el plan para que te quede más fácil con tus horarios.',
+  accion:'Marcar como pagado'},
+{id:8,a:null,nom:'Valeria Montemayor',ch:'web',tag:'Cliente nuevo',hace:'1 día',pend:true,msgs:[{de:'él',t:'Solicitud desde msrunning.com\nDeporte: Hyrox\nMeta: bajar de 1:30 en HYROX Monterrey\nNivel: corro 3 veces por semana, 25 km en total\nWhatsApp: 81 0000 0000'}],
+  lee:'Llegó por el formulario de msrunning.com hace 1 día. La página promete contactarla por WhatsApp en máximo 2 días: hoy es el último. Quiere Hyrox y ya tiene base de carrera.',
+  sug:'¡Hola Valeria! Soy Marcelo, de MS Running. Vi tu solicitud para HYROX y me encantó la meta de bajar de 1:30. ¿Te late una llamada de 10 minutos mañana a las 8 pm o el sábado a las 10 am? Ahí platicamos tu semana y armamos tu plan.'},
+ {id:7,a:'rodrigo',ch:'wa',tag:'Zonas',hace:'ayer',pend:false,msgs:[{de:'él',t:'¿Ya quedaron mis zonas de la prueba del lunes?'},{de:'yo',t:'Ya están en tu app, Rodri. Z2 de 132 a 150 ppm, que en ritmo es 5:10–5:40 /km.'}],
+  lee:'Preguntó por sus zonas nuevas. Ya se le contestó.',sug:''}
+];
+let sel=1,filt='todas',tab='mensajes',atab='semana',logged=false;
+
+const tabsDef=[['mensajes','Mensajes'],['atletas','Atletas y planes'],['cobros','Cobros']];
+function renderTabs(){const p=convs.filter(c=>c.pend).length;
+ $('#tabs').innerHTML=tabsDef.map(([k,l])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${k==='mensajes'&&p?`<span class="cnt">${p}</span>`:''}</button>`).join('')}
+const nombre=c=>c.a?A(c.a).n:c.nom;
+const ini=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('');
+const colOf=n=>COL[[...n].reduce((s,c)=>s+c.charCodeAt(0),0)%COL.length];
+
+function zonesHTML(a,bike){const z=bike?a.zb:a.zr;if(!z)return'';
+ return `<div class="zones">${z.map((v,i)=>`<div class="zr"><b>Z${i+1}</b><i style="background:${ZC[i]}"></i><span>${v}${bike?'':' ppm'}</span></div>`).join('')}</div>`}
+
+function vMensajes(){
+ const pend=convs.filter(c=>c.pend).length,nuevos=convs.filter(c=>c.tag==='Cliente nuevo').length,les=convs.filter(c=>c.tag==='Lesión'&&c.pend).length;
+ const fs=[['todas','Todas'],['pend','Por contestar'],['tu','Para ti'],['wa','WhatsApp'],['ig','Instagram'],['web','Página'],['app','App']];
+ const L=convs.filter(c=>filt==='todas'||(filt==='pend'&&c.pend)||(filt==='tu'&&c.tag==='Lesión')||(filt==='ig'&&(c.ch==='ig'||c.ch==='igp'))||c.ch===filt);
+ const c=convs.find(x=>x.id===sel)||convs[0];const a=c.a&&A(c.a);
+ return `<div class="stats">
+  <div class="card stat"><div class="num">${pend}</div><span>por contestar, con respuesta lista</span></div>
+  <div class="card stat"><div class="num" style="color:var(--red)">${les}</div><span>necesitan tu criterio (lesiones)</span></div>
+  <div class="card stat"><div class="num">${nuevos}</div><span>posibles clientes nuevos</span></div>
+  <div class="card stat"><div class="num">5</div><span>entradas en una bandeja: WhatsApp, 2 Instagram, la página y la app</span></div></div>
+ <div class="inbox">
+  <div class="card list"><div class="filters">${fs.map(([k,l])=>`<button data-f="${k}" class="${filt===k?'on':''}">${l}</button>`).join('')}</div>
+   ${L.map(x=>{const n=nombre(x);return `<div class="conv ${x.id===c.id?'on':''}" data-c="${x.id}"><div class="av" style="background:${colOf(n)}">${ini(n)}</div>
+    <div><b>${esc(n)}</b><div class="row" style="gap:4px;margin-top:2px"><span class="ch ${x.ch}">${CH[x.ch]}</span><span class="tag ${x.tag==='Lesión'?'les':''}">${x.tag}</span></div><p>${esc(x.msgs[x.msgs.length-1].t)}</p></div>
+    <div style="text-align:right"><small class="note">${x.hace}</small><br>${x.pend?'<span class="dot"></span>':''}</div></div>`}).join('')||'<p class="pad note">Nada aquí.</p>'}
+  </div>
+  <div class="card chat"><div class="chead"><div class="av" style="background:${colOf(nombre(c))}">${ini(nombre(c))}</div><div><b>${esc(nombre(c))}</b><br><span class="ch ${c.ch}">${CH[c.ch]}</span></div></div>
+   <div class="msgs">${c.msgs.map(m=>`<div class="m ${m.de==='yo'?'me':''}">${esc(m.t).replace(/\n/g,'<br>')}<small>${m.de==='yo'?'Marcelo':nombre(c)}</small></div>`).join('')}</div>
+   ${c.pend?`<div class="reply"><span class="note">Respuesta que te deja la IA, con los datos de ${esc(nombre(c).split(' ')[0])}. Revísala, cámbiala y mándala. Nada sale solo.</span>
+    <textarea id="txt">${esc(c.sug)}</textarea>
+    <div class="row"><button class="redb" id="send">Mandar por ${c.ch==='web'?'WhatsApp':CH[c.ch]}</button>${c.accion?`<button id="acc">${c.accion}</button>`:''}${c.tag==='Cliente nuevo'?'<button id="alta">Dar de alta como atleta</button>':''}${c.ch==='web'?'<button id="cita">Agendar llamada</button>':''}</div></div>`:'<div class="reply note">Conversación contestada.</div>'}
+  </div>
+  <div class="card ai aiw"><h3>Lo que entendió la IA</h3>
+   <div class="box ${c.tag==='Lesión'?'alert':''}">${esc(c.lee)}</div>
+   ${a?`<h3>Lo que sabe de ${esc(a.n.split(' ')[0])}</h3>
+   <div class="kv"><span>Próxima carrera</span><span><b>${a.ev}</b> · ${a.f} (${a.dias} días)</span><span>Cumplimiento</span><span>${a.cump}% este mes</span><span>Última prueba</span><span>${a.prueba}</span><span>Pago</span><span>${pill(a.pago)}</span><span>Ritmo</span><span>${a.rit}</span></div>
+   <div><div class="k">Zonas de pulso (carrera)</div>${zonesHTML(a)}</div>
+   ${a.zb?`<div><div class="k">Zonas de potencia (bici)</div>${zonesHTML(a,1)}</div>`:''}
+   ${a.nota?`<div class="box"><span class="k">Nota tuya:</span> ${esc(a.nota)}</div>`:''}<button data-ver="${a.id}">Ver su ficha completa</button>`:`<div class="box"><span class="k">Todavía no es atleta.</span> Con un clic queda dado de alta: cuestionario, pago y su app con usuario y contraseña.</div>`}
+  </div></div>`}
+const pill=p=>p==='pagado'?'<span class="pill p-ok">Al corriente</span>':p==='pendiente'?'<span class="pill p-warn">Por pagar</span>':'<span class="pill p-bad">Vencido</span>';
+
+/* ---------- Atletas: ficha para planear ---------- */
+const D=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const exp={
+ andres:{fase:'Pico · la afinación empieza el lunes',sem:[[10.5,10.1],[11.5,11],[12,11.4],[6,5.5]],
+  ult:[['Lun','Natación técnica · 2,000 m','2,050 m · bien','ok'],['Mar','Bici 4×8 min Z4 · 212–246 W','Promedio de 231 W, pero con 8 ppm más que hace 3 semanas a la misma potencia','alto'],['Mié','Carrera 10 km Z2','10.2 km a 5:48 /km · en zona','ok'],['Jue','Nado pirámide 3,000 m','Hoy','pend']],
+  siente:[['Sueño','6.1 h promedio','bajo'],['Cansancio','7 de 10','alto'],['Molestias','Calambre en el pie al nadar (2 veces)','alto']],
+  dijo:['Pidió mover el tempo del viernes por una junta','Dijo que se sintió pesado en la bici el martes','Viaja a San Diego el 2 de diciembre'],
+  nota:[['Cansancio acumulado','Tiene el pulso más alto a la misma potencia y duerme poco. Podrías empezar la afinación desde esta semana.'],['Calambres al nadar','Le pasó en 2 de las últimas 3 sesiones de nado. Vale la pena revisar la patada o su hidratación antes de La Quinta.'],['Viaje','Del 2 al 4 de diciembre entrena fuera de casa: la semana de carrera tiene 2 días solo con trote suave.']],
+  prop:['Descanso','Bici 3×8 min Z4 · 212–246 W','Carrera 8 km Z2 · 5:35–6:05','Nado 2,500 m · 6×200 a ritmo de carrera','Bici 60 min Z2 con 3×5 min Z3','Ladrillo 60 km Z2 + 5 km a ritmo de carrera','Carrera 12 km Z2 · 128–145 ppm'],
+  porque:'Baja el volumen 35% y mantiene la intensidad en sesiones cortas. Sigue tu plantilla de afinación para 70.3.'},
+ ana:{fase:'Específica · medio maratón en 18 días',sem:[[5,4.8],[5.5,5.2],[6,5.5],[3,1.1]],
+  ult:[['Lun','Descanso','—','ok'],['Mar','Series 6×1 km Z4 · 4:45 /km','Hizo 4 de 6; se paró por la rodilla','parcial'],['Mié','Rodaje 8 km Z2','No lo hizo','falto'],['Jue','Fuerza + 5 km suave','Hoy','pend']],
+  siente:[['Sueño','7.4 h','ok'],['Cansancio','4 de 10','ok'],['Molestias','Rodilla, lado externo · 4 de 10 desde el martes','alto']],
+  dijo:['"Me duele la rodilla por fuera desde el martes. ¿Corro mañana?"'],
+  nota:[['Rodilla','La molestia empezó en las series del martes y no ha bajado. La IA no diagnostica: tú decides si la ve un fisio.'],['Su carrera','Con 18 días para su medio maratón, 3 o 4 días sin impacto no le quitan condición si mantiene bici o elíptica.']],
+  prop:['Bici suave 40 min','Fuerza de cadera y glúteo 30 min','Elíptica 45 min Z2','Descanso','Prueba de 5 km suave, solo si no duele','Bici 60 min Z2','Rodaje 10 km Z2 si el viernes salió bien'],
+  porque:'Quita el impacto 4 días y vuelve a correr de forma gradual. Si le duele en la prueba del viernes, la semana se queda sin carrera.'},
+ luis:{fase:'Base · IRONMAN 70.3 Monterrey en abril',sem:[[8,7],[8,2.5],[8,1.5],[4,0]],
+  ult:[['Lun','Nado 2,000 m','No lo hizo','falto'],['Mar','Bici 60 min Z2','No lo hizo','falto'],['Mié','Carrera 8 km Z2','No lo hizo','falto'],['Jue','Nado 2,000 m','Hoy','pend']],
+  siente:[['Sueño','Sin datos','—'],['Cansancio','No ha llenado su check-in','—'],['Molestias','Ninguna reportada','ok']],
+  dijo:['"Ya te deposité lo de octubre y noviembre"'],
+  nota:[['Dejó de entrenar','Cumplía 85% hasta octubre y lleva 3 semanas en menos de 20%. Algo cambió; vale la pena una llamada antes de planear.'],['Tiempo','Faltan 5 meses para su carrera, así que regresar con calma no pone en riesgo su meta.']],
+  prop:['Descanso','Bici 45 min Z2','Descanso','Carrera 30 min Z2','Descanso','Bici 75 min Z2','Nado 1,500 m suave'],
+  porque:'Una semana de regreso con 4 sesiones cortas, para que vuelva a agarrar el hábito sin abrumarse.'},
+ pepe:{fase:'Pico · último fondo largo',sem:[[6,6],[6.5,6.2],[7,6.8],[3.5,3.5]],
+  ult:[['Lun','Descanso','—','ok'],['Mar','Tempo 3×3 km a ritmo de maratón · 4:58','Promedio 4:55 /km','ok'],['Mié','Rodaje 10 km Z2','10 km a 5:31','ok'],['Jue','Fuerza','Hoy','pend']],
+  siente:[['Sueño','7.2 h','ok'],['Cansancio','5 de 10','ok'],['Molestias','Ninguna','ok']],
+  dijo:['Preguntó cuántos carbs y cuánto sodio llevar al fondo de 30 km'],
+  nota:[['Va bien','Sus fondos largos bajaron 8 s/km en 4 semanas al mismo pulso. La meta de 3:30 en el maratón se ve realista.'],['Afinación','Este domingo es su último fondo; desde el lunes empieza a bajar el volumen para el 13 de diciembre.']],
+  prop:['Descanso','Rodaje 8 km Z2','Series 5×1 km a ritmo de maratón','Fuerza ligera','Rodaje 8 km Z2','Descanso','Fondo 22 km con los últimos 6 a ritmo de maratón'],
+  porque:'Baja el volumen 25% y mantiene un toque de ritmo de maratón.'},
+ diego:{fase:'Pico · La Quinta en 17 días',sem:[[11,9.2],[11.5,8.8],[12,9.5],[6,4]],
+  ult:[['Lun','Nado 2,000 m','Bien','ok'],['Mar','Bici 4×8 min Z4 · 235–273 W','Bien, 252 W de promedio','ok'],['Mié','Carrera 10 km Z2','No lo hizo','falto'],['Jue','Nado 3,000 m','Hoy','pend']],
+  siente:[['Sueño','7.0 h','ok'],['Cansancio','5 de 10','ok'],['Molestias','Ninguna','ok']],
+  dijo:['Preguntó si puede hacer la bici larga en rodillo'],
+  nota:[['Bici larga','Se ha saltado 2 de las últimas 3 bicis largas. Para su 70.3, es su punto débil.'],['Pagos','Noviembre está pendiente.']],
+  prop:['Descanso','Bici 3×8 min Z4 · 235–273 W','Carrera 8 km Z2','Nado 2,500 m','Bici 60 min Z2','Bici 70 km Z2 temprano + 4 km','Carrera 12 km Z2'],
+  porque:'Misma afinación que Andrés, pero con la bici larga del sábado temprano para que no se la salte.'},
+ rodrigo:{fase:'Construcción · ultra 50K en enero',sem:[[7,7],[7.5,7.4],[8,8.1],[4,4]],ult:[['Lun','Descanso','—','ok'],['Mar','Cuestas 8×2 min','Bien','ok'],['Mié','Trail 14 km Z2','14.5 km','ok'],['Jue','Fuerza','Hoy','pend']],
+  siente:[['Sueño','7.5 h','ok'],['Cansancio','4 de 10','ok'],['Molestias','Ninguna','ok']],dijo:['Preguntó por sus zonas nuevas'],nota:[['Va muy bien','96% de cumplimiento. Puedes subir el desnivel del fondo largo.']],
+  prop:['Descanso','Cuestas 10×2 min','Trail 12 km Z2','Fuerza','Rodaje 8 km','Trail largo 28 km, 1,200 m de desnivel','Rodaje suave 10 km'],porque:'Sube 10% el volumen y mete más desnivel.'},
+ sofia:{fase:'Base · HYROX en marzo',sem:[[5,4.5],[5,4.6],[5.5,4.8],[2.5,2.2]],ult:[['Lun','Fuerza + estaciones','Bien','ok'],['Mar','Rodaje 6 km Z2','Bien','ok'],['Mié','Intervalos 8×400 m','Bien','ok'],['Jue','Ergómetro de remo + sled','Hoy','pend']],
+  siente:[['Sueño','7 h','ok'],['Cansancio','5 de 10','ok'],['Molestias','Ninguna','ok']],dijo:['—'],nota:[['Correr','Sus tiempos en estaciones van muy bien; lo que más le falta es correr. Podrías meter un rodaje más.']],
+  prop:['Fuerza + estaciones','Rodaje 7 km Z2','Descanso','Intervalos 6×800 m','Remo + sled','Simulacro HYROX medio','Descanso'],porque:'Agrega carrera sin quitarle trabajo de estaciones.'},
+ mariana:{fase:'Pico · maratón en 24 días',sem:[[6,5.6],[6.5,5.9],[7,6.4],[3.5,3.1]],ult:[['Lun','Descanso','—','ok'],['Mar','Tempo 3×3 km','Bien','ok'],['Mié','Rodaje 10 km','9 km','parcial'],['Jue','Fuerza','Hoy','pend']],
+  siente:[['Sueño','6.8 h','ok'],['Cansancio','6 de 10','ok'],['Molestias','Ninguna','ok']],dijo:['—'],nota:[['Va bien','90% de cumplimiento. Mismo esquema de afinación que Pepe.']],
+  prop:['Descanso','Rodaje 8 km Z2','Series 5×1 km a ritmo de maratón','Fuerza ligera','Rodaje 8 km','Descanso','Fondo 22 km'],porque:'Afinación estándar para maratón.'}
+};
+const prio=a=>(exp[a.id].siente.some(s=>s[2]==='alto')?3:0)+(a.cump<50?3:0)+(a.dias<=20?2:0);
+let fsel=null,listas={},EU=null;
+const est={ok:['✓','var(--mute)'],alto:['!','var(--red)'],parcial:['½','var(--warn)'],falto:['✗','var(--red)'],pend:['·','var(--mute)']};
+function sugCarb(p,a){if(/Descanso|Fuerza|Movilidad/.test(p)||!p.trim())return '';
+ const km=+(p.match(/(\d+)\s*km/)||[0,0])[1],min=+(p.match(/(\d+)\s*min/)||[0,0])[1];
+ if(/Ladrillo/.test(p))return 80;if(/Nado|Natación/.test(p))return 0;
+ if(/Bici/.test(p))return km>=60||min>=90?75:60;
+ if(km>=18)return 60;if(km>=12)return 45;if(/Z4|Series|Intervalos|ritmo/.test(p))return 30;return 0}
+const PLT=['Plantilla','Repetir semana pasada','En blanco'];
+const TPL={andres:['Descanso','Bici 3×8 min Z4 · 212–246 W','Carrera 8 km Z2 · 5:35–6:05','Nado 2,500 m · 6×200 a ritmo de carrera','Bici 60 min Z2 con 3×5 min Z3','Ladrillo 60 km Z2 + 5 km a ritmo de carrera','Carrera 12 km Z2 · 128–145 ppm'],
+ ana:['Descanso','Series 5×1 km Z4 · 4:45 /km','Rodaje 8 km Z2','Fuerza + 5 km suave','Rodaje 6 km Z2','Descanso','Fondo 16 km Z2'],
+ luis:['Descanso','Nado 2,000 m','Bici 75 min Z2','Carrera 10 km Z2','Nado 2,000 m','Bici 2 h Z2','Carrera 14 km Z2']};
+const PREV={};const prevOf=id=>PREV[id]||(id==='andres'?week.map(d=>d[2]+' · '+d[3]):exp[id].prop);
+const HINT={andres:{1:['Pulso 8 ppm más alto en los intervalos del martes y duerme 6 h','Bici 3×6 min Z4 · 212–246 W'],5:['Viaja el 2 de diciembre; llegaría más fresco','Ladrillo 50 km Z2 + 4 km a ritmo de carrera']},
+ ana:{1:['Rodilla 4/10 desde las series del martes','Bici suave 40 min'],2:['Rodilla 4/10; sin impacto 3–4 días','Elíptica 45 min Z2'],6:['Si la prueba del viernes sale sin dolor','Rodaje 10 km Z2']},
+ luis:{2:['Lleva 3 semanas en menos de 20%','Bici 45 min Z2'],5:['Lleva 3 semanas en menos de 20%','Bici 75 min Z2'],6:['Lleva 3 semanas en menos de 20%','Carrera 30 min Z2']},
+ diego:{5:['Se saltó 2 de 3 bicis largas (las hace en la tarde)','Bici 70 km Z2 temprano + 4 km']}};
+let PLs={},PLd={},HUSED={};
+const plt=id=>'Plantilla';
+function pl(id){if(!PLd[id])PLd[id]=(TPL[id]||exp[id].prop).slice();return PLd[id]}
+function menos(t){return t.replace(/(\d+(?:,\d{3})?)(\s*)(km|min|m|h)\b/,(m,n,s,u)=>{let v=+n.replace(',','')*0.8;v=u==='m'?Math.round(v/100)*100:u==='h'?Math.round(v*4)/4:Math.round(v);return v.toLocaleString('en-US')+s+u})}
+function suave(t){const dep=(t.match(/^(Bici|Carrera|Nado|Rodaje|Fondo|Trail|Ladrillo|Series|Tempo|Remo|Elíptica)/)||['Rodaje'])[0];const b={Series:'Rodaje',Tempo:'Rodaje',Fondo:'Rodaje',Ladrillo:'Bici'}[dep]||dep;return b+' suave 40 min Z2'}
+function vAtletas(){
+ const orden=athletes.slice().sort((a,b)=>prio(b)-prio(a));
+ if(!fsel||!exp[fsel])fsel=orden.find(a=>!listas[a.id])?.id||orden[0].id;
+ const a=A(fsel),e=exp[fsel],pend=orden.filter(x=>!listas[x.id]).length,mx=Math.max(...e.sem.flat());
+ return `<div class="stats"><div class="card stat"><div class="num">${pend}</div><span>semanas por armar (23–29 nov)</span></div>
+  <div class="card stat"><div class="num" style="color:var(--red)">${orden.filter(x=>prio(x)>=3).length}</div><span>atletas con algo que revisar</span></div>
+  <div class="card stat"><div class="num">${Object.keys(listas).length}</div><span>enviadas a TrainingPeaks</span></div></div>
+ <div class="inbox" style="grid-template-columns:minmax(0,290px) minmax(0,1fr)">
+ <div class="card list"><div class="filters"><span class="k" style="margin:0">Por armar, primero lo urgente</span></div>
+  ${orden.map(x=>{const al=exp[x.id].nota[0][0];return `<div class="conv ${x.id===fsel?'on':''}" data-fa="${x.id}"><div class="av">${ini(x.n)}</div>
+   <div><b>${x.n}</b><p>${x.ev} · ${x.dias} días</p><div class="row" style="gap:4px;margin-top:4px">${listas[x.id]?'<span class="tag">Enviada ✓</span>':`<span class="tag ${prio(x)>=3?'les':''}">${al}</span>`}</div></div><div></div></div>`}).join('')}
+  <details style="border-top:1px solid var(--line);padding:12px"><summary class="k" style="cursor:pointer">Tus criterios para revisar cambios de día</summary>
+   ${reglas.map(r=>`<button data-regla="${r[0]}" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;text-transform:none;letter-spacing:0;font:13px Inter,sans-serif;margin-top:6px;padding:8px 10px"><span class="chk ${r[2]?'y':''}" style="flex:none">${r[2]?'✓':''}</span>${r[1]}</button>`).join('')}</details>
+ </div>
+ <div style="display:grid;gap:12px">
+  <div class="card pad" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:end">
+   <div><div class="k">${e.fase}</div><h2 style="font-size:26px">${a.n}</h2><span class="note">${a.ev} · ${a.f} · ${a.plan} · ${pill(a.pago)}</span></div>
+   <div class="row" style="gap:22px"><div><div class="k">Días</div><div class="num" style="font-size:34px;color:var(--red)">${a.dias}</div></div><div><div class="k">Cumple</div><div class="num" style="font-size:34px">${a.cump}%</div></div><div><div class="k">Última prueba</div><div class="num" style="font-size:22px">${a.prueba}</div></div></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px">
+   <div class="card pad"><div class="k">Horas: plan vs. hecho · últimas 4 semanas</div>${e.sem.map((s,i)=>`<div style="display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:center;margin-top:8px;font-size:13px"><span class="note">${i===3?'Esta (a jue)':'Sem −'+(3-i)}</span>
+    <div style="position:relative;height:12px;background:var(--line);border-radius:1px"><i style="position:absolute;inset:0 auto 0 0;width:${s[0]/mx*100}%;border:1px solid var(--mute)"></i><i style="position:absolute;inset:2px auto 2px 0;width:${s[1]/mx*100}%;background:${s[1]/s[0]<.7?'var(--red)':'var(--ink)'}"></i></div><span>${s[1]}/${s[0]} h</span></div>`).join('')}</div>
+   <div class="card pad"><div class="k">Cómo se siente · su check-in</div>${e.siente.map(s=>`<div style="margin-top:8px"><span class="note">${s[0]}</span><br><span style="color:${s[2]==='alto'?'var(--red)':'var(--ink)'}">${s[1]}</span></div>`).join('')}</div>
+   <div class="card pad"><div class="k">Lo que dijo esta semana · WhatsApp e IG</div>${e.dijo.map(s=>`<p style="margin:8px 0 0;font-size:14px">${esc(s)}</p>`).join('')}</div>
+  </div>
+  <div class="card"><div class="pad" style="padding-bottom:0"><div class="k">Esta semana: lo que le pusiste vs. lo que hizo (de su reloj) · lo pendiente lo puedes editar aquí</div></div>
+   <table class="stack"><thead><tr><th>Día</th><th>Le pusiste</th><th>Hizo</th><th></th></tr></thead><tbody>${e.ult.map((u,ui)=>`<tr><td>${u[0]}</td><td>${EU===fsel+ui?`<div contenteditable="true" id="eut" class="box" style="outline:none;padding:6px 8px">${esc(u[1])}</div><div class="row" style="margin-top:6px"><button class="redb" data-sav="${ui}" style="min-height:32px;font-size:10px">Guardar en su reloj</button><button data-edu="x" style="min-height:32px;font-size:10px">Cancelar</button></div>`:u[1]+(u[3]==='pend'?` <button data-edu="${ui}" style="min-height:28px;padding:0 8px;font-size:10px;margin-left:6px">Editar</button>`:'')}</td><td style="color:${est[u[3]][1]==='var(--red)'?'var(--red)':'inherit'}">${u[2]}</td><td class="r"><b style="color:${est[u[3]][1]}">${est[u[3]][0]}</b></td></tr>`).join('')}</tbody></table></div>
+  <div class="card pad"><div class="k">Lo que la IA encontró en sus datos</div>${e.nota.map(n=>`<div class="box ${prio(a)>=3&&n===e.nota[0]?'alert':''}" style="margin-top:8px"><b>${n[0]}.</b> ${n[1]}</div>`).join('')}</div>
+  <div class="card pad" style="display:grid;gap:8px"><div class="row" style="justify-content:space-between"><div class="k">Perfil de sudor de ${a.n.split(' ')[0]}</div><span class="note">${SW[fsel].src}</span></div>
+   <div class="row" style="gap:14px">${[['tasa','Sudor','L/h','0.1'],['na','Sodio en sudor','mg/L','50'],['tol','Carbs que tolera','g/h','5']].map(([k,l,u,st])=>`<label class="k" style="display:flex;align-items:center;gap:6px;margin:0">${l}<input data-sw="${k}" type="number" step="${st}" value="${SW[fsel][k]}" style="width:80px;min-height:36px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--ink);font:15px Inter,sans-serif;padding:0 6px">${u}</label>`).join('')}</div>
+   <span class="note">Sale de su prueba de sudor (pesarse antes y después de 1 h de entrenamiento, más lo que tomó). Si lo cambias, se recalculan sus entrenamientos y su estrategia de carrera.</span></div>
+  <div class="card pad" id="plan"><div class="row" style="justify-content:space-between;align-items:end"><div><div class="k">Tu plan · semana del 23 al 29 de noviembre</div><span class="note">Sale de tu plantilla. Ajusta con un clic o escribe directo en cada día.</span></div>
+    <div class="row">${PLT.map(t=>`<button data-plt="${t}" class="${(PLs[fsel]||plt(fsel))===t?'redb':''}" style="min-height:34px;font-size:11px">${t}</button>`).join('')}</div></div>
+   <div class="wk">${pl(fsel).map((p,i)=>{const hx=hyd(fsel,durOf(p),zOf(p),20,isRun(p),/Nado|Natación/.test(p)),hn=(HINT[fsel]||{})[i],qb=(k,l)=>`<button data-qa="${i}-${k}" style="min-height:26px;padding:0 6px;font-size:10px;border-radius:3px">${l}</button>`;
+     return `<div style="display:flex;flex-direction:column;gap:6px"><b>${D[i]} ${23+i}</b><div contenteditable="true" data-dia="${i}" style="outline:none;min-height:40px;flex:1">${esc(p)}</div>
+     ${hn&&!HUSED[fsel+i]?`<div style="border:1px dashed var(--red);border-radius:3px;padding:6px;font-size:12px"><span style="color:var(--red);font:10px 'JetBrains Mono',monospace;text-transform:uppercase">Dato</span> ${hn[0]}<br><button data-hint="${i}" style="min-height:26px;padding:0 6px;font-size:10px;margin-top:4px;border-color:var(--red)">Cambiar a: ${esc(hn[1])}</button></div>`:''}
+     ${/Descanso/.test(p)||!p.trim()?'':`<div class="row" style="gap:4px">${qb('menos','−20%')}${qb('suave','Suave')}${qb('desc','Descanso')}</div>`}
+     <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 4px;align-items:center;padding-top:6px;border-top:1px dashed var(--line);font:10px 'JetBrains Mono',monospace;color:var(--mute);text-transform:uppercase">${[['g','Carbs','g/h'],['ml','Líq.','ml/h'],['na','Sodio','mg/h']].map(([k,l,u])=>`<span>${l}</span><span style="display:flex;align-items:center;gap:3px"><input data-h="${i}-${k}" inputmode="numeric" value="${hx[k]||''}" placeholder="0" style="width:52px;min-height:28px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--ink);font:12px Inter,sans-serif;text-align:right;padding:0 4px">${u}</span>`).join('')}</div></div>`}).join('')}</div>
+   <p class="note" style="margin:8px 0 0">Las zonas y potencias salen de su última prueba. Carbs, líquido y sodio por hora se calculan solos con su perfil de sudor y la duración e intensidad de cada día; cámbialos si quieres. Los recuadros con línea naranja son datos de su semana que quizá quieras tomar en cuenta; tú decides si cambias algo.</p>
+   <div class="row" style="margin-top:12px"><button class="redb" id="aprob">${listas[fsel]?'Volver a mandar':'Mandar a TrainingPeaks'}</button><span class="note">Se manda a su reloj y pasas al siguiente atleta.</span></div></div>
+  ${vEstrategia(a)}
+ </div></div>`}
+
+const MET={andres:'Tarjeta · automático',pepe:'Tarjeta · automático',ana:'OXXO',luis:'Transferencia SPEI',rodrigo:'Tarjeta · automático',sofia:'Tarjeta · automático',diego:'Transferencia SPEI',mariana:'Tarjeta · automático'};
+function vCobros(){
+ const tot=athletes.reduce((s,a)=>s+precios[a.plan],0),cob=athletes.filter(a=>a.pago==='pagado').reduce((s,a)=>s+precios[a.plan],0);
+ const f=n=>'$'+n.toLocaleString('es-MX');const auto=athletes.filter(a=>/automático/.test(MET[a.id])).length;
+ return `<div class="box" style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="dot" style="background:#3ddc84"></span><b>Conectado a tu cuenta de Stripe</b><span class="note">Los pagos se marcan solos aquí en cuanto Stripe los confirma; el dinero cae directo a tu cuenta.</span></div>
+ <div class="stats"><div class="card stat"><div class="num">${f(cob)}</div><span>cobrado en noviembre</span></div>
+ <div class="card stat"><div class="num" style="color:var(--red)">${f(tot-cob)}</div><span>por cobrar</span></div>
+ <div class="card stat"><div class="num">${auto}/${athletes.length}</div><span>con cobro automático a tarjeta</span></div></div>
+ <div class="card"><table class="stack"><thead><tr><th>Atleta</th><th>Cómo paga</th><th class="r">Mensualidad</th><th>Estado</th><th></th></tr></thead><tbody>
+ ${athletes.map(a=>`<tr><td><b>${a.n}</b><br><span class="note">${a.plan}</span></td><td>${MET[a.id]}</td><td class="r">${f(precios[a.plan])}</td><td>${pill(a.pago)}</td><td>${a.pago!=='pagado'?`<button data-rec="${a.id}">Mandar liga de pago</button>`:''}</td></tr>`).join('')}
+ </tbody></table><p class="pad note">Plan personalizado a $999 al mes. Con tarjeta se cobra solo cada mes. Con OXXO o transferencia, Stripe le genera al atleta su referencia o su CLABE cada mes.</p></div>`}
+
+function renderCoach(){renderTabs();$('#cview').innerHTML={mensajes:vMensajes,atletas:vAtletas,cobros:vCobros}[tab]()}
+
+/* ---------- App del atleta ---------- */
+const me=A('andres');
+const week=[['Lun',16,'Natación técnica','2,000 m · drills',1,'y',0,45],['Mar',17,'Bici intervalos','4×8 min en Z4 · 212–246 W',4,'y',60,75],['Mié',18,'Carrera','10 km en Z2 · 5:35–6:05 /km',2,'y',30,60],['Jue',19,'Nado pirámide','3,000 m · 100-200-300-400-300-200-100',3,'hoy',0,60],['Vie',20,'Bici tempo','2×20 min en Z3 · 177–211 W',3,'',60,75],['Sáb',21,'Ladrillo','80 km bici Z2 + 6 km a ritmo de carrera',2,'',80,210],['Dom',22,'Carrera larga','16 km en Z2 · 128–145 ppm',2,'',60,95]];
+const fuel=d=>{const x=hyd('andres',d[7],d[4],20,isRun(d[2]),/Nado|Natación/.test(d[2]));if(!x.ml)return `<span class="note">${/Nado|Natación/.test(d[2])?'Nada durante el nado; 300 ml con 300 mg de sodio al terminar':'Sin hidratación especial'}</span>`;
+ const hrs=d[7]/60;return `<div style="display:grid;grid-template-columns:repeat(3,auto);gap:2px 14px;justify-content:start;font:11px 'JetBrains Mono',monospace">
+  <span style="color:var(--mute)">CARBS</span><span style="color:var(--mute)">LÍQUIDO</span><span style="color:var(--mute)">SODIO</span>
+  <b>${x.g} g/h</b><b>${fmt(x.ml)} ml/h</b><b>${fmt(x.na)} mg/h</b>
+  <span class="note">${fmt(r5(x.g*hrs))} g</span><span class="note">${(x.ml*hrs/1000).toFixed(1)} L</span><span class="note">${fmt(r50(x.na*hrs))} mg</span></div>`};
+let mov=null,rq={j:null,m:null},sol={},aprob={};
+const reglas=[['duras','Nunca dos sesiones fuertes seguidas',true],['finde','Fondo largo y ladrillo solo en fin de semana',true],['carrera','Semana de carrera: no muevo nada, solo acorto',true]];
+const R=k=>reglas.find(r=>r[0]===k)[2];
+const hard=d=>(d[4]>=3&&!/Nado|Natación/.test(d[2]))||/Ladrillo/.test(d[2]);
+function veredicto(i,j){const w=week.map(x=>x.slice());const t=w[i];w[i]=w[j];w[j]=t;
+ if(R('finde'))for(let k=0;k<5;k++)if(/Ladrillo|larga/.test(w[k][2])&&w[k][5]!=='y')return '"'+w[k][2]+'" se quedaría entre semana';
+ if(R('duras'))for(let k=0;k<6;k++)if(hard(w[k])&&hard(w[k+1]))return 'quedarían dos sesiones fuertes seguidas ('+w[k][0]+' y '+w[k+1][0]+')';
+ return ''}
+const MOT=['Trabajo','Viaje','Cansancio','Molestia','Otro'];
+function aSemana(){const T=week.reduce((s,d)=>{const x=hyd('andres',d[7],d[4],20,isRun(d[2]),/Nado|Natación/.test(d[2])),hr=d[7]/60;s.g+=x.g*hr;s.ml+=x.ml*hr;s.na+=x.na*hr;return s},{g:0,ml:0,na:0});return `<h3>Semana del 16 al 22 de noviembre</h3><div class="box" style="display:grid;gap:4px"><span class="k">Lo que Marcelo te recomienda tomar esta semana, por entrenamiento</span><div class="row" style="gap:18px;font:12px 'JetBrains Mono',monospace"><span><b>${fmt(r5(T.g))} g</b> de carbs</span><span><b>${(T.ml/1000).toFixed(1)} L</b> de líquido</span><span><b>${fmt(r50(T.na))} mg</b> de sodio</span></div></div>${week.map((d,i)=>{const puede=i>=3&&d[5]!=='y',s=sol[i];
+ return `<div class="day ${d[5]==='hoy'?'today':''}"><div class="d">${d[1]}<small>${d[0]}</small></div>
+ <div><b>${d[2]}</b> <span class="zb" style="background:${ZC[d[4]-1]};color:${d[4]<3?'var(--ink)':'var(--on)'}">Z${d[4]}</span><p>${d[3]}</p><div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)">${fuel(d)}</div>
+ ${s?`<p style="color:var(--red)">Pediste pasarla al ${week[s][0]} ${week[s][1]} · esperando a Marcelo</p>`:''}${aprob[i]?`<p style="color:var(--ink)">✓ Marcelo aprobó el cambio</p>`:''}</div>
+ ${puede&&!s?`<button data-mv="${i}" style="min-height:34px;padding:0 10px;font-size:11px">${mov===i?'Cerrar':'Pedir cambio'}</button>`:`<div class="chk ${d[5]==='y'?'y':''}">${d[5]==='y'?'✓':''}</div>`}</div>
+ ${mov===i?`<div class="box" style="display:grid;gap:10px"><div><div class="k">¿A qué día te gustaría pasarla?</div><div class="row">${week.map((o,j)=>j<3||j===i?'':`<button data-rj="${j}" class="${rq.j===j?'redb':''}" style="min-height:36px;font-size:11px">${o[0]} ${o[1]}</button>`).join('')}</div></div>
+  <div><div class="k">¿Por qué?</div><div class="row">${MOT.map(m=>`<button data-rm="${m}" class="${rq.m===m?'redb':''}" style="min-height:36px;font-size:11px">${m}</button>`).join('')}</div></div>
+  <textarea id="rqn" placeholder="Algo más que Marcelo deba saber (opcional)" style="width:100%;min-height:60px;border:1px solid var(--line);border-radius:4px;padding:10px;background:var(--bg);font:14px Inter,sans-serif"></textarea>
+  <button class="redb" id="sendreq" ${rq.j==null||!rq.m?'disabled style="opacity:.4"':''}>Mandar a Marcelo</button>
+  <span class="note">Marcelo lo revisa y, si lo aprueba, se actualiza solo en tu reloj.</span></div>`:''}`}).join('')}`}
+let seg=null;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const RACE={andres:{segs:[['nado','Nado','0:33'],['bici','Bici','2:47'],['carrera','Carrera','1:52']],total:'menos de 5:30',temp:[22,28,32],
+  indic:'Bici a 165–175 W (Z2 alta), sin pasar de 200 W en las rectas. Los primeros 5 km de la carrera a 5:30 /km.'},
+ diego:{segs:[['nado','Nado','0:30'],['bici','Bici','2:35'],['carrera','Carrera','1:45']],total:'menos de 5:00',temp:[22,28,32],
+  indic:'Bici a 185–195 W, sin pasar de 220 W en las rectas. Los primeros 5 km de la carrera a 5:05 /km.'},
+ luis:{segs:[['nado','Nado','0:38'],['bici','Bici','3:05'],['carrera','Carrera','2:10']],total:'menos de 6:00',temp:[20,24,27],indic:'Por definir más cerca de la carrera.'},
+ pepe:{segs:[['carrera','Maratón','3:30']],total:'3:30',temp:[16],indic:'Salida a 5:00 /km, sin bajar de 4:55 antes del km 30.'},
+ mariana:{segs:[['carrera','Maratón','4:05']],total:'menos de 4:10',temp:[16],indic:'Salida a 5:50 /km; acelerar solo después del km 32.'},
+ ana:{segs:[['carrera','Medio maratón','1:55']],total:'menos de 1:56',temp:[14],indic:'Salida a 5:30 /km los primeros 5 km.'},
+ rodrigo:{segs:[['carrera','Ultra 50K','6:00']],total:'6:00',temp:[18],indic:'Caminar las subidas de más de 10%; correr en Z2 lo plano.'},
+ sofia:{segs:[['carrera','HYROX','1:28']],total:'menos de 1:30',temp:[24],indic:'Correr los 8 km a 5:15 /km y no pasar de Z4 en las estaciones.'}};
+const toMin=s=>{const [a,b]=s.split(':').map(Number);return a*60+(b||0)};
+function pasos(id,k,lab,min,temp){const a=A(id);
+ if(k==='nado')return [['Durante','0 g de carbs · 0 ml · 0 mg de sodio'],['Al salir del agua','150 ml · 0 g de carbs']];
+ const run=k==='carrera',x=hyd(id,min,run?3:2,temp,run),hrs=min/60;
+ return [[run?'Primeros 10 min':'Min 0–15',`${r50(x.ml/4)} ml · 0 g de carbs`],
+  ['Cada 15 min',`${r50(x.ml/4)} ml con ${r50(x.na/4)} mg de sodio`],
+  ['Cada 20 min',`${r5(x.g/3)} g de carbs`],
+  ['Por hora',`${x.g} g de carbs · ${fmt(x.ml)} ml · ${fmt(x.na)} mg de sodio`],
+  ['Total '+lab.toLowerCase(),`${fmt(r5(x.g*hrs))} g de carbs · ${(x.ml*hrs/1000).toFixed(1)} L · ${fmt(r50(x.na*hrs))} mg de sodio`]]}
+function makeST(id){const a=A(id),R=RACE[id],p=SW[id];
+ const nut={};R.segs.forEach((s,i)=>nut[s[0]]=pasos(id,s[0],s[1],toMin(s[2]),R.temp[i]));
+ const res=[['3 h antes',`${r5(a.peso*2)} g de carbs (2 g por kg) · 500 ml con 500 mg de sodio`]];
+ R.segs.forEach((s,i)=>{if(s[0]==='nado')return;const x=hyd(id,toMin(s[2]),s[0]==='carrera'?3:2,R.temp[i],s[0]==='carrera');res.push([s[1],`${x.g} g de carbs/h · ${fmt(x.ml)} ml/h · ${fmt(x.na)} mg de sodio/h`])});
+ res.push(['Después','1.5 L por cada kg de peso que pierdas, con 1,000 mg de sodio por litro']);
+ return{segs:clone(R.segs),total:R.total,indic:R.indic,resumen:res,nut,
+  basada:`${p.src}: ${p.tasa} L/h de sudor y ${fmt(p.na)} mg de sodio por litro · tolera ${p.tol} g de carbs por hora · ${a.peso} kg · temperatura esperada: ${R.temp.join(' / ')} °C`,pub:id==='andres'?'19 nov':''}}
+const ST={};
+function genST(a){if(!ST[a.id])ST[a.id]=makeST(a.id);return ST[a.id]}
+let DR={},eseg={};
+function vEstrategia(a){const pubd=genST(a);if(!DR[a.id])DR[a.id]=clone(pubd);const d=DR[a.id];const sg=eseg[a.id]||d.segs[Math.min(1,d.segs.length-1)][0];eseg[a.id]=sg;
+ const dirty=JSON.stringify(d)!==JSON.stringify(pubd)||!pubd.pub;const otros=athletes.filter(x=>x.id!==a.id&&x.ev===a.ev);
+ const inp='border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--ink);font:16px Inter,sans-serif;min-height:38px;padding:0 8px;width:100%';
+ return `<div class="card pad" id="strat"><div class="row" style="justify-content:space-between"><div><div class="k">Estrategia de carrera · ${a.ev}</div><span class="note">Tú la ajustas; ${a.n.split(' ')[0]} la ve en la pestaña Carrera de su app.</span></div>
+   ${dirty?'<span class="pill p-warn">'+(pubd.pub?'Cambios sin publicar':'Sin publicar')+'</span>':'<span class="pill p-ok">Publicada el '+pubd.pub+'</span>'}</div>
+  <div class="box" style="margin-top:10px"><span class="k">Tu plantilla, con los números de ${a.n.split(' ')[0]}. Datos que se usaron:</span> ${d.basada}</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:12px">
+   ${d.segs.map((s,i)=>`<label class="k" style="display:grid;gap:4px">${s[1]}<input data-sm="${i}" value="${esc(s[2])}" style="${inp}"></label>`).join('')}
+   <label class="k" style="display:grid;gap:4px">Meta total<input id="stt" value="${esc(d.total)}" style="${inp}"></label></div>
+  <div class="k" style="margin-top:12px">Indicaciones de ritmo</div><div contenteditable="true" id="sti" class="box" style="outline:none">${esc(d.indic)}</div>
+  <div class="k" style="margin-top:12px">Carbs, líquido y sodio paso por paso</div>
+  <div class="row">${d.segs.map(s=>`<button data-ss="${s[0]}" class="${sg===s[0]?'redb':''}" style="min-height:34px;font-size:11px">${s[1]}</button>`).join('')}</div>
+  <div class="box" style="margin-top:8px">${d.nut[sg].map((p,i)=>`<div style="display:grid;grid-template-columns:22px minmax(0,140px) 1fr auto;gap:10px;padding:8px 0;align-items:start;${i?'border-top:1px solid var(--line)':''}"><span class="num" style="font-size:15px;color:var(--red)">${i+1}</span>
+    <div contenteditable="true" data-stk="${i}" style="outline:none;font:12px 'JetBrains Mono',monospace;text-transform:uppercase">${esc(p[0])}</div><div contenteditable="true" data-stx="${i}" style="outline:none;font-size:14px">${esc(p[1])}</div><button data-sdel="${i}" style="min-height:28px;padding:0 8px;font-size:11px" aria-label="Quitar paso">✕</button></div>`).join('')}
+   <button id="stadd" style="min-height:34px;font-size:11px;margin-top:6px">+ Agregar paso</button></div>
+  <div class="row" style="margin-top:12px"><button class="redb" id="stpub">Publicar en su app</button><button id="strecalc">Recalcular con su perfil de sudor</button>${otros.length?`<button id="stcopy">Usarla de base para ${otros.map(o=>o.n.split(' ')[0]).join(', ')} (con sus números)</button>`:''}</div>
+ </div>`}
+function aCarrera(){const S=genST(me);
+ const b=(k,l,v)=>`<button data-seg="${k}" style="display:block;width:100%;min-height:0;padding:12px 6px;border:0;border-radius:0;background:${seg===k?'var(--ink)':'var(--card2)'};color:${seg===k?'var(--on)':'var(--ink)'}"><span class="note" style="color:inherit;opacity:.7">${l} ${seg===k?'▴':'▾'}</span><span class="num" style="display:block;font-size:30px;margin-top:4px">${esc(v)}</span></button>`;
+ const n=seg&&S.nut[seg];const lab=seg&&S.segs.find(x=>x[0]===seg);
+ return `<div class="split">${S.segs.map(x=>b(x[0],x[1],x[2])).join('')}</div>
+ ${n?`<div class="box" style="border-color:var(--ink)"><div class="k">${lab[1]} · ${esc(lab[2])} · carbs, líquido y sodio paso por paso</div>${n.map((p,i)=>`<div style="display:grid;grid-template-columns:22px 1fr;gap:10px;padding:10px 0;${i?'border-top:1px solid var(--line)':''}"><span class="num" style="font-size:16px;color:var(--red)">${i+1}</span><div><b style="font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase">${esc(p[0])}</b><div style="font-size:14px;margin-top:2px">${esc(p[1])}</div></div></div>`).join('')}</div>`:''}
+ <div class="box"><b>Meta: ${esc(S.total)}</b><br><span class="note">${esc(S.indic)}</span></div>
+ <h3>Carbs, líquido y sodio</h3>
+ <div class="kv">${S.resumen.map(r=>`<span>${r[0]}</span><span>${r[1]}</span>`).join('')}</div>
+ <span class="note">Toca cada deporte arriba para ver el detalle paso por paso.</span>
+ <h3>Antes de viajar</h3><ul class="cl"><li>Recoger el kit el viernes 4</li><li>Bici al transition el sábado 5</li><li>Probar el neopreno en el lago, si dejan</li></ul>`}
+function aZonas(){const p=SW.andres;return `<div class="box" style="display:grid;gap:6px"><b>Tu perfil de sudor</b><div class="kv"><span>Sudor</span><span>${p.tasa} L por hora (a 20 °C)</span><span>Sodio en sudor</span><span>${fmt(p.na)} mg por litro</span><span>Carbs que toleras</span><span>hasta ${p.tol} g por hora</span><span>Fuente</span><span>${p.src}</span></div><span class="note">Con esto se calculan los carbs, el líquido y el sodio de cada entrenamiento y de tu carrera.</span></div><div class="kv"><span>Última prueba</span><span>${me.prueba}</span><span>Próxima</span><span>Después de La Quinta</span></div>
+ <div><b>Pulso · carrera</b>${zonesHTML(me)}</div><div><b>Potencia · bici (FTP ${me.ftp} W)</b>${zonesHTML(me,1)}</div><div class="box"><b>Nado</b> · ritmo umbral ${me.css}</div>`}
+let pago={dic:false,metodo:'Tarjeta',auto:true,proc:false,nueva:false};
+function aviso(){if(pago.dic||atab==='pagos')return '';
+ return `<div class="box" style="border-color:var(--red)"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><b>Tu mensualidad de diciembre</b><br><span class="note">$999 · vence el 1 de diciembre</span></div><button class="redb" data-a="pagos" style="flex:none">Pagar</button></div></div>`}
+function aPagos(){
+ const inp='width:100%;min-height:44px;border:1px solid var(--line);border-radius:6px;padding:0 12px;background:#fff;color:#1a1a1a;font:16px Inter,sans-serif';
+ const lab='display:grid;gap:4px;font:13px Inter,sans-serif;color:#30313d';
+ return `<div class="box" style="display:grid;gap:4px;${pago.dic?'':'border-color:var(--red)'}">
+  <div class="row" style="justify-content:space-between"><div><div class="k">Diciembre</div><div class="num" style="font-size:34px">$999</div></div>${pago.dic?'<span class="pill p-ok">Pagado</span>':'<span class="pill p-warn">Vence el 1 dic</span>'}</div>
+  <span class="note">Plan personalizado · MS Running</span></div>
+ ${pago.dic?`<div class="box" style="display:grid;gap:6px"><b>¡Gracias! Pago recibido.</b><span class="note">Recibo #MSR-1042 · Stripe te lo mandó por correo. Marcelo ya lo ve en su portal; no tienes que mandarle comprobante.</span><button data-recibo="dic" style="justify-self:start;min-height:36px;font-size:11px">Ver recibo</button></div>`:`
+ <div style="background:#fff;border:1px solid #e6e6e6;border-radius:10px;padding:16px;display:grid;gap:12px;color:#30313d">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${[['Tarjeta','Tarjeta'],['OXXO','OXXO'],['SPEI','Transferencia']].map(([k,l])=>`<button data-pm="${k}" style="min-height:58px;border-radius:6px;text-transform:none;letter-spacing:0;font:600 13px Inter,sans-serif;text-align:left;padding:8px 10px;background:#fff;color:${pago.metodo===k?'#0570de':'#30313d'};border:${pago.metodo===k?'2px solid #0570de':'1px solid #e6e6e6'}">${l}</button>`).join('')}</div>
+  ${pago.metodo==='Tarjeta'?(!pago.nueva?`<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid #e6e6e6;border-radius:6px;padding:12px"><span style="font:14px Inter,sans-serif">Visa con terminación 4417</span><button data-nueva="1" style="min-height:30px;font:12px Inter,sans-serif;text-transform:none;letter-spacing:0;color:#0570de;border:0;padding:0">Usar otra</button></div>`:`
+   <label style="${lab}">Número de tarjeta<input value="4242 4242 4242 4242" inputmode="numeric" autocomplete="off" style="${inp}"></label>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label style="${lab}">Vencimiento<input value="12 / 28" autocomplete="off" style="${inp}"></label><label style="${lab}">CVC<input value="123" autocomplete="off" style="${inp}"></label></div>
+   <span style="font:12px Inter,sans-serif;color:#6d6e78">Demo: tarjeta de prueba de Stripe. No escribas una tarjeta real.</span>`)+`
+   <button data-auto="1" style="display:flex;gap:10px;align-items:center;text-align:left;text-transform:none;letter-spacing:0;font:14px Inter,sans-serif;padding:8px 0;border:0;background:none;color:#30313d"><span class="chk ${pago.auto?'y':''}" style="flex:none">${pago.auto?'✓':''}</span>Cobrarme automático cada mes con esta tarjeta</button>`:''}
+  ${pago.metodo==='OXXO'?`<span style="font:14px Inter,sans-serif">Stripe te genera una ficha con número de referencia. Págala en efectivo en cualquier OXXO antes del 1 de diciembre y se marca sola.</span>`:''}
+  ${pago.metodo==='SPEI'?`<span style="font:14px Inter,sans-serif">Stripe te da una CLABE que es solo tuya. Transfiere desde tu banco y el pago se confirma solo, normalmente en menos de 30 minutos.</span>`:''}
+  <button id="pagar" style="min-height:48px;border:0;border-radius:6px;background:#0570de;color:#fff;font:600 15px Inter,sans-serif;text-transform:none;letter-spacing:0">${pago.proc?'Procesando…':pago.metodo==='Tarjeta'?'Pagar $999':pago.metodo==='OXXO'?'Generar ficha OXXO':'Ver mi CLABE'}</button>
+  <span style="font:12px Inter,sans-serif;color:#6d6e78;text-align:center">Pago seguro con <b>stripe</b></span>
+ </div>`}
+ <div><div class="k">Historial</div>${[['Noviembre','1 nov','Visa 4417'],['Octubre','2 oct','Visa 4417'],['Septiembre','1 sep','OXXO']].map(r=>`<div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${r[0]}</b><br><span class="note">$999 · ${r[1]} · ${r[2]}</span></div><button data-recibo="${r[0]}" style="min-height:32px;font-size:10px">Recibo</button></div>`).join('')}</div>`}
+function aMas(){return `<h3>Pregúntale a Marcelo</h3><p class="note">Le llega a su bandeja con tus datos, y te contesta aquí o por WhatsApp.</p>
+ <textarea id="q" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:4px;padding:10px;background:var(--bg);font:15px Inter,sans-serif">¿Cuántas sales llevo si hace mucho calor en La Quinta?</textarea>
+ <button class="redb" id="ask2">Mandar pregunta</button>`}
+function renderAtl(){
+ if(!logged){$('#aview').innerHTML=`<form class="card login" id="lg"><h2 style="font-size:24px">Entra a tu semana</h2><p class="note">Cada atleta entra con su usuario y contraseña.</p>
+  <label>Usuario<input id="u" value="andres" autocomplete="username"></label><label>Contraseña<input id="pw" type="password" value="lquinta26" autocomplete="current-password"></label><button class="prim">Entrar</button></form>`;return}
+ const T=[['semana','Semana'],['carrera','Carrera'],['zonas','Zonas'],['pagos','Pagos'],['mas','Dudas']];
+ $('#aview').innerHTML=`<div class="phone"><div class="phead"><span class="note" style="color:inherit;opacity:.7">Hola, Andrés</span><h2>IRONMAN 70.3 La Quinta</h2>
+  <div class="count"><span class="num">17</span><span>días · domingo 6 de diciembre</span></div></div>
+  <div class="ptabs">${T.map(([k,l])=>`<button data-a="${k}" class="${atab===k?'on':''}">${l}</button>`).join('')}</div>
+  <div class="pbody">${aviso()}${{semana:aSemana,carrera:aCarrera,zonas:aZonas,pagos:aPagos,mas:aMas}[atab]()}</div></div>`}
+
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,[data-c],[data-fa]');if(!t)return;
+ if(t.id==='vCoach'||t.id==='vAtl'){const c=t.id==='vCoach';$('#coach').hidden=!c;$('#atleta').hidden=c;$('#vCoach').classList.toggle('on',c);$('#vAtl').classList.toggle('on',!c);c?renderCoach():renderAtl();return}
+ if(t.dataset.t){tab=t.dataset.t;renderCoach();return}
+ if(t.dataset.f){filt=t.dataset.f;renderCoach();return}
+ if(t.dataset.c){sel=+t.dataset.c;renderCoach();return}
+ if(t.dataset.a){atab=t.dataset.a;renderAtl();return}
+ if(t.dataset.mv){const i=+t.dataset.mv;mov=mov===i?null:i;rq={j:null,m:null};renderAtl();return}
+ if(t.dataset.rj){rq.j=+t.dataset.rj;const n=$('#rqn')?.value;renderAtl();if(n)$('#rqn').value=n;return}
+ if(t.dataset.rm){rq.m=t.dataset.rm;const n=$('#rqn')?.value;renderAtl();if(n)$('#rqn').value=n;return}
+ if(t.id==='sendreq'){if(rq.j==null||!rq.m)return;const i=mov,j=rq.j,n=$('#rqn').value.trim(),v=veredicto(i,j),di=week[i][0]+' '+week[i][1],dj=week[j][0]+' '+week[j][1];
+  const alt=week.map((o,k)=>k).filter(k=>k>=3&&k!==i&&k!==j&&!veredicto(i,k))[0];const lc=x=>x[0].toLowerCase()+x.slice(1);
+  convs.unshift({id:400+convs.length,a:'andres',ch:'app',tag:'Cambio de plan',hace:'ahora',pend:true,
+   msgs:[{de:'él',t:'Solicitud de cambio: pasar "'+week[i][2]+'" del '+di+' al '+dj+'.\nMotivo: '+rq.m+(n?'\n'+n:'')}],
+   lee:v?'No cumple tus criterios: '+v+'.'+(alt!=null?' Lo que sí cuadra: pasarla al '+week[alt][0]+' '+week[alt][1]+'.':' No hay otro día que cuadre esta semana.'):'Cumple tus criterios: no quedan dos sesiones fuertes seguidas y el fin de semana no cambia. Puedes aprobarlo tal cual.',
+   sug:v?(alt!=null?'Al '+dj+' no se puede, porque '+lc(v)+'. Te la paso al '+week[alt][0]+' '+week[alt][1]+', ¿va?':'Esta semana no hay otro día que cuadre. Déjala donde está y, si no te da el tiempo, hazla 20% más corta.'):'Va, ya te la pasé al '+dj+'. Ya está en tu reloj.',
+   accion:v?(alt!=null?'Aprobar el '+week[alt][0]+' '+week[alt][1]:''):'Aprobar cambio',req:{i,j:v?alt:j}});
+  sol[i]=j;mov=null;rq={j:null,m:null};sel=convs[0].id;toast('Le llegó a Marcelo. Te avisamos cuando lo apruebe.');renderAtl();return}
+ if(t.dataset.ss){eseg[fsel]=t.dataset.ss;renderCoach();document.getElementById('strat').scrollIntoView({block:'nearest'});return}
+ if(t.dataset.sdel){DR[fsel].nut[eseg[fsel]].splice(+t.dataset.sdel,1);renderCoach();document.getElementById('strat').scrollIntoView({block:'nearest'});return}
+ if(t.id==='stadd'){DR[fsel].nut[eseg[fsel]].push(['Nuevo paso','Escribe la indicación']);renderCoach();document.getElementById('strat').scrollIntoView({block:'nearest'});return}
+ if(t.id==='strecalc'){const d=makeST(fsel);d.pub=ST[fsel]?.pub||'';d.indic=DR[fsel].indic;d.segs=DR[fsel].segs;DR[fsel]=d;renderCoach();document.getElementById('strat').scrollIntoView({block:'nearest'});toast('Recalculado con su perfil de sudor. Revisa y publica.');return}
+ if(t.id==='stpub'){const d=clone(DR[fsel]);d.pub='19 nov';ST[fsel]=d;DR[fsel]=clone(d);toast('Estrategia publicada. '+A(fsel).n.split(' ')[0]+' ya la ve en su app y le llega aviso (demo)');renderCoach();document.getElementById('strat').scrollIntoView({block:'nearest'});return}
+ if(t.id==='stcopy'){const a=A(fsel);athletes.filter(x=>x.id!==a.id&&x.ev===a.ev).forEach(x=>{genST(x);const d=clone(DR[fsel]);d.segs=ST[x.id].segs;d.indic=ST[x.id].indic;d.basada=ST[x.id].basada;d.pub=ST[x.id].pub;DR[x.id]=d});toast('Listo: la usé de base para los demás, con sus propios ritmos y potencias. Revísalas antes de publicar.');return}
+ if(t.dataset.seg){seg=seg===t.dataset.seg?null:t.dataset.seg;renderAtl();return}
+ if(t.dataset.pm){pago.metodo=t.dataset.pm;renderAtl();return}
+ if(t.dataset.auto){pago.auto=!pago.auto;renderAtl();return}
+ if(t.dataset.nueva){pago.nueva=true;renderAtl();return}
+ if(t.dataset.recibo){toast('Se abre el recibo de Stripe de '+t.dataset.recibo.replace('dic','diciembre')+' (demo)');return}
+ if(t.id==='pagar'){if(pago.proc)return;pago.proc=true;renderAtl();setTimeout(()=>{pago.proc=false;if(pago.metodo==='Tarjeta'){pago.dic=true;A('andres').pago='pagado';toast('Pago aprobado por Stripe (demo)')}else toast(pago.metodo==='OXXO'?'Ficha OXXO generada; también te llegó por correo (demo)':'Tu CLABE: 646 180 1234 5678 9012 · también te llegó por correo (demo)');renderAtl()},1100);return}
+ if(t.dataset.rec){toast('Liga de pago de Stripe enviada a '+A(t.dataset.rec).n+' por WhatsApp y en su app (demo)');return}
+ const c=convs.find(x=>x.id===sel);
+ if(t.id==='send'){const v=$('#txt').value.trim();if(!v)return;c.msgs.push({de:'yo',t:v});c.pend=false;toast('Enviado por '+(c.ch==='web'?'WhatsApp':CH[c.ch])+' (demo)');renderCoach();return}
+ if(t.id==='acc'&&c.req){const {i,j}=c.req;for(const k of [2,3,4,6,7]){const x=week[i][k];week[i][k]=week[j][k];week[j][k]=x}
+  delete sol[i];aprob[j]=1;c.msgs.push({de:'yo',t:$('#txt').value.trim()});c.pend=false;c.req=null;toast('Cambio aplicado en TrainingPeaks y en su reloj. Le avisamos en su app.');renderCoach();return}
+ if(t.id==='acc'){if(c.a==='luis'){A('luis').pago='pagado';toast('Pago de Luis registrado')}else toast('Sesión movida en TrainingPeaks (demo)');t.disabled=true;return}
+ if(t.id==='cita'){toast('Llamada agendada; le llegó la invitación por WhatsApp (demo)');return}
+ if(t.id==='alta'){toast('Se le mandó a '+nombre(c)+' su liga de registro y pago (demo)');return}
+ if(t.dataset.plt){const id=fsel,v=t.dataset.plt;PLs[id]=v;PLd[id]=v==='En blanco'?Array(7).fill(''):v==='Repetir semana pasada'?prevOf(id).slice():(TPL[id]||exp[id].prop).slice();Object.keys(HUSED).forEach(k=>{if(k.startsWith(id))delete HUSED[k]});renderCoach();document.getElementById('plan').scrollIntoView({block:'nearest'});return}
+ if(t.dataset.edu){EU=t.dataset.edu==='x'?null:fsel+t.dataset.edu;renderCoach();return}
+ if(t.dataset.sav){const ui=+t.dataset.sav,v=$('#eut').textContent.trim();const u=exp[fsel].ult[ui];u[1]=v;EU=null;
+  if(fsel==='andres'){const w=week.find(d=>d[0]===u[0]);if(w){w[2]=v;w[3]='Cambiado por Marcelo hoy';w[4]=zOf(v);w[7]=durOf(v)||w[7]}}
+  toast('Guardado en TrainingPeaks de '+A(fsel).n.split(' ')[0]+'; ya le llegó a su reloj (demo)');renderCoach();return}
+ if(t.dataset.qa){const [i,k]=t.dataset.qa.split('-');const P=pl(fsel);P[+i]=k==='menos'?menos(P[+i]):k==='suave'?suave(P[+i]):'Descanso';renderCoach();document.getElementById('plan').scrollIntoView({block:'nearest'});return}
+ if(t.dataset.hint){const i=+t.dataset.hint;pl(fsel)[i]=HINT[fsel][i][1];HUSED[fsel+i]=1;renderCoach();document.getElementById('plan').scrollIntoView({block:'nearest'});return}
+ if(t.id==='aprob'){listas[fsel]=1;const n=A(fsel).n;const sig=athletes.slice().sort((x,y)=>prio(y)-prio(x)).find(x=>!listas[x.id]);toast('Semana de '+n+' enviada a TrainingPeaks y a su reloj (demo)');if(sig)fsel=sig.id;renderCoach();return}
+  if(t.dataset.fa){fsel=t.dataset.fa;renderCoach();return}
+ if(t.dataset.ver){fsel=t.dataset.ver;tab='atletas';renderCoach();return}
+ if(t.id==='ask2'){const v=$('#q').value.trim();if(!v)return;
+  convs.unshift({id:99+convs.length,a:'andres',ch:'app',tag:'Nutrición',hace:'ahora',pend:true,msgs:[{de:'él',t:v}],
+   lee:'Pregunta de hidratación para La Quinta. Pronóstico: 28 °C en la tarde. Pesa 74 kg y suda mucho según su nota.',
+   sug:'Si pasa de 25 °C, sube a 700–900 mg de sodio por hora en la bici: una tableta extra de electrolitos en cada bidón. Corriendo, toma sal en las estaciones cada 20 min. Pruébalo en el ladrillo del sábado para que no sea la primera vez.'});
+  sel=convs[0].id;$('#q').value='';toast('Le llegó a Marcelo. Cámbiate a su portal para verla.');return}
+});
+document.addEventListener('input',e=>{const x=e.target;if(x.dataset.dia){pl(fsel)[+x.dataset.dia]=x.textContent;return}const d=DR[fsel];if(!d)return;
+ if(x.dataset.sm)d.segs[+x.dataset.sm][2]=x.value;else if(x.id==='stt')d.total=x.value;else if(x.id==='sti')d.indic=x.textContent;
+ else if(x.dataset.stk)d.nut[eseg[fsel]][+x.dataset.stk][0]=x.textContent;else if(x.dataset.stx)d.nut[eseg[fsel]][+x.dataset.stx][1]=x.textContent;else return;
+ const pl=document.querySelector('#strat .pill');if(pl){pl.className='pill p-warn';pl.textContent='Cambios sin publicar'}});
+document.addEventListener('change',e=>{const x=e.target;if(x.dataset.sw){SW[fsel][x.dataset.sw]=+x.value;SW[fsel].src='Ajustado por Marcelo';const d=makeST(fsel);if(DR[fsel]){d.indic=DR[fsel].indic;d.segs=DR[fsel].segs}d.pub=ST[fsel]?.pub||'';DR[fsel]=d;renderCoach()}});
+document.addEventListener('submit',e=>{if(e.target.id==='lg'){e.preventDefault();logged=true;renderAtl()}});
+renderCoach();
+}
+</script>
+</body>
+</html>
