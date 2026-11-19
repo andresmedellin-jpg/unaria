@@ -212,9 +212,9 @@ let convs=[
  {id:7,a:'rodrigo',ch:'wa',tag:'Zonas',hace:'ayer',pend:false,msgs:[{de:'él',t:'¿Ya quedaron mis zonas de la prueba del lunes?'},{de:'yo',t:'Ya están en tu app, Rodri. Z2 de 132 a 150 ppm, que en ritmo es 5:10–5:40 /km.'}],
   lee:'Preguntó por sus zonas nuevas. Ya se le contestó.',sug:''}
 ];
-let sel=1,filt='todas',tab='mensajes',atab='semana',logged=false;
+let sel=1,filt='todas',tab='inicio',atab='semana',logged=false;
 
-const tabsDef=[['mensajes','Mensajes'],['atletas','Atletas y planes'],['cobros','Cobros']];
+const tabsDef=[['inicio','Inicio'],['mensajes','Mensajes'],['atletas','Atletas y planes'],['cobros','Cobros']];
 function renderTabs(){const p=convs.filter(c=>c.pend).length;
  $('#tabs').innerHTML=tabsDef.map(([k,l])=>`<button data-t="${k}" class="${tab===k?'on':''}">${l}${k==='mensajes'&&p?`<span class="cnt">${p}</span>`:''}</button>`).join('')}
 const nombre=c=>c.a?A(c.a).n:c.nom;
@@ -224,6 +224,41 @@ const colOf=n=>COL[[...n].reduce((s,c)=>s+c.charCodeAt(0),0)%COL.length];
 function zonesHTML(a,bike){const z=bike?a.zb:a.zr;if(!z)return'';
  return `<div class="zones">${z.map((v,i)=>`<div class="zr"><b>Z${i+1}</b><i style="background:${ZC[i]}"></i><span>${v}${bike?'':' ppm'}</span></div>`).join('')}</div>`}
 
+const ING=[['Jun',62],['Jul',66],['Ago',71],['Sep',76],['Oct',81],['Nov',null]];
+function vInicio(){
+ const f=n=>'$'+n.toLocaleString('es-MX');
+ const pend=convs.filter(c=>c.pend),les=pend.filter(c=>c.tag==='Lesión'),nuevos=pend.filter(c=>c.tag==='Cliente nuevo'),camb=pend.filter(c=>c.tag==='Cambio de plan');
+ const debe=athletes.filter(a=>a.pago!=='pagado'),cob=athletes.filter(a=>a.pago==='pagado').length*999,tot=athletes.length*999;
+ const porArmar=athletes.filter(a=>!listas[a.id]).length,prom=Math.round(athletes.reduce((s,a)=>s+a.cump,0)/athletes.length);
+ const carreras={};athletes.forEach(a=>{(carreras[a.ev]=carreras[a.ev]||{ev:a.ev,f:a.f,dias:a.dias,q:[]}).q.push(a.n.split(' ')[0])});
+ const prox=Object.values(carreras).sort((x,y)=>x.dias-y.dias);
+ const hoy=[
+  ...les.map(c=>({t:`${nombre(c)} reportó una lesión`,d:'Esto lo decides tú',btn:`data-goc="${c.id}"`,al:1})),
+  ...camb.map(c=>({t:`${nombre(c)} pide cambiar un día`,d:'La IA ya revisó si cuadra con tus criterios',btn:`data-goc="${c.id}"`})),
+  ...(nuevos.length?[{t:`${nuevos.length} posibles clientes nuevos`,d:'WhatsApp, Instagram y tu página',btn:'data-t="mensajes"'}]:[]),
+  ...athletes.filter(a=>a.cump<50).map(a=>({t:`${a.n} casi no está entrenando`,d:`${a.cump}% de cumplimiento este mes`,btn:`data-ver="${a.id}"`,al:1})),
+  {t:`${porArmar} semanas por armar`,d:'Del 23 al 29 de noviembre, primero lo urgente',btn:'data-t="atletas"'},
+  ...(debe.length?[{t:`${debe.length} pagos pendientes`,d:debe.map(a=>a.n.split(' ')[0]).join(', '),btn:'data-t="cobros"'}]:[])];
+ const nov=Math.round(85*999*(cob/tot)/1000),mx=85;
+ return `<div class="row" style="justify-content:space-between;align-items:end;margin-bottom:16px"><div><div class="k">Jueves 19 de noviembre</div><h2 style="font-size:30px">Buenos días, Marcelo</h2></div>
+  <span class="note">${pend.length} mensajes con respuesta lista · ${les.length} para tu criterio</span></div>
+ <div class="stats">
+  <div class="card stat"><div class="num">${athletes.length}</div><span>atletas activos (en la demo; tienes más de 85)</span></div>
+  <div class="card stat"><div class="num">${prom}%</div><span>cumplimiento promedio del equipo este mes</span></div>
+  <div class="card stat"><div class="num">${f(cob)}</div><span>cobrado en noviembre de ${f(tot)}</span></div>
+  <div class="card stat"><div class="num" style="color:var(--red)">${pend.length}</div><span>mensajes por contestar</span></div></div>
+ <div class="two">
+  <div class="card"><div class="pad" style="padding-bottom:6px"><div class="k">Lo que necesita tu atención hoy</div></div>
+   ${hoy.map(x=>`<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:12px 18px;border-top:1px solid var(--line)"><div style="display:flex;gap:10px;align-items:flex-start"><span class="dot" style="margin-top:7px;background:${x.al?'var(--red)':'var(--mute)'}"></span><div><b>${x.t}</b><br><span class="note">${x.d}</span></div></div><button ${x.btn} style="flex:none;min-height:36px;font-size:11px">Ver</button></div>`).join('')}
+  </div>
+  <div style="display:grid;gap:12px">
+   <div class="card pad"><div class="k">Próximas carreras del equipo</div>${prox.map(c=>`<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:9px 0;border-bottom:1px solid var(--line)"><div><b>${c.ev}</b><br><span class="note">${c.q.join(', ')}</span></div><div style="text-align:right;flex:none"><span class="num" style="font-size:22px;${c.dias<=20?'color:var(--red)':''}">${c.dias}</span><br><span class="note">días · ${c.f}</span></div></div>`).join('')}</div>
+   <div class="card pad"><div class="k">Ingresos de todo tu equipo · miles de pesos</div>
+    <div style="display:flex;align-items:flex-end;gap:10px;height:130px;margin-top:12px">${ING.map(x=>{const v=x[1]??nov;return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end"><span class="mono" style="font-size:11px">${x[1]==null?v+' de 85':v}</span><div style="width:100%;height:${v/mx*90}%;background:${x[1]==null?'var(--red)':'var(--ink)'};border-radius:2px 2px 0 0"></div><span class="note">${x[0]}</span></div>`}).join('')}</div>
+    <span class="note">Noviembre va en curso (en naranja, lo cobrado contra lo esperado). En el sistema real sale de tu Stripe.</span></div>
+  </div></div>
+ <div class="card pad" style="margin-top:12px"><div class="k">Cómo va cada atleta este mes</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 24px;margin-top:8px">${athletes.slice().sort((a,b)=>a.cump-b.cump).map(a=>`<button data-ver="${a.id}" style="display:grid;grid-template-columns:1fr 90px 40px;gap:10px;align-items:center;border:0;border-radius:0;padding:6px 0;text-transform:none;letter-spacing:0;font:14px Inter,sans-serif;text-align:left;min-height:36px"><span>${a.n}</span><div class="bar"><i style="width:${a.cump}%;background:${a.cump>=85?'var(--ink)':a.cump>=60?'var(--warn)':'var(--red)'}"></i></div><span class="mono" style="font-size:12px;text-align:right">${a.cump}%</span></button>`).join('')}</div></div>`}
 function vMensajes(){
  const pend=convs.filter(c=>c.pend).length,nuevos=convs.filter(c=>c.tag==='Cliente nuevo').length,les=convs.filter(c=>c.tag==='Lesión'&&c.pend).length;
  const fs=[['todas','Todas'],['pend','Por contestar'],['tu','Para ti'],['wa','WhatsApp'],['ig','Instagram'],['web','Página'],['app','App']];
@@ -380,7 +415,7 @@ function vCobros(){
  ${athletes.map(a=>`<tr><td><b>${a.n}</b><br><span class="note">${a.plan}</span></td><td>${MET[a.id]}</td><td class="r">${f(precios[a.plan])}</td><td>${pill(a.pago)}</td><td>${a.pago!=='pagado'?`<button data-rec="${a.id}">Mandar liga de pago</button>`:''}</td></tr>`).join('')}
  </tbody></table><p class="pad note">Plan personalizado a $999 al mes. Con tarjeta se cobra solo cada mes. Con OXXO o transferencia, Stripe le genera al atleta su referencia o su CLABE cada mes.</p></div>`}
 
-function renderCoach(){renderTabs();$('#cview').innerHTML={mensajes:vMensajes,atletas:vAtletas,cobros:vCobros}[tab]()}
+function renderCoach(){renderTabs();$('#cview').innerHTML={inicio:vInicio,mensajes:vMensajes,atletas:vAtletas,cobros:vCobros}[tab]()}
 
 /* ---------- App del atleta ---------- */
 const me=A('andres');
@@ -551,7 +586,8 @@ document.addEventListener('click',e=>{
  if(t.dataset.hint){const i=+t.dataset.hint;pl(fsel)[i]=HINT[fsel][i][1];HUSED[fsel+i]=1;renderCoach();document.getElementById('plan').scrollIntoView({block:'nearest'});return}
  if(t.id==='aprob'){listas[fsel]=1;const n=A(fsel).n;const sig=athletes.slice().sort((x,y)=>prio(y)-prio(x)).find(x=>!listas[x.id]);toast('Semana de '+n+' enviada a TrainingPeaks y a su reloj (demo)');if(sig)fsel=sig.id;renderCoach();return}
   if(t.dataset.fa){fsel=t.dataset.fa;renderCoach();return}
- if(t.dataset.ver){fsel=t.dataset.ver;tab='atletas';renderCoach();return}
+ if(t.dataset.goc){sel=+t.dataset.goc;tab='mensajes';renderCoach();window.scrollTo(0,0);return}
+ if(t.dataset.ver){fsel=t.dataset.ver;tab='atletas';renderCoach();window.scrollTo(0,0);return}
  if(t.id==='ask2'){const v=$('#q').value.trim();if(!v)return;
   convs.unshift({id:99+convs.length,a:'andres',ch:'app',tag:'Nutrición',hace:'ahora',pend:true,msgs:[{de:'él',t:v}],
    lee:'Pregunta de hidratación para La Quinta. Pronóstico: 28 °C en la tarde. Pesa 74 kg y suda mucho según su nota.',
